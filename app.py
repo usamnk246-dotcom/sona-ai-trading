@@ -1,55 +1,64 @@
 import streamlit as st
 import yfinance as yf
 import pandas as pd
-import plotly.graph_objects as go
-from ta.momentum import RSIIndicator
+import ta
 
-st.set_page_config(page_title="Wase AI Trading PRO", layout="wide")
-st.markdown("<h1 style='text-align:center;color:gold'>🔥 Wase AI Trading PRO - Bhera</h1>", unsafe_allow_html=True)
+st.set_page_config(page_title="Wase AI Trading PRO - Bhera", layout="wide", page_icon="🔥")
 
-market = st.selectbox("Market Select karo Wase sah:", ["Gold","Silver","Bitcoin","Oil","EUR/USD"])
-symbols = {"Gold":"GC=F","Silver":"SI=F","Bitcoin":"BTC-USD","Oil":"CL=F","EUR/USD":"EURUSD=X"}
-sym = symbols[market]
+st.markdown("""
+<style>
+.big-signal {font-size: 45px; font-weight: 900; text-align: center; padding: 25px; border-radius: 20px; margin: 20px 0;}
+.buy {background: linear-gradient(135deg, #00c853, #009624); color: white; animation: pulse 1.5s infinite;}
+.sell {background: linear-gradient(135deg, #ff1744, #d50000); color: white; animation: pulse 1.5s infinite;}
+@keyframes pulse {0%{transform:scale(1)} 50%{transform:scale(1.05)} 100%{transform:scale(1)}}
+.price-box {background: #111; padding: 15px; border-radius: 15px; text-align: center; border: 2px solid gold;}
+</style>
+""", unsafe_allow_html=True)
 
-@st.cache_data(ttl=60)
-def get_data(s):
-    d = yf.download(s, period="5d", interval="15m")
-    if isinstance(d.columns, pd.MultiIndex):
-        d.columns = d.columns.get_level_values(0)
-    return d.dropna()
+st.title("🔥 Wase AI Trading PRO - Bhera Next Level")
+st.caption("Gold | Silver | BTC | Oil - Live AI Signals")
 
-data = get_data(sym)
-price = float(data['Close'].iloc[-1])
-ma20 = float(data['Close'].rolling(20).mean().iloc[-1])
-ma50 = float(data['Close'].rolling(50).mean().iloc[-1])
-rsi = float(RSIIndicator(data['Close']).rsi().iloc[-1])
+# Sidebar - Next Level
+asset = st.sidebar.selectbox("Asset Chunoo Wase sah:", ["Gold (GC=F)", "Silver (SI=F)", "Bitcoin (BTC-USD)", "Oil (CL=F)"])
+tola = st.sidebar.number_input("Kitna Tola / Quantity?", value=1.0)
 
-col1,col2,col3,col4 = st.columns(4)
-col1.metric(f"{market} Price", f"{price:.2f}")
-col2.metric("MA 20", f"{ma20:.2f}")
-col3.metric("MA 50", f"{ma50:.2f}")
-col4.metric("RSI", f"{rsi:.1f}")
+# Live Data
+symbol = asset.split("(")[1].replace(")","")
+data = yf.download(symbol, period="1mo", interval="1h")
+if len(data) == 0:
+    st.error("Net check ka Wase sah!")
+    st.stop()
 
-st.divider()
+close = data['Close'].squeeze()
+price = float(close.iloc[-1])
+ma20 = float(close.rolling(20).mean().iloc[-1])
+ma50 = float(close.rolling(50).mean().iloc[-1])
+rsi = float(ta.momentum.RSIIndicator(close).rsi().iloc[-1])
 
-# BUY / SELL LOGIC ADVANCE
-if price > ma20 and rsi < 70 and price > ma50:
-    st.success(f"✅ STRONG BUY - Wase sah {market} UPAR jayega! Target: {price*1.01:.2f}")
-    st.balloons()
-    signal = "BUY"
-elif price < ma20 and rsi > 30:
-    st.error(f"❌ STRONG SELL - Wase sah {market} NEECHE ayega! Target: {price*0.99:.2f}")
-    signal = "SELL"
+# Signal Logic - Next Level
+if price > ma20 and price > ma50 and rsi < 70:
+    signal, cls, msg = "🚀 STRONG BUY", "buy", "Wase sah UP jayega! Kharido!"
+elif price < ma20 and price < ma50 and rsi > 30:
+    signal, cls, msg = "🔻 STRONG SELL", "sell", "Wase sah NEECHE ayega! Becho!"
 else:
-    st.warning(f"⚠️ WAIT - Wase sah Sideways hai, thoda sabar karo")
-    signal = "WAIT"
+    signal, cls, msg = "⏸️ WAIT", "sell", "Wase sah Thora Wait Karo!"
 
-# CHART MODERN
-fig = go.Figure()
-fig.add_trace(go.Candlestick(x=data.index, open=data['Open'], high=data['High'], low=data['Low'], close=data['Close'], name="Price"))
-fig.add_trace(go.Scatter(x=data.index, y=data['Close'].rolling(20).mean(), line=dict(color='orange',width=2), name="MA 20"))
-fig.add_trace(go.Scatter(x=data.index, y=data['Close'].rolling(50).mean(), line=dict(color='blue',width=2), name="MA 50"))
-fig.update_layout(height=500, template="plotly_dark", xaxis_rangeslider_visible=False)
-st.plotly_chart(fig, use_container_width=True)
+# Display
+c1, c2, c3, c4 = st.columns(4)
+c1.markdown(f'<div class="price-box"><h3>Price</h3><h2>${price:.2f}</h2></div>', unsafe_allow_html=True)
+c2.markdown(f'<div class="price-box"><h3>MA20</h3><h2>${ma20:.2f}</h2></div>', unsafe_allow_html=True)
+c3.markdown(f'<div class="price-box"><h3>MA50</h3><h2>${ma50:.2f}</h2></div>', unsafe_allow_html=True)
+c4.markdown(f'<div class="price-box"><h3>RSI</h3><h2>{rsi:.1f}</h2></div>', unsafe_allow_html=True)
 
-st.info(f"Signal: {signal} | RSI: {rsi:.1f} | Wase sah Bhera ka Sona AI Bot")
+st.markdown(f'<div class="big-signal {cls}">{signal}<br><span style="font-size:20px">{msg}</span></div>', unsafe_allow_html=True)
+
+st.line_chart(data['Close'])
+
+# Bhera Profit Calculator
+st.divider()
+st.subheader(f"💰 Bhera Profit Calculator - {tola} Tola ka")
+buy_price = st.number_input("Kharidne ka Rate?", value=price)
+profit = (price - buy_price) * tola * 11.66 # 1 tola = 11.66g approx for Gold calc
+st.metric(f"{tola} Tola ka Munafa / Nuqsan", f"${profit:.2f} | Rs {profit*280:.0f}")
+
+st.success(f"Wase sah App Next Level pe hai! Link: l6sj.streamlit.app")
