@@ -7,17 +7,18 @@ st.title("🔥 WASE SAH BHERA GOLD PRO 🔥")
 
 SYMBOL="GC=F"
 
-# Gold Data Download
+# Data Download
 data=yf.download(SYMBOL, period="5d", interval="5m", auto_adjust=True)
 
 if data.empty:
     st.error("Market band hai Wase sah")
     st.stop()
 
-# Wase sah ye naya fix hai yfinance ke liye
+# WASE SAH YE FINAL FIX HAI - MultiIndex hatana
+if isinstance(data.columns, pd.MultiIndex):
+    data.columns = data.columns.get_level_values(0)
+
 close_col = data['Close']
-if isinstance(close_col, pd.DataFrame):
-    close_col = close_col.squeeze()
 
 price = float(close_col.iloc[-1])
 st.metric("Gold Price (GC=F)", f"${price:.2f}")
@@ -27,10 +28,10 @@ data['EMA21']=close_col.ewm(span=21).mean()
 
 # Signal
 if data['EMA9'].iloc[-1] > data['EMA21'].iloc[-1]:
-    signal="STRONG BUY"
+    signal="STRONG BUY 🟢"
     color="green"
 else:
-    signal="STRONG SELL"
+    signal="STRONG SELL 🔴"
     color="red"
 
 st.markdown(f"<h2 style='color:{color}'>Signal: {signal} Wase sah</h2>", unsafe_allow_html=True)
