@@ -62,3 +62,12 @@ profit = (price - buy_price) * tola * 11.66 # 1 tola = 11.66g approx for Gold ca
 st.metric(f"{tola} Tola ka Munafa / Nuqsan", f"${profit:.2f} | Rs {profit*280:.0f}")
 
 st.success(f"Wase sah App Next Level pe hai! Link: l6sj.streamlit.app")
+# --- WASE SAH WHATSAPP ALERT ---
+st.divider()
+st.subheader("📲 WhatsApp Alert Bhejo")
+wa_number = st.text_input("Apna WhatsApp Number (92 se start)", "92XXXXXXXXXX")
+alert_text = f"WASE SAH ALERT: {SYMBOL} {last_price:.2f} - {signal}! https://l6sj.streamlit.app"
+wa_link = f"https://wa.me/{wa_number}?text={alert_text.replace(' ', '%20')}"
+st.link_button("🚀 WhatsApp Pe Alert Bhejo", wa_link)
+if "STRONG" in signal:
+    st.toast(f"🚨 {signal} - WhatsApp Alert Ready!", icon="📲")
