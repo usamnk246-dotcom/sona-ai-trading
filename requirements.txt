@@ -4,3 +4,4 @@ plotly
 pandas
 ta
 streamlit-autorefresh
+plotly
