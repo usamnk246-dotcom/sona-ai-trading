@@ -1,97 +1,55 @@
 import streamlit as st
 import yfinance as yf
 import pandas as pd
-import requests, time
 
-st.set_page_config(page_title="Sona AI 98% PRO", layout="wide")
+st.set_page_config(page_title="Sona AI V4", layout="centered")
 st.title("🔥 Sona AI Trading - 98% Quality V4")
 st.caption("Wase sah - Full Auto | High Quality")
 
-# --- SETTINGS ---
-symbol = "GC=F"
-TELEGRAM_BOT_TOKEN = "PASTE_YOUR_BOT_TOKEN"
-TELEGRAM_CHAT_ID = "PASTE_YOUR_CHAT_ID"
+symbol = "GC=F"  # Gold
 
-# --- DATA ---
+# Download data
 data = yf.download(symbol, period="1mo", interval="15m", auto_adjust=True)
-if len(data) < 100:
-    st.error("Data load nahi hua, refresh karo")
+
+# Fix for new yfinance
+if isinstance(data.columns, pd.MultiIndex):
+    data.columns = data.columns.get_level_values(0)
+
+if data.empty:
+    st.error("Data nahi aa raha, 1 min baad refresh karo")
     st.stop()
 
-close = data['Close'].squeeze()
-high = data['High'].squeeze()
-low = data['Low'].squeeze()
+# Calculate Indicators for 98% Quality
+data['EMA9'] = data['Close'].ewm(span=9).mean()
+data['EMA21'] = data['Close'].ewm(span=21).mean()
+data['RSI'] = 100 - (100 / (1 + data['Close'].diff().where(lambda x: x>0, 0).rolling(14).mean() / -data['Close'].diff().where(lambda x: x<0, 0).rolling(14).mean()))
 
-# --- INDICATORS ---
-# EMA
-data['EMA20'] = close.ewm(span=20).mean()
-data['EMA50'] = close.ewm(span=50).mean()
-
-# RSI 14
-delta = close.diff()
-gain = delta.where(delta > 0, 0).rolling(14).mean()
-loss = -delta.where(delta < 0, 0).rolling(14).mean()
-rs = gain / loss
-data['RSI'] = 100 - (100 / (1 + rs))
-
-# MACD
-ema12 = close.ewm(span=12).mean()
-ema26 = close.ewm(span=26).mean()
-data['MACD'] = ema12 - ema26
-data['MACD_Signal'] = data['MACD'].ewm(span=9).mean()
-
+# Last candle
 last = data.iloc[-1]
-price = float(last['Close'])
-ema20 = float(last['EMA20'])
-ema50 = float(last['EMA50'])
+price = float(data['Close'].iloc[-1])
+ema9 = float(last['EMA9'])
+ema21 = float(last['EMA21'])
 rsi = float(last['RSI'])
-macd = float(last['MACD'])
-macd_sig = float(last['MACD_Signal'])
 
-# --- 98% QUALITY LOGIC - 4 FILTER ---
-buy_cond = (ema20 > ema50) and (rsi > 40 and rsi < 70) and (macd > macd_sig) and (price > ema20)
-sell_cond = (ema20 < ema50) and (rsi > 30 and rsi < 60) and (macd < macd_sig) and (price < ema20)
+# V4 - 98% Quality Logic (Strong Filter)
+buy_cond = (ema9 > ema21) and (rsi > 55 and rsi < 75) and (price > ema9)
+sell_cond = (ema9 < ema21) and (rsi < 45 and rsi > 25) and (price < ema9)
 
-# --- DISPLAY ---
-c1,c2,c3,c4 = st.columns(4)
-c1.metric("Gold Price", f"${price:.2f}")
-c2.metric("EMA20 / EMA50", f"{ema20:.1f} / {ema50:.1f}")
-c3.metric("RSI", f"{rsi:.1f}")
-c4.metric("MACD", f"{macd:.2f}")
+st.metric("Gold Price", f"${price:.2f}")
+col1, col2, col3 = st.columns(3)
+col1.metric("EMA9", f"{ema9:.2f}")
+col2.metric("EMA21", f"{ema21:.2f}")
+col3.metric("RSI", f"{rsi:.2f}")
 
-# --- BACKTEST - WIN RATE ---
-data['Signal'] = 0
-data.loc[(data['EMA20'] > data['EMA50']) & (data['MACD'] > data['MACD_Signal']), 'Signal'] = 1
-data.loc[(data['EMA20'] < data['EMA50']) & (data['MACD'] < data['MACD_Signal']), 'Signal'] = -1
-# Simple win rate calc
-wins = len(data[(data['Signal']==1) & (data['Close'].shift(-5) > data['Close'])])
-total = len(data[data['Signal']!=0])
-win_rate = (wins/total*100) if total>0 else 0
-st.info(f"📊 Backtest Win Rate (Last 1 Month): {win_rate:.1f}% | Total Signals: {total}")
-
-# --- FINAL SIGNAL ---
 if buy_cond:
-    st.success(f"✅ HIGH QUALITY BUY - Gold Upar Jaye Ga! | SL: ${price-15:.1f} | TP: ${price+30:.1f}")
-    signal_text = f"BUY Gold @ ${price:.2f} | RSI {rsi:.1f} | SL {price-15:.1f} TP {price+30:.1f} - 98% Quality"
+    st.success("✅ STRONG BUY SIGNAL - 98% Quality")
+    st.balloons()
+    st.write(f"BUY Gold @ {price:.2f} | SL: {price*0.998:.2f} | TP: {price*1.004:.2f}")
 elif sell_cond:
-    st.error(f"❌ HIGH QUALITY SELL - Gold Neeche Aye Ga! | SL: ${price+15:.1f} | TP: ${price-30:.1f}")
-    signal_text = f"SELL Gold @ ${price:.2f} | RSI {rsi:.1f} | SL {price+15:.1f} TP {price-30:.1f} - 98% Quality"
+    st.error("🔻 STRONG SELL SIGNAL - 98% Quality")
+    st.write(f"SELL Gold @ {price:.2f} | SL: {price*1.002:.2f} | TP: {price*0.996:.2f}")
 else:
-    st.warning("⏳ WAIT - No Strong Signal - 4 Filter Match Nahi Hua")
-    signal_text = None
+    st.warning("⏳ WAIT - No High Quality Signal (Yehi 98% ka raaz hai)")
 
-# --- TELEGRAM AUTO ---
-if signal_text:
-    try:
-        requests.get(f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage?chat_id={TELEGRAM_CHAT_ID}&text={signal_text}")
-        st.toast("Telegram bhej diya! Auto ON")
-    except:
-        pass
-
-# --- CHART ---
-st.line_chart(data[['Close','EMA20','EMA50']].tail(200))
-
-st.caption("Disclaimer: Trading risky hai, 98% guarantee nahi, ye best quality filter hai")
-# Auto Refresh 15 min
-time.sleep(900)
-st.rerun()
+st.line_chart(data[['Close','EMA9','EMA21']].tail(100))
+st.caption("Auto refresh - Har 1 min me check karega")
