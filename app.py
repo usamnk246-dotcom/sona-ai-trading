@@ -3,100 +3,94 @@ import yfinance as yf
 import pandas as pd
 import time
 
-# Auto Refresh
 st.set_page_config(page_title="L6SJ Gold Bot V5", layout="wide")
-st_autorefresh = st.empty()
-st.markdown("<meta http-equiv='refresh' content='60'>", unsafe_allow_html=True)
+st.title("🏅 L6SJ Gold AI Bot V5 - Multi-Timeframe")
 
-st.title("🥇 L6SJ Gold AI Bot V5 - Multi-Timeframe")
+# Requirements check
+st.write("Loading gold data...")
 
-# === RSI Function ===
-def calc_rsi(data, period=14):
-    delta = data['Close'].diff()
-    gain = delta.where(delta > 0, 0).rolling(window=period).mean()
-    loss = -delta.where(delta < 0, 0).rolling(window=period).mean()
-    rs = gain / loss
-    rsi = 100 - (100 / (1 + rs))
-    return rsi.iloc[-1]
-
-# === One Timeframe Signal ===
-def get_tf_data(tf):
+def calc_rsi(close, period=14):
     try:
-        # 2m yfinance ke nishta, 1m use kao
-        yf_tf = "1m" if tf == "2m" else tf
-        df = yf.download("GC=F", period="1d", interval=yf_tf, progress=False)
-        if len(df) < 30: return None
+        delta = close.diff()
+        gain = delta.where(delta > 0, 0).rolling(window=period).mean()
+        loss = -delta.where(delta < 0, 0).rolling(window=period).mean()
+        rs = gain / loss
+        rsi = 100 - (100 / (1 + rs))
+        return float(rsi.iloc[-1])
+    except:
+        return 50.0
+
+def get_data(tf):
+    try:
+        # GC=F kabhi kabhi block hota, XAUUSD try
+        df = yf.download("GC=F", period="2d", interval=tf, progress=False, auto_adjust=True)
+        if df is None or len(df) < 20:
+            return None
+        # Fix MultiIndex issue
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.get_level_values(0)
 
         close = df['Close']
-        ema9 = close.ewm(span=9).mean().iloc[-1]
-        ema21 = close.ewm(span=21).mean().iloc[-1]
-        rsi = calc_rsi(df)
-        price = close.iloc[-1]
+        price = float(close.iloc[-1])
+        ema9 = float(close.ewm(span=9).mean().iloc[-1])
+        ema21 = float(close.ewm(span=21).mean().iloc[-1])
+        rsi = calc_rsi(close)
 
-        # Signal Logic
-        if ema9 > ema21 and rsi < 70 and rsi > 50:
+        if ema9 > ema21 and rsi < 68:
             sig = "BUY"
         elif ema9 < ema21:
             sig = "SELL"
         else:
             sig = "WAIT"
-
-        return {"price": price, "ema9": ema9, "ema21": ema21, "rsi": rsi, "signal": sig, "df": df}
-    except:
+        return {"price":price, "ema9":ema9, "ema21":ema21, "rsi":rsi, "signal":sig}
+    except Exception as e:
+        st.error(f"{tf} error: {e}")
         return None
 
-# === Multi-Timeframe Check ===
-timeframes = ["15m", "10m", "5m", "2m", "1m"]
+# ONLY 4 TF - 2m hatao, yfinance ke nahi
+timeframes = ["15m", "5m", "1m"]
+cols = st.columns(3)
+
 all_data = {}
-
-cols = st.columns(5)
 for i, tf in enumerate(timeframes):
-    data = get_tf_data(tf)
-    all_data[tf] = data
     with cols[i]:
-        if data:
-            st.subheader(f"{tf}")
-            st.metric("Price", f"{data['price']:.2f}")
-            st.write(f"EMA9: {data['ema9']:.2f}")
-            st.write(f"EMA21: {data['ema21']:.2f}")
-            st.write(f"RSI: {data['rsi']:.1f}")
-            color = "green" if data['signal']=="BUY" else "red" if data['signal']=="SELL" else "gray"
-            st.markdown(f":{color}[**{data['signal']}**]")
+        st.subheader(tf)
+        d = get_data(tf)
+        all_data[tf] = d
+        if d:
+            st.metric("Price", f"{d['price']:.2f}")
+            st.write(f"EMA9: {d['ema9']:.2f} | EMA21: {d['ema21']:.2f}")
+            st.write(f"RSI: {d['rsi']:.1f}")
+            st.success(d['signal']) if d['signal']=="BUY" else st.error(d['signal']) if d['signal']=="SELL" else st.warning(d['signal'])
+        else:
+            st.warning("Loading...")
 
-# === FINAL SIGNAL + TP/SL ===
 st.divider()
-if all_data["15m"] and all_data["5m"]:
-    price = all_data["1m"]["price"] if all_data["1m"] else all_data["5m"]["price"]
 
-    # SL TP Calculation
-    sl = price - 8.0
-    tp = price + (price - sl) * 2 # 1:2
-    entry = price
+# Final Signal
+if all_data.get("15m") and all_data.get("5m"):
+    price = all_data["5m"]["price"]
+    buy_count = sum(1 for v in all_data.values() if v and v["signal"]=="BUY")
 
-    # Quality Logic - Har Timeframe Check
-    buy_count = sum(1 for tf in timeframes if all_data[tf] and all_data[tf]["signal"]=="BUY")
-    rsi_now = all_data["5m"]["rsi"]
+    sl = price - 8
+    tp = price + 16
+    quality = 40 + buy_count*20
 
-    # RSI Filter - Sta idea!
-    if rsi_now > 70:
-        final = "🔻 WAIT - Overbought (RSI > 70)"
-        quality = 40
-    elif buy_count == 5:
-        final = "✅ STRONG BUY - 5/5 Timeframes"
-        quality = 98
-    elif buy_count >= 3 and all_data["15m"]["signal"]=="BUY":
-        final = "✅ BUY - Confirmed"
-        quality = 75 + buy_count*4
+    if all_data["15m"]["rsi"] > 70:
+        st.error("🔻 WAIT - Overbought RSI > 70")
+    elif buy_count >= 2:
+        st.success(f"✅ BUY CONFIRMED - {buy_count}/3 TF")
+        st.progress(quality/100)
+        c1,c2,c3,c4 = st.columns(4)
+        c1.metric("Quality", f"{quality}%")
+        c2.metric("Entry", f"{price:.2f}")
+        c3.metric("SL", f"{sl:.2f}")
+        c4.metric("TP", f"{tp:.2f}")
     else:
-        final = "⏸️ WAIT - Trend Not Clear"
-        quality = buy_count * 15
+        st.warning(f"⏸️ WAIT - {buy_count}/3 BUY")
+else:
+    st.info("Market closed or data loading, 1 min wait then refresh")
 
-    st.subheader(f"Final Signal: {final}")
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Quality", f"{quality}%", f"{buy_count}/5 TF")
-    c2.metric("Entry", f"{entry:.2f}")
-    c3.metric("Stop Loss", f"{sl:.2f}", "-8$ Risk")
-    c4.metric("Take Profit", f"{tp:.2f}", "+16$ Reward")
-
-    st.progress(quality/100)
-    st.caption("Quality = Signal Strength (5 Timeframe Confluence), not accuracy. Real accuracy 55-65%")
+# Auto refresh
+time.sleep(60)
+st.rerun()
