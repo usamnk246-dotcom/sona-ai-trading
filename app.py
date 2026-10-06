@@ -61,9 +61,14 @@ for i, tf in enumerate(timeframes):
             st.metric("Price", f"{d['price']:.2f}")
             st.write(f"EMA9: {d['ema9']:.2f} | EMA21: {d['ema21']:.2f}")
             st.write(f"RSI: {d['rsi']:.1f}")
-            st.success(d['signal']) if d['signal']=="BUY" else st.error(d['signal']) if d['signal']=="SELL" else st.warning(d['signal'])
-        else:
-            st.warning("Loading...")
+                        if d['signal']=="BUY":
+                st.success(f"✅ {d['signal']}")
+            elif d['signal']=="SELL":
+                st.error(f"🔻 {d['signal']}")
+            else:
+                st.warning(f"⏸️ {d['signal']}")
+                else:
+        st.warning("Loading...")
 
 st.divider()
 
