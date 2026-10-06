@@ -3,99 +3,146 @@ import yfinance as yf
 import pandas as pd
 import time
 
-st.set_page_config(page_title="L6SJ Gold Bot V5", layout="wide")
-st.title("🏅 L6SJ Gold AI Bot V5 - Multi-Timeframe")
+st.set_page_config(page_title="L6SJ Gold V6 PRO", layout="wide")
+st.title("🏅 L6SJ Gold AI V6 PRO - High Quality")
+st.caption("GC=F | 15m + 5m + 1m | EMA + RSI + MACD + ATR")
 
-# Requirements check
-st.write("Loading gold data...")
-
-def calc_rsi(close, period=14):
+# --- INDICATORS ---
+def calc_rsi(close, p=14):
     try:
-        delta = close.diff()
-        gain = delta.where(delta > 0, 0).rolling(window=period).mean()
-        loss = -delta.where(delta < 0, 0).rolling(window=period).mean()
-        rs = gain / loss
-        rsi = 100 - (100 / (1 + rs))
-        return float(rsi.iloc[-1])
-    except:
-        return 50.0
+        d = close.diff()
+        g = d.where(d>0,0).rolling(p).mean()
+        l = -d.where(d<0,0).rolling(p).mean()
+        rs = g / l
+        return float((100 - (100/(1+rs))).iloc[-1])
+    except: return 50
+
+def calc_macd(close):
+    try:
+        e12 = close.ewm(span=12).mean()
+        e26 = close.ewm(span=26).mean()
+        macd = e12 - e26
+        sig = macd.ewm(span=9).mean()
+        return float(macd.iloc[-1]), float(sig.iloc[-1])
+    except: return 0,0
 
 def get_data(tf):
     try:
-        # GC=F kabhi kabhi block hota, XAUUSD try
-        df = yf.download("GC=F", period="2d", interval=tf, progress=False, auto_adjust=True)
-        if df is None or len(df) < 20:
-            return None
-        # Fix MultiIndex issue
+        df = yf.download("GC=F", period="5d", interval=tf, progress=False, auto_adjust=True)
+        if df is None or len(df) < 50: return None
         if isinstance(df.columns, pd.MultiIndex):
             df.columns = df.columns.get_level_values(0)
+        c = df['Close']
+        h = df['High']
+        l = df['Low']
+        price = float(c.iloc[-1])
+        e9 = float(c.ewm(span=9).mean().iloc[-1])
+        e21 = float(c.ewm(span=21).mean().iloc[-1])
+        e50 = float(c.ewm(span=50).mean().iloc[-1])
+        rsi = calc_rsi(c)
+        macd, macd_sig = calc_macd(c)
+        # ATR for SL/TP
+        tr = pd.concat([h-l, (h-c.shift()).abs(), (l-c.shift()).abs()], axis=1).max(axis=1)
+        atr = float(tr.rolling(14).mean().iloc[-1])
 
-        close = df['Close']
-        price = float(close.iloc[-1])
-        ema9 = float(close.ewm(span=9).mean().iloc[-1])
-        ema21 = float(close.ewm(span=21).mean().iloc[-1])
-        rsi = calc_rsi(close)
+        # SIGNAL LOGIC
+        score = 0
+        if e9 > e21: score += 1
+        if e21 > e50: score += 1
+        if 40 < rsi < 68: score += 1
+        if macd > macd_sig: score += 1
+        if price > e9: score += 1
 
-        if ema9 > ema21 and rsi < 68:
+        if score >= 4:
             sig = "BUY"
-        elif ema9 < ema21:
+        elif score <= 1:
             sig = "SELL"
         else:
             sig = "WAIT"
-        return {"price":price, "ema9":ema9, "ema21":ema21, "rsi":rsi, "signal":sig}
-    except Exception as e:
-        st.error(f"{tf} error: {e}")
+
+        return {"price":price, "e9":e9, "e21":e21, "e50":e50, "rsi":rsi, "macd":macd, "macd_sig":macd_sig, "atr":atr, "score":score, "signal":sig}
+    except:
         return None
 
-# ONLY 4 TF - 2m hatao, yfinance ke nahi
-timeframes = ["15m", "5m", "1m"]
+# --- FETCH ---
+tfs = ["15m", "5m", "1m"]
 cols = st.columns(3)
-
 all_data = {}
-for i, tf in enumerate(timeframes):
+
+for i, tf in enumerate(tfs):
     with cols[i]:
-        st.subheader(tf)
+        st.subheader(f"⏰ {tf}")
         d = get_data(tf)
         all_data[tf] = d
         if d:
-            st.metric("Price", f"{d['price']:.2f}")
-            st.write(f"EMA9: {d['ema9']:.2f} | EMA21: {d['ema21']:.2f}")
-            st.write(f"RSI: {d['rsi']:.1f}")
-                        if d['signal']=="BUY":
-                st.success(f"✅ {d['signal']}")
+            st.metric("Price", f"{d['price']:.2f}", f"RSI {d['rsi']:.0f}")
+            st.write(f"EMA 9/21/50: {d['e9']:.1f} / {d['e21']:.1f} / {d['e50']:.1f}")
+            st.write(f"MACD: {d['macd']:.2f} vs {d['macd_sig']:.2f} | ATR: {d['atr']:.2f}")
+            st.write(f"Score: {d['score']}/5")
+            if d['signal']=="BUY":
+                st.success(f"✅ {d['signal']} - {d['score']}/5")
             elif d['signal']=="SELL":
-                st.error(f"🔻 {d['signal']}")
+                st.error(f"🔻 {d['signal']} - {d['score']}/5")
             else:
-                st.warning(f"⏸️ {d['signal']}")
-                else:
-        st.warning("Loading...")
+                st.warning(f"⏸️ {d['signal']} - {d['score']}/5")
+        else:
+            st.warning("Loading...")
 
 st.divider()
+st.subheader("🎯 FINAL DECISION")
 
-# Final Signal
-if all_data.get("15m") and all_data.get("5m"):
-    price = all_data["5m"]["price"]
+if all_data.get("15m") and all_data.get("5m") and all_data.get("1m"):
+    p = all_data["5m"]["price"]
+    atr = all_data["5m"]["atr"]
     buy_count = sum(1 for v in all_data.values() if v and v["signal"]=="BUY")
+    sell_count = sum(1 for v in all_data.values() if v and v["signal"]=="SELL")
+    avg_score = sum(v["score"] for v in all_data.values() if v) / 3
+    avg_rsi = sum(v["rsi"] for v in all_data.values() if v) / 3
 
-    sl = price - 8
-    tp = price + 16
-    quality = 40 + buy_count*20
+    # QUALITY CALCULATION
+    quality = 0
+    quality += buy_count * 25 # 75% max
+    quality += (avg_score / 5) * 15 # 15% max
+    if 45 < avg_rsi < 65: quality += 10 # perfect RSI
 
-    if all_data["15m"]["rsi"] > 70:
-        st.error("🔻 WAIT - Overbought RSI > 70")
-    elif buy_count >= 2:
-        st.success(f"✅ BUY CONFIRMED - {buy_count}/3 TF")
-        st.progress(quality/100)
-        c1,c2,c3,c4 = st.columns(4)
-        c1.metric("Quality", f"{quality}%")
-        c2.metric("Entry", f"{price:.2f}")
-        c3.metric("SL", f"{sl:.2f}")
-        c4.metric("TP", f"{tp:.2f}")
+    quality = min(95, int(quality))
+
+    # SL / TP with ATR (Professional)
+    sl = p - (atr * 1.5)
+    tp1 = p + (atr * 2)
+    tp2 = p + (atr * 3.5)
+
+    c1,c2,c3,c4 = st.columns(4)
+    c1.metric("Avg RSI", f"{avg_rsi:.0f}")
+    c2.metric("Avg Score", f"{avg_score:.1f}/5")
+    c3.metric("BUY TFs", f"{buy_count}/3")
+    c4.metric("Quality", f"{quality}%")
+
+    st.progress(quality/100)
+
+    if all_data["15m"]["rsi"] > 72:
+        st.error("🔴 HIGH RISK - 15m RSI >72 Overbought! WAIT")
+    elif all_data["15m"]["rsi"] < 28:
+        st.error("🔴 HIGH RISK - 15m RSI <28 Oversold! WAIT")
+    elif buy_count == 3 and quality >= 80:
+        st.success(f"✅✅ STRONG BUY CONFIRMED - {buy_count}/3 TF | Quality {quality}%")
+        st.balloons()
+        st.write(f"**Entry:** {p:.2f} | **SL:** {sl:.2f} (-{p-sl:.2f}) | **TP1:** {tp1:.2f} (+{tp1-p:.2f}) | **TP2:** {tp2:.2f}")
+    elif buy_count >= 2 and quality >= 65:
+        st.success(f"✅ BUY CONFIRMED - {buy_count}/3 TF | Quality {quality}%")
+        st.write(f"**Entry:** {p:.2f} | **SL:** {sl:.2f} | **TP1:** {tp1:.2f} | **TP2:** {tp2:.2f}")
+    elif sell_count >= 2:
+        st.error(f"🔻 SELL SIGNAL - {sell_count}/3 TF | Quality {quality}%")
+        st.write(f"**Entry:** {p:.2f} | **SL:** {p + atr*1.5:.2f} | **TP:** {p - atr*2:.2f}")
     else:
-        st.warning(f"⏸️ WAIT - {buy_count}/3 BUY")
-else:
-    st.info("Market closed or data loading, 1 min wait then refresh")
+        st.warning(f"⏸️ WAIT - No Confirmation | {buy_count} BUY / {sell_count} SELL | Quality {quality}%")
+        st.info("Rule: Need 2/3 BUY + RSI 45-65 + MACD Bullish for High Quality")
 
-# Auto refresh
+    with st.expander("📊 Details Analysis"):
+        st.write(all_data)
+
+else:
+    st.info("⏳ Loading multi-timeframe data... Auto refresh in 60s")
+
 time.sleep(60)
 st.rerun()
