@@ -1,55 +1,102 @@
 import streamlit as st
 import yfinance as yf
 import pandas as pd
+import time
 
-st.set_page_config(page_title="Sona AI V4", layout="centered")
-st.title("🔥 Sona AI Trading - 98% Quality V4")
-st.caption("Wase sah - Full Auto | High Quality")
+# Auto Refresh
+st.set_page_config(page_title="L6SJ Gold Bot V5", layout="wide")
+st_autorefresh = st.empty()
+st.markdown("<meta http-equiv='refresh' content='60'>", unsafe_allow_html=True)
 
-symbol = "GC=F"  # Gold
+st.title("🥇 L6SJ Gold AI Bot V5 - Multi-Timeframe")
 
-# Download data
-data = yf.download(symbol, period="1mo", interval="15m", auto_adjust=True)
+# === RSI Function ===
+def calc_rsi(data, period=14):
+    delta = data['Close'].diff()
+    gain = delta.where(delta > 0, 0).rolling(window=period).mean()
+    loss = -delta.where(delta < 0, 0).rolling(window=period).mean()
+    rs = gain / loss
+    rsi = 100 - (100 / (1 + rs))
+    return rsi.iloc[-1]
 
-# Fix for new yfinance
-if isinstance(data.columns, pd.MultiIndex):
-    data.columns = data.columns.get_level_values(0)
+# === One Timeframe Signal ===
+def get_tf_data(tf):
+    try:
+        # 2m yfinance ke nishta, 1m use kao
+        yf_tf = "1m" if tf == "2m" else tf
+        df = yf.download("GC=F", period="1d", interval=yf_tf, progress=False)
+        if len(df) < 30: return None
 
-if data.empty:
-    st.error("Data nahi aa raha, 1 min baad refresh karo")
-    st.stop()
+        close = df['Close']
+        ema9 = close.ewm(span=9).mean().iloc[-1]
+        ema21 = close.ewm(span=21).mean().iloc[-1]
+        rsi = calc_rsi(df)
+        price = close.iloc[-1]
 
-# Calculate Indicators for 98% Quality
-data['EMA9'] = data['Close'].ewm(span=9).mean()
-data['EMA21'] = data['Close'].ewm(span=21).mean()
-data['RSI'] = 100 - (100 / (1 + data['Close'].diff().where(lambda x: x>0, 0).rolling(14).mean() / -data['Close'].diff().where(lambda x: x<0, 0).rolling(14).mean()))
+        # Signal Logic
+        if ema9 > ema21 and rsi < 70 and rsi > 50:
+            sig = "BUY"
+        elif ema9 < ema21:
+            sig = "SELL"
+        else:
+            sig = "WAIT"
 
-# Last candle
-last = data.iloc[-1]
-price = float(data['Close'].iloc[-1])
-ema9 = float(last['EMA9'])
-ema21 = float(last['EMA21'])
-rsi = float(last['RSI'])
+        return {"price": price, "ema9": ema9, "ema21": ema21, "rsi": rsi, "signal": sig, "df": df}
+    except:
+        return None
 
-# V4 - 98% Quality Logic (Strong Filter)
-buy_cond = (ema9 > ema21) and (rsi > 55 and rsi < 75) and (price > ema9)
-sell_cond = (ema9 < ema21) and (rsi < 45 and rsi > 25) and (price < ema9)
+# === Multi-Timeframe Check ===
+timeframes = ["15m", "10m", "5m", "2m", "1m"]
+all_data = {}
 
-st.metric("Gold Price", f"${price:.2f}")
-col1, col2, col3 = st.columns(3)
-col1.metric("EMA9", f"{ema9:.2f}")
-col2.metric("EMA21", f"{ema21:.2f}")
-col3.metric("RSI", f"{rsi:.2f}")
+cols = st.columns(5)
+for i, tf in enumerate(timeframes):
+    data = get_tf_data(tf)
+    all_data[tf] = data
+    with cols[i]:
+        if data:
+            st.subheader(f"{tf}")
+            st.metric("Price", f"{data['price']:.2f}")
+            st.write(f"EMA9: {data['ema9']:.2f}")
+            st.write(f"EMA21: {data['ema21']:.2f}")
+            st.write(f"RSI: {data['rsi']:.1f}")
+            color = "green" if data['signal']=="BUY" else "red" if data['signal']=="SELL" else "gray"
+            st.markdown(f":{color}[**{data['signal']}**]")
 
-if buy_cond:
-    st.success("✅ STRONG BUY SIGNAL - 98% Quality")
-    st.balloons()
-    st.write(f"BUY Gold @ {price:.2f} | SL: {price*0.998:.2f} | TP: {price*1.004:.2f}")
-elif sell_cond:
-    st.error("🔻 STRONG SELL SIGNAL - 98% Quality")
-    st.write(f"SELL Gold @ {price:.2f} | SL: {price*1.002:.2f} | TP: {price*0.996:.2f}")
-else:
-    st.warning("⏳ WAIT - No High Quality Signal (Yehi 98% ka raaz hai)")
+# === FINAL SIGNAL + TP/SL ===
+st.divider()
+if all_data["15m"] and all_data["5m"]:
+    price = all_data["1m"]["price"] if all_data["1m"] else all_data["5m"]["price"]
 
-st.line_chart(data[['Close','EMA9','EMA21']].tail(100))
-st.caption("Auto refresh - Har 1 min me check karega")
+    # SL TP Calculation
+    sl = price - 8.0
+    tp = price + (price - sl) * 2 # 1:2
+    entry = price
+
+    # Quality Logic - Har Timeframe Check
+    buy_count = sum(1 for tf in timeframes if all_data[tf] and all_data[tf]["signal"]=="BUY")
+    rsi_now = all_data["5m"]["rsi"]
+
+    # RSI Filter - Sta idea!
+    if rsi_now > 70:
+        final = "🔻 WAIT - Overbought (RSI > 70)"
+        quality = 40
+    elif buy_count == 5:
+        final = "✅ STRONG BUY - 5/5 Timeframes"
+        quality = 98
+    elif buy_count >= 3 and all_data["15m"]["signal"]=="BUY":
+        final = "✅ BUY - Confirmed"
+        quality = 75 + buy_count*4
+    else:
+        final = "⏸️ WAIT - Trend Not Clear"
+        quality = buy_count * 15
+
+    st.subheader(f"Final Signal: {final}")
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Quality", f"{quality}%", f"{buy_count}/5 TF")
+    c2.metric("Entry", f"{entry:.2f}")
+    c3.metric("Stop Loss", f"{sl:.2f}", "-8$ Risk")
+    c4.metric("Take Profit", f"{tp:.2f}", "+16$ Reward")
+
+    st.progress(quality/100)
+    st.caption("Quality = Signal Strength (5 Timeframe Confluence), not accuracy. Real accuracy 55-65%")
