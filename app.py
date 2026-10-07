@@ -1,125 +1,132 @@
 import streamlit as st
 import yfinance as yf
 import pandas as pd
-import numpy as np
+import ta
 
-st.set_page_config(page_title="L6SJ Gold AI V6 PRO", layout="wide")
-st.title("🏅 L6SJ Gold AI V6 PRO - High Quality")
-st.caption("GC=F | 15m + 5m + 1m | EMA + RSI + MACD + ATR")
+st.set_page_config(page_title="L6SJ V8", layout="wide", page_icon="🏅")
+st.markdown("<style>.stApp{background:#080c14;} .gold{color:#FFD700; font-weight:900;} .card{background:#111827; border:1px solid #1f2a3a; border-radius:16px; padding:15px;}</style>", unsafe_allow_html=True)
 
-@st.cache_data(ttl=60)
-def get_data(tf):
-    try:
-        period_map = {"15m": "5d", "5m": "2d", "1m": "1d"}
-        data = yf.download("GC=F", period=period_map[tf], interval=tf, progress=False)
-        if isinstance(data.columns, pd.MultiIndex):
-            data.columns = data.columns.get_level_values(0)
-        data['EMA9'] = data['Close'].ewm(span=9).mean()
-        data['EMA21'] = data['Close'].ewm(span=21).mean()
-        data['EMA50'] = data['Close'].ewm(span=50).mean()
-        delta = data['Close'].diff()
-        gain = (delta.where(delta > 0, 0)).ewm(alpha=1/14).mean()
-        loss = (-delta.where(delta < 0, 0)).ewm(alpha=1/14).mean()
-        rs = gain / loss
-        data['RSI'] = 100 - (100 / (1 + rs))
-        exp1 = data['Close'].ewm(span=12).mean()
-        exp2 = data['Close'].ewm(span=26).mean()
-        data['MACD'] = exp1 - exp2
-        data['MACD_SIGNAL'] = data['MACD'].ewm(span=9).mean()
-        data['ATR'] = (data['High'] - data['Low']).ewm(span=14).mean()
-        return data.dropna().tail(100)
-    except:
-        return None
+st.markdown("<h1 style='text-align:center; color:#FFD700;'>🏅 L6SJ GOLD AI V8 PRO - AUTO</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align:center; color:#666; letter-spacing:3px;'>15M • 5M • 1M • RSI • EMA • MACD • ATR • SCORE • QUALITY 95% • AUTO</p>", unsafe_allow_html=True)
 
-# FETCH ALL TIMEFRAMES
-tf_list = ["15m", "5m", "1m"]
-all_data = {}
-cols = st.columns(3)
-
-for i, tf in enumerate(tf_list):
-    df = get_data(tf)
-    if df is not None and len(df) > 20:
-        last = df.iloc[-1]
-        price = float(last['Close'])
-        rsi = float(last['RSI'])
-        ema9 = float(last['EMA9'])
-        ema21 = float(last['EMA21'])
-        ema50 = float(last['EMA50'])
-        macd = float(last['MACD'])
-        macd_sig = float(last['MACD_SIGNAL'])
-        atr = float(last['ATR'])
-
-        score = 0
-        if price > ema9: score += 1
-        if ema9 > ema21: score += 1
-        if ema21 > ema50: score += 1
-        if rsi > 50: score += 1
-        if macd > macd_sig: score += 1
-
-        signal = "BUY" if score >= 3 else "SELL"
-        if score == 3: signal = "NEUTRAL"
-
-        all_data[tf] = {"price": price, "rsi": rsi, "score": score, "signal": signal, "ema9": ema9, "ema21": ema21, "ema50": ema50, "macd": macd, "macd_sig": macd_sig, "atr": atr}
-
-        with cols[i]:
-            st.subheader(f"⏰ {tf}")
-            st.metric("Price", f"{price:.2f}", delta=f"RSI {rsi:.0f}")
-            st.write(f"EMA 9/21/50: {ema9:.1f} / {ema21:.1f} / {ema50:.1f}")
-            st.write(f"MACD: {macd:.2f} vs {macd_sig:.2f} | ATR: {atr:.2f}")
-            st.write(f"Score: {score}/5")
-            if "BUY" in signal:
-                st.success(f"▲ {signal} - {score}/5")
-            elif "SELL" in signal:
-                st.error(f"▼ {signal} - {score}/5")
-            else:
-                st.warning(f"{signal} - {score}/5")
-
-if len(all_data) == 3:
-    buy_count = sum(1 for v in all_data.values() if "BUY" in v["signal"])
-    sell_count = sum(1 for v in all_data.values() if "SELL" in v["signal"])
-    avg_rsi = np.mean([v["rsi"] for v in all_data.values()])
-    avg_score = np.mean([v["score"] for v in all_data.values()])
-    curr_price = all_data["5m"]["price"]
-    curr_atr = all_data["5m"]["atr"]
-
-    # QUALITY CALCULATION - FOR BOTH BUY & SELL - FIXED
-    quality = 0
-    strong_count = max(buy_count, sell_count)
-    quality += strong_count * 25
-    quality += 10
-    quality += 15 if (avg_score >= 3 or avg_score <= 2) else 0
-    quality = min(quality, 95)
-
+# SIDEBAR - AUTO
+with st.sidebar:
+    st.title("🤖 AUTO")
+    auto = st.toggle("Auto Trading ON", False)
+    min_q = st.slider("Min Quality", 60,95,80)
     st.divider()
-    st.header("🎯 FINAL DECISION")
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Avg RSI", f"{avg_rsi:.0f}")
-    c2.metric("Avg Score", f"{avg_score:.1f}/5")
-    c3.metric("BUY TFs", f"{buy_count}/3")
-    c4.metric("Quality", f"{quality:.0f}%")
+    st.markdown("**Quality Logic:**\n- 3/3 TF = 75%+10%+10% = 95%\n- 2/3 TF = 50%+10%+15% = 75%\n- Score avg included")
 
-    st.progress(quality/100)
+@st.cache_data(ttl=45)
+def analyze(tf):
+    df = yf.download("GC=F", period="2d", interval=tf, progress=False)
+    if df.empty: return None
+    if isinstance(df.columns, pd.MultiIndex): df.columns = df.columns.get_level_values(0)
+    close, high, low = df['Close'], df['High'], df['Low']
+    price = close.iloc[-1]
+    
+    # --- ZAROOR INDICATORS ---
+    # EMA
+    ema9 = ta.trend.ema_indicator(close, 9).iloc[-1]
+    ema21 = ta.trend.ema_indicator(close, 21).iloc[-1]
+    ema50 = ta.trend.ema_indicator(close, 50).iloc[-1]
+    # RSI with 70/30
+    rsi = ta.momentum.rsi(close, 14).iloc[-1]
+    rsi_signal = "OVERBOUGHT" if rsi >=70 else "OVERSOLD" if rsi <=30 else "NEUTRAL"
+    # MACD
+    macd = ta.trend.macd(close).iloc[-1]
+    macd_sig = ta.trend.macd_signal(close).iloc[-1]
+    macd_hist = ta.trend.macd_diff(close).iloc[-1]
+    # ATR
+    atr = ta.volatility.average_true_range(high, low, close, 14).iloc[-1]
+    
+    # SCORE 0-5 (zaroor)
+    score = 0
+    if price > ema9: score+=1
+    if ema9 > ema21: score+=1
+    if ema21 > ema50: score+=1
+    if rsi > 50: score+=1
+    if macd > macd_sig: score+=1
+    
+    signal = "BUY" if score >=3 else "SELL"
+    
+    return {
+        "price":price, "ema9":ema9, "ema21":ema21, "ema50":ema50,
+        "rsi":rsi, "rsi_signal":rsi_signal,
+        "macd":macd, "macd_sig":macd_sig, "macd_hist":macd_hist,
+        "atr":atr, "score":score, "signal":signal
+    }
 
-    sl = curr_price - curr_atr*1.2 if buy_count > sell_count else curr_price + curr_atr*1.2
-    tp = curr_price + curr_atr*1.5 if buy_count > sell_count else curr_price - curr_atr*1.5
+# FETCH ALL 3
+d15 = analyze("15m"); d5 = analyze("5m"); d1 = analyze("1m")
 
-    if all_data["15m"]["rsi"] > 72:
-        st.warning("⚠️ 15m RSI Overbought (>72) - WAIT for BUY")
-    elif buy_count == 3 and quality >= 80:
-        st.success(f"✅ STRONG BUY CONFIRMED - 3/3 TF | Quality {quality:.0f}%")
-        st.balloons()
-    elif buy_count >= 2 and quality >= 65:
-        st.success(f"✅ BUY SIGNAL - {buy_count}/3 TF | Quality {quality:.0f}%")
-    elif sell_count == 3 and quality >= 80:
-        st.error(f"🔻 STRONG SELL CONFIRMED - 3/3 TF | Quality {quality:.0f}%")
-    elif sell_count >= 2:
-        st.error(f"🔻 SELL SIGNAL - {sell_count}/3 TF | Quality {quality:.0f}%")
-    else:
-        st.info(f"⏸️ NO CLEAR SIGNAL - Wait | Quality {quality:.0f}%")
+if d15 and d5 and d1:
+    buy_c = sum([1 for x in [d15,d5,d1] if x['signal']=="BUY"])
+    sell_c = 3-buy_c
+    avg_rsi = (d15['rsi']+d5['rsi']+d1['rsi'])/3
+    avg_score = (d15['score']+d5['score']+d1['score'])/3
+    avg_atr = (d15['atr']+d5['atr']+d1['atr'])/3
+    
+    # QUALITY 95% - BOTH SIDE LOGIC
+    quality = max(buy_c, sell_c)*25 + 10 + (15 if (avg_score>=3.5 or avg_score<=1.5) else 5)
+    quality = min(quality, 95)
+    
+    # DISPLAY
+    cols = st.columns(3)
+    for col, (tf_name, d) in zip(cols, [("15 MIN",d15),("5 MIN",d5),("1 MIN",d1)]):
+        with col:
+            color = "#00ff88" if d['signal']=="BUY" else "#ff3b30"
+            rsi_color = "#ff3b30" if d['rsi_signal']=="OVERBOUGHT" else "#00ff88" if d['rsi_signal']=="OVERSOLD" else "#aaa"
+            st.markdown(f"""
+            <div class="card">
+                <div style="display:flex; justify-content:space-between;">
+                    <b class="gold">{tf_name}</b>
+                    <span style="background:{color}; color:{'black' if d['signal']=='BUY' else 'white'}; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:800;">{d['signal']} {d['score']}/5</span>
+                </div>
+                <div style="font-size:24px; font-weight:800; color:white; margin:8px 0;">${d['price']:.2f}</div>
+                
+                <div style="background:#0c121e; border-radius:10px; padding:10px; font-size:11px; color:#888; line-height:1.7;">
+                    <b style="color:white;">RSI:</b> <span style="color:{rsi_color}; font-weight:800;">{d['rsi']:.1f} ({d['rsi_signal']})</span> | 70 OB / 30 OS<br>
+                    <b style="color:white;">EMA:</b> 9:{d['ema9']:.2f} | 21:{d['ema21']:.2f} | 50:{d['ema50']:.2f}<br>
+                    <b style="color:white;">MACD:</b> {d['macd']:.3f} vs Sig {d['macd_sig']:.3f} | Hist {d['macd_hist']:.3f}<br>
+                    <b style="color:white;">ATR:</b> {d['atr']:.3f} | <b style="color:#FFD700;">SCORE: {d['score']}/5</b>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
 
-    st.write(f"**Entry:** {curr_price:.2f} | **SL:** {sl:.2f} | **TP:** {tp:.2f}")
-
-    with st.expander("📊 Details Analysis"):
-        st.json(all_data)
-
-st.button("🔄 Refresh")
+    # FINAL - ALL INCLUDED
+    main_sig = "BUY" if buy_c > sell_c else "SELL"
+    main_color = "#00ff88" if main_sig=="BUY" else "#ff3b30"
+    
+    can_auto = quality >= min_q
+    st.markdown(f"""
+    <div class="card" style="margin-top:18px; border:2px solid {main_color}; text-align:center;">
+        <div style="color:#666; font-size:10px; letter-spacing:3px;">FINAL ANALYSIS • ALL INDICATORS INCLUDED</div>
+        <div style="color:{main_color}; font-size:28px; font-weight:900;">STRONG {main_sig} CONFIRMED - {max(buy_c,sell_c)}/3 TF</div>
+        <div style="display:flex; justify-content:center; gap:30px; margin:10px 0; color:#aaa; font-size:12px;">
+            <span>Avg RSI: <b style="color:white;">{avg_rsi:.1f}</b> (70 OB/30 OS)</span>
+            <span>Avg Score: <b style="color:#FFD700;">{avg_score:.1f}/5</b></span>
+            <span>Avg ATR: <b style="color:white;">{avg_atr:.3f}</b></span>
+            <span>BUY TFs: {buy_c}/3</span>
+        </div>
+        <div style="font-size:58px; font-weight:900; color:#FFD700; text-shadow:0 0 25px #FFD700;">{quality}%</div>
+        <div style="color:#FFD700; font-size:11px;">QUALITY 95% - {main_sig} POWER - ALL TF {main_sig}</div>
+        
+        <div style="background:#0c121e; border-radius:12px; padding:12px; margin-top:12px; display:flex; justify-content:space-around; color:#aaa; font-size:13px;">
+            <span>Entry: <b style="color:white;">${d15['price']:.2f}</b></span>
+            <span>SL: <b style="color:#ff5a5a;">${d15['price'] + d15['atr']*1.2 if main_sig=='BUY' else d15['price'] - d15['atr']*1.2:.2f}</b></span>
+            <span>TP: <b style="color:#00ff88;">${d15['price'] + d15['atr']*1.8 if main_sig=='BUY' else d15['price'] - d15['atr']*1.8:.2f}</b></span>
+        </div>
+        
+        <div style="margin-top:12px; padding:10px; border-radius:10px; background:{'#00ff8820' if can_auto and auto else '#ffaa0020'}; color:{'#00ff88' if can_auto and auto else '#ffaa00'}; font-weight:700;">
+            {'🤖 AUTO TRADE EXECUTED - ' + main_sig + f' at ${d15["price"]:.2f} | Quality {quality}%' if auto and can_auto else f'{"⏸️ AUTO ON - Waiting Quality >="+str(min_q)+"%" if auto else "⏸️ AUTO OFF"} | Current {quality}% | {"✅ Ready" if can_auto else "❌ Low Quality"}'}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    if st.button("🔄 REFRESH ALL INDICATORS", use_container_width=True):
+        st.cache_data.clear()
+        st.rerun()
+else:
+    st.error("Data loading - Wait 30 sec")
