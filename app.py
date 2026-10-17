@@ -11,4 +11,4 @@ if isinstance(d.columns, pd.MultiIndex):
 d = d.dropna()
 st.metric(m, float(d['Close'].iloc[-1]))
 fig = go.Figure([go.Candlestick(x=d.index, open=d['Open'], high=d['High'], low=d['Low'], close=d['Close'])])
-st.plotly_chart(fig)
+st.plotly_chart(fig, width="stretch")
