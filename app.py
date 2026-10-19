@@ -1,164 +1,88 @@
 import streamlit as st
 import yfinance as yf
 import pandas as pd
-import numpy as np
-import time
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
-st.set_page_config(page_title="SONA AI + KING 103 WAR - FINAL", page_icon="👑", layout="wide")
+st.set_page_config(page_title="SONA AI x KING 103", layout="wide", page_icon="👑")
 
-st.markdown("""<div style="background: linear-gradient(90deg, #000, #FFD700); padding:15px; border-radius:15px; text-align:center;">
-<h2>👑 SONA AI + KING 103 WAR + SONI MORNING STRATEGY 👑</h2>
-<p>EMA 9/21/50/200 | RSI14 | MACD | VWAP | ATR14 | Volume | BOS | Liquidity Sweep | Pullback</p>
-</div>""", unsafe_allow_html=True)
+st.markdown("""
+<style>
+.stApp { background:#0E0E0E; }
+.market-btn { width:100%; background:#1E222D; color:#D1D4DC; border:1px solid #363A45; border-radius:12px; padding:16px; margin:6px 0; }
+.card { background:#1E222D; border-radius:12px; padding:16px; margin:8px 0; border:1px solid #2A2E39; }
+.price-big { font-size:42px; font-weight:bold; color:#F0F3FA; }
+.badge-green { background:#184A2E; color:#00FF88; padding:4px 10px; border-radius:20px; font-size:13px; }
+.tp { color:#00E396; } .sl { color:#FF4560; }
+</style>
+""", unsafe_allow_html=True)
 
-@st.cache_data(ttl=60)
-def get_data(tf):
-    try:
-        period_map = {"15m": "5d", "5m": "2d", "1m": "1d"}
-        df = yf.download("GC=F", period=period_map.get(tf,"5d"), interval=tf, progress=False)
-        if isinstance(df.columns, pd.MultiIndex):
-            df.columns = df.columns.get_level_values(0)
-        df = df.dropna()
-        if len(df) < 50: return None
-        
-        # EMA - Tumhara Sara
-        df['EMA9'] = df['Close'].ewm(span=9).mean()
-        df['EMA21'] = df['Close'].ewm(span=21).mean()
-        df['EMA50'] = df['Close'].ewm(span=50).mean()
-        df['EMA200'] = df['Close'].ewm(span=200).mean()
-        
-        # RSI 14
-        delta = df['Close'].diff()
-        gain = (delta.where(delta > 0, 0)).rolling(14).mean()
-        loss = (-delta.where(delta < 0, 0)).rolling(14).mean()
-        rs = gain / loss
-        df['RSI'] = 100 - (100 / (1 + rs))
-        
-        # MACD
-        exp1 = df['Close'].ewm(span=12).mean()
-        exp2 = df['Close'].ewm(span=26).mean()
-        df['MACD'] = exp1 - exp2
-        df['MACD_SIGNAL'] = df['MACD'].ewm(span=9).mean()
-        
-        # VWAP - Volume Weighted
-        typical = (df['High'] + df['Low'] + df['Close'])/3
-        df['VWAP'] = (typical * df['Volume']).cumsum() / df['Volume'].cumsum()
-        
-        # ATR 14
-        df['ATR'] = (df['High'] - df['Low']).rolling(14).mean()
-        
-        # BOS - Break of Structure
-        df['SwingHigh'] = df['High'].rolling(20).max()
-        df['SwingLow'] = df['Low'].rolling(20).min()
-        df['BOS_Bull'] = df['Close'] > df['SwingHigh'].shift(1)
-        df['BOS_Bear'] = df['Close'] < df['SwingLow'].shift(1)
-        
-        # Liquidity Sweep
-        df['Liq_Sweep_Buy'] = (df['Low'] < df['SwingLow'].shift(1)) & (df['Close'] > df['SwingLow'].shift(1))
-        df['Liq_Sweep_Sell'] = (df['High'] > df['SwingHigh'].shift(1)) & (df['Close'] < df['SwingHigh'].shift(1))
-        
-        # Pullback
-        df['Pullback_Buy'] = (df['Close'] <= df['EMA21']) & (df['Close'] >= df['EMA50'])
-        df['Pullback_Sell'] = (df['Close'] >= df['EMA21']) & (df['Close'] <= df['EMA50'])
-        
-        return df.tail(100)
-    except:
-        return None
+st.markdown('<p style="color:#8B8E9B; text-align:center;">| RSI14 | MACD | VWAP | ATR | BOS | CHOCH | Liquidity | OB | FVG | 5M Scalping</p>', unsafe_allow_html=True)
 
-tf_list = ["15m", "5m", "1m"]
-all_data = {}
-cols = st.columns(3)
+if 'market' not in st.session_state: st.session_state.market = "US30"
+if 'tf' not in st.session_state: st.session_state.tf = "30m"
 
-for i, tf in enumerate(tf_list):
-    df = get_data(tf)
-    if df is not None:
-        last = df.iloc[-1]
-        price = float(last['Close'])
-        ema9 = float(last['EMA9']); ema21 = float(last['EMA21'])
-        ema50 = float(last['EMA50']); ema200 = float(last['EMA200'])
-        rsi = float(last['RSI']); macd = float(last['MACD'])
-        macd_sig = float(last['MACD_SIGNAL']); vwap = float(last['VWAP'])
-        atr = float(last['ATR']); vol = float(last['Volume'])
-        avg_vol = float(df['Volume'].tail(20).mean())
-        
-        bos_bull = bool(last['BOS_Bull']); bos_bear = bool(last['BOS_Bear'])
-        liq_buy = bool(last['Liq_Sweep_Buy']); liq_sell = bool(last['Liq_Sweep_Sell'])
-        pull_buy = bool(last['Pullback_Buy']); pull_sell = bool(last['Pullback_Sell'])
-        
-        # KING 103 + SONI SCORING - Da Tol Pa Ka
-        score = 0
-        reason = []
-        # EMA 9/21 cross
-        if ema9 > ema21: score+=1; reason.append("EMA9>21")
-        if price > ema50: score+=1; reason.append("Price>50")
-        if price > ema200: score+=1; reason.append("Price>200")
-        # RSI
-        if 50 < rsi < 70: score+=1; reason.append(f"RSI {rsi:.0f}")
-        # MACD
-        if macd > macd_sig: score+=1; reason.append("MACD Bull")
-        # VWAP
-        if price > vwap: score+=1; reason.append("VWAP>")
-        # Volume
-        if vol > avg_vol: score+=1; reason.append("Vol High")
-        # BOS
-        if bos_bull: score+=1; reason.append("BOS Bull")
-        # Liquidity Sweep + Pullback
-        if liq_buy or pull_buy: score+=1; reason.append("LiqSweep/Pullback")
-        
-        # Final Signal
-        signal = "BUY" if score >= 5 else "SELL" if score <= 3 else "NEUTRAL"
-        if liq_buy and bos_bull and score>=4: signal = "STRONG BUY"
-        if liq_sell and bos_bear: signal = "STRONG SELL"
-        
-        all_data[tf] = {"price":price, "score":score, "signal":signal, "rsi":rsi, "reason":",".join(reason), "atr":atr, "bos":bos_bull, "liq":liq_buy}
-        
-        with cols[i]:
-            st.subheader(f"⏰ {tf} - Score {score}/9")
-            st.metric("Price", f"{price:.2f}", f"RSI {rsi:.0f}")
-            st.write(f"EMA 9/21/50/200: {ema9:.1f}/{ema21:.1f}/{ema50:.1f}/{ema200:.1f}")
-            st.write(f"VWAP: {vwap:.1f} | ATR: {atr:.2f}")
-            st.write(f"BOS: {'✅' if bos_bull else '❌'} | Liq Sweep: {'✅' if liq_buy else '❌'} | Pullback: {'✅' if pull_buy else '❌'}")
-            if "BUY" in signal: st.success(f"▲ {signal} - {','.join(reason)}")
-            elif "SELL" in signal: st.error(f"▼ {signal}")
-            else: st.warning(signal)
+symbol_map = {"GOLD XAUUSD": "GC=F", "SILVER": "SI=F", "BTC/USD": "BTC-USD", "ETH/USD": "ETH-USD", "EUR/USD": "EURUSD=X", "GBP/USD": "GBPUSD=X", "US100": "^NDX", "US30": "^DJI"}
 
-# FINAL DECISION - SONI + KING 103 WAR
-if len(all_data)==3:
-    buy_count = sum(1 for v in all_data.values() if "BUY" in v["signal"])
-    sell_count = sum(1 for v in all_data.values() if "SELL" in v["signal"])
-    avg_score = np.mean([v["score"] for v in all_data.values()])
-    curr_price = all_data["5m"]["price"]; curr_atr = all_data["5m"]["atr"]
-    quality = min((buy_count*30 + int(avg_score*10)), 95) if buy_count>=sell_count else min((sell_count*30 + int((9-avg_score)*10)),95)
-    
-    st.divider()
-    st.header("🎯 FINAL DECISION - SONA + KING 103 WAR + LIQUIDITY")
-    c1,c2,c3,c4 = st.columns(4)
-    c1.metric("Avg Score", f"{avg_score:.1f}/9"); c2.metric("BUY TFs", f"{buy_count}/3")
-    c3.metric("SELL TFs", f"{sell_count}/3"); c4.metric("Quality", f"{quality:.0f}%")
-    st.progress(quality/100)
-    
-    sl = curr_price - curr_atr*1.2 if buy_count>=2 else curr_price + curr_atr*1.2
-    tp = curr_price + curr_atr*1.5 if buy_count>=2 else curr_price - curr_atr*1.5
-    
-    st.subheader("🔔 KHAPEL ALERT - King 103 + Soni War")
-    alert_on = st.toggle("🔔 Alert ON - Liquidity + BOS + Pullback", value=False)
-    
-    if buy_count==3 and quality>=80:
-        st.success(f"✅ STRONG BUY CONFIRMED - KING 103 WAR - {curr_price:.2f} Q {quality:.0f}%")
-        st.write(f"Entry {curr_price:.2f} SL {sl:.2f} TP {tp:.2f} - EMA50/200 + RSI + MACD + VWAP + BOS + Liq Sweep OK")
-        if alert_on: st.balloons(); st.components.v1.html(f"""<script>new Notification('👑 KING 103 BUY!',{{body:'{curr_price:.2f} Q{quality:.0f}%'}})</script><audio autoplay><source src="https://www.soundjay.com/buttons/beep-07a.wav"></audio>""", height=80)
-    elif buy_count>=2:
-        st.success(f"✅ BUY SIGNAL - {buy_count}/3 TFs - {curr_price:.2f}")
-        if alert_on: st.toast("BUY Alert Baja!")
-    elif sell_count==3:
-        st.error(f"▼ STRONG SELL CONFIRMED - {curr_price:.2f} Q {quality:.0f}%")
-        if alert_on: st.components.v1.html(f"""<script>new Notification('KING 103 SELL!',{{body:'{curr_price:.2f}'}})</script><audio autoplay><source src="https://www.soundjay.com/buttons/beep-07a.wav"></audio>""", height=80)
-    else:
-        st.info(f"⏸️ WAIT - No BOS/Liquidity Setup Yet - Score {avg_score:.1f}")
-        if alert_on: 
-            st.info("60 sec me auto check..."); time.sleep(60); st.rerun()
+st.markdown('### 🎯 MARKET SELECT - Click to Change')
+for m in ["GOLD XAUUSD","SILVER","BTC/USD","ETH/USD","EUR/USD","GBP/USD","US100","US30"]:
+    label = f"✅ {m}" if st.session_state.market == m else m
+    if st.button(label, key=f"m_{m}", use_container_width=True):
+        st.session_state.market = m; st.rerun()
 
-    st.write(f"**Entry:** {curr_price:.2f} | **SL:** {sl:.2f} | **TP:** {tp:.2f}")
-    with st.expander("📊 Full Soni + King 103 Details - VWAP/BOS/Liquidity"): st.json(all_data)
+st.markdown('### ⏰ TIMEFRAME + STRATEGY - Click to Change')
+for tf in ["1m","5m","15m","30m","1h","4h","1d"]:
+    lab = f"✅ {tf}" if st.session_state.tf == tf else tf
+    if st.button(lab, key=f"tf_{tf}"):
+        st.session_state.tf = tf; st.rerun()
 
-st.button("🔄 Refresh War Mode")
+strategy = st.selectbox("Strategy", ["KING V71 SCALP 5M","KING V103 4/HR BOTH","KING V103 x SONA AI LINKED"], index=0)
+
+@st.cache_data(ttl=120)
+def get_full_data(symbol, tf):
+    tf_map = {"1m":"1m","5m":"5m","15m":"15m","30m":"30m","1h":"60m","4h":"240m","1d":"1d"}
+    period_map = {"1m":"1d","5m":"5d","15m":"5d","30m":"7d","60m":"1mo","240m":"3mo","1d":"6mo"}
+    iv = tf_map.get(tf,"30m"); pr = period_map.get(iv,"7d")
+    df = yf.download(symbol, period=pr, interval=iv, progress=False)
+    if isinstance(df.columns, pd.MultiIndex): df.columns = df.columns.get_level_values(0)
+    df = df.dropna()
+    df['EMA9'] = df['Close'].ewm(9).mean(); df['EMA21'] = df['Close'].ewm(21).mean(); df['EMA200'] = df['Close'].ewm(200).mean()
+    typical = (df['High']+df['Low']+df['Close'])/3
+    df['VWAP'] = (typical*df['Volume']).cumsum()/df['Volume'].cumsum()
+    delta = df['Close'].diff(); gain = delta.where(delta>0,0).rolling(14).mean(); loss = -delta.where(delta<0,0).rolling(14).mean()
+    rs = gain/loss; df['RSI'] = 100-(100/(1+rs))
+    exp1 = df['Close'].ewm(12).mean(); exp2 = df['Close'].ewm(26).mean()
+    df['MACD'] = exp1-exp2; df['MACD_SIGNAL']=df['MACD'].ewm(9).mean()
+    df['ATR'] = (df['High']-df['Low']).rolling(14).mean()
+    df['SwingHigh']=df['High'].rolling(20).max(); df['SwingLow']=df['Low'].rolling(20).min()
+    df['BOS']=df['Close']>df['SwingHigh'].shift(1)
+    df['LiqSweep']=(df['Low']<df['SwingLow'].shift(1))&(df['Close']>df['SwingLow'].shift(1))
+    return df
+
+df = get_full_data(symbol_map[st.session_state.market], st.session_state.tf)
+if df is not None:
+    last = df.iloc[-1]; price=float(last['Close']); ema9=float(last['EMA9']); ema21=float(last['EMA21']); ema200=float(last['EMA200'])
+    vwap=float(last['VWAP']); rsi=float(last['RSI']); macd=float(last['MACD']); atr=float(last['ATR'])
+    change = price - float(df['Close'].iloc[-2])
+    st.markdown(f'<div class="card"><p>💰 {st.session_state.market}</p><div class="price-big">{price:.2f}</div><span class="badge-green">↑ {change:+.2f}</span></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="card"><p>📈 EMA 9/21/200</p><div style="font-size:28px;">{ema9:.1f} / {ema21:.1f} / {ema200:.1f}</div><span class="badge-green">↑ Mixed</span></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="card"><p>📊 RSI14 {rsi:.1f} | MACD {macd:.3f}</p><div style="font-size:32px;">VWAP {vwap:.2f}</div><span class="badge-green">↑ ATR {atr:.3f}</span></div>', unsafe_allow_html=True)
+    sl = price - atr*1.5; tp = price + atr*3
+    st.markdown(f'<div class="card"><p>🛑 SL {sl:.2f}</p><div style="font-size:36px;" class="tp">TP {tp:.2f}</div><span class="badge-green">↑ RR 1:2.0</span></div>', unsafe_allow_html=True)
+    liq_text = "Sweep Detected" if bool(last['LiqSweep']) else "No Sweep"
+    bos_text = "BOS Confirmed" if bool(last['BOS']) else "No BOS"
+    st.markdown(f'<div class="card"><p>💧 Liquidity</p><div style="font-size:32px; color:#5A5E6B;">{liq_text}</div><span class="badge-green">↑ {bos_text}</span></div>', unsafe_allow_html=True)
+    fig = make_subplots(rows=3, cols=1, shared_xaxes=True, vertical_spacing=0.05, row_heights=[0.6,0.2,0.2])
+    fig.add_trace(go.Candlestick(x=df.index, open=df['Open'], high=df['High'], low=df['Low'], close=df['Close'], name=st.session_state.market), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df.index, y=df['EMA9'], line=dict(color='#00BFFF'), name='EMA9'), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df.index, y=df['EMA21'], line=dict(color='#FFA500'), name='EMA21'), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df.index, y=df['EMA200'], line=dict(color='#FF00FF', width=2), name='EMA200'), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df.index, y=df['VWAP'], line=dict(color='#FFD700', dash='dot'), name='VWAP'), row=1, col=1)
+    fig.add_hline(y=tp, line_dash="dash", line_color="#00E396", annotation_text=f"TP {tp:.2f}", row=1, col=1)
+    fig.add_hline(y=sl, line_dash="dash", line_color="#FF4560", annotation_text=f"SL {sl:.2f}", row=1, col=1)
+    fig.add_trace(go.Scatter(x=df.index, y=df['RSI'], line=dict(color='#FFD700'), fill='tozeroy', name='RSI14'), row=2, col=1)
+    fig.add_hline(y=70, line_dash="dash", line_color="#FF4560", row=2, col=1); fig.add_hline(y=30, line_dash="dash", line_color="#00E396", row=2, col=1)
+    fig.add_trace(go.Scatter(x=df.index, y=df['MACD'], line=dict(color='#00BFFF'), name='MACD'), row=3, col=1)
+    fig.add_trace(go.Scatter(x=df.index, y=df['MACD_SIGNAL'], line=dict(color='#FFA500'), name='Signal'), row=3, col=1)
+    fig.update_layout(template="plotly_dark", height=800, showlegend=True, xaxis_rangeslider_visible=False, paper_bgcolor="#0E0E0E", plot_bgcolor="#0E0E0E")
+    st.plotly_chart(fig, use_container_width=True)
