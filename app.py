@@ -1,143 +1,138 @@
-import streamlit as st
-import yfinance as yf
-import pandas as pd
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-import time
-
-st.set_page_config(page_title="SONA AI x KING 103 - ALERT", layout="wide", page_icon="👑")
-
-st.markdown("""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sona AI Advance - KING V103 x SONA LINKED</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-.stApp { background:#0E0E0E; color:#D1D4DC; }
-.card { background:#1E222D; border-radius:12px; padding:16px; margin:8px 0; border:1px solid #2A2E39; }
-.alert-box { background: linear-gradient(90deg, #FFD700, #FF8C00); color:black; padding:15px; border-radius:12px; text-align:center; font-weight:bold; animation: blink 1s infinite; }
-@keyframes blink { 50% { opacity: 0.7; } }
+body { font-family: 'Inter'; background: #020A14; }
+.gold-glow { box-shadow: 0 0 20px rgba(255,215,0,0.15); border: 1px solid rgba(255,215,0,0.3); }
+.neon { background: linear-gradient(90deg, #00D4FF, #00FF9D); }
 </style>
-""", unsafe_allow_html=True)
+</head>
+<body class="text-white p-4 max-w-[430px] mx-auto">
 
-st.markdown('<p style="color:#8B8E9B; text-align:center;">| RSI14 | MACD | VWAP | ATR | BOS | CHOCH | Liquidity | OB | FVG | 5M Scalping</p>', unsafe_allow_html=True)
+<!-- Header -->
+<div class="flex justify-between items-center">
+  <div class="flex items-center gap-3">
+    <div class="w-14 h-14 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center text-3xl font-black">S</div>
+    <div>
+      <h1 class="text-3xl font-extrabold">Sona <span class="text-yellow-400">AI</span> <span class="text-xs border border-yellow-400 px-2 py-1 rounded-lg ml-2">ADVANCE</span></h1>
+      <p class="text-xs text-gray-400">Smarter Trades • Higher Profits</p>
+    </div>
+  </div>
+  <div class="flex gap-3"><span>🔔<sup class="bg-red-500 rounded-full px-1">3</sup></span><span>👤</span></div>
+</div>
 
-if 'market' not in st.session_state: st.session_state.market = "GOLD XAUUSD"
-if 'tf' not in st.session_state: st.session_state.tf = "30m"
-symbol_map = {"GOLD XAUUSD": "GC=F", "SILVER": "SI=F", "BTC/USD": "BTC-USD", "ETH/USD": "ETH-USD", "EUR/USD": "EURUSD=X", "GBP/USD": "GBPUSD=X", "US100": "^NDX", "US30": "^DJI"}
+<!-- AI Companion -->
+<div class="mt-4 rounded-2xl bg-[#081425] p-4 gold-glow relative overflow-hidden">
+  <span class="text-xs bg-cyan-900/50 border border-cyan-400 px-3 py-1 rounded-full">⭐ AI Powered Trading</span>
+  <h2 class="text-3xl font-bold mt-3 leading-tight">Your <span class="text-cyan-400">AI</span> Trading<br>Companion</h2>
+  <p class="text-sm text-gray-400 mt-2">Sona AI analyzes market, finds<br>best opportunities</p>
+  <button onclick="startTrading()" class="neon mt-4 px-6 py-3 rounded-full font-bold text-black">📈 Start Trading →</button>
+  <div class="absolute right-0 top-0 w-1/2 h-full opacity-80">
+    <img src="https://i.imgur.com/8QJ4s2y.png" class="w-full h-full object-cover" style="mask-image: linear-gradient(to left, black, transparent);">
+    <!-- Blue AI girl will be from your design -->
+    <div class="absolute bottom-0 right-2 text-[10px] text-yellow-400">XAU/USD Gold ↗</div>
+  </div>
+  <div class="mt-6 text-xs text-yellow-500">• LIVE MARKETS • REAL-TIME</div>
+</div>
 
-# MARKET SELECT
-for m in ["GOLD XAUUSD","SILVER","BTC/USD","ETH/USD","EUR/USD","GBP/USD","US100","US30"]:
-    label = f"✅ {m}" if st.session_state.market == m else m
-    if st.button(label, key=f"m_{m}", use_container_width=True):
-        st.session_state.market = m; st.rerun()
+<!-- Markets -->
+<div class="grid grid-cols-4 gap-2 mt-4">
+  <div class="bg-[#0B1E35] p-2 rounded-xl"><div class="text-xs">₿ BTC/USDT</div><div class="font-bold">67,432.18</div><div class="text-green-400 text-xs">+2.34% ▲</div></div>
+  <div class="bg-[#0B1E35] p-2 rounded-xl"><div class="text-xs">🪙 XAU/USD</div><div class="font-bold">2,658.42</div><div class="text-green-400 text-xs">+0.82% ▲</div></div>
+  <div class="bg-[#0B1E35] p-2 rounded-xl"><div class="text-xs">€ EUR/USD</div><div class="font-bold">1.0874</div><div class="text-green-400 text-xs">+0.21% ▲</div></div>
+  <div class="bg-[#0B1E35] p-2 rounded-xl"><div class="text-xs">🇬🇧 GBP/USD</div><div class="font-bold">1.2987</div><div class="text-green-400 text-xs">+0.33% ▲</div></div>
+</div>
 
-# TIMEFRAME
-st.markdown('### ⏰ TIMEFRAME + STRATEGY - Click to Change')
-for tf in ["1m","5m","15m","30m","1h","4h","1d"]:
-    lab = f"✅ {tf}" if st.session_state.tf == tf else tf
-    if st.button(lab, key=f"tf_{tf}"):
-        st.session_state.tf = tf; st.rerun()
+<!-- Automatic Trading + Quality + Win Rate -->
+<div class="flex gap-2 mt-3">
+  <div class="flex-1 bg-[#0F1F35] rounded-xl p-3 flex justify-between items-center gold-glow">
+    <span class="font-bold text-sm">Automatic Trading</span>
+    <label class="relative inline-flex items-center cursor-pointer">
+      <input type="checkbox" id="autoToggle" checked class="sr-only peer" onchange="toggleAuto()">
+      <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-green-500"></div>
+    </label>
+  </div>
+</div>
 
-strategy = st.selectbox("Strategy", ["KING V71 SCALP 5M","KING V103 4/HR BOTH","KING V103 x SONA AI LINKED"], index=2)
+<div class="flex gap-2 mt-2 text-[10px]">
+  <div class="bg-[#1A2A40] px-3 py-2 rounded-xl border border-yellow-500/30">📊 Quality Filter Score<br>6/7 Minimum</div>
+  <div class="bg-[#1A2A40] px-3 py-2 rounded-xl border border-yellow-500">⭐ Win Rate<br>90%</div>
+  <div class="bg-[#1A2A40] px-3 py-2 rounded-xl border border-yellow-500">🔗 KING V103 x SONA AI<br>LINKED <span class="bg-green-500 text-[8px] px-1 rounded">Selected</span></div>
+</div>
 
-@st.cache_data(ttl=60)
-def get_full_data(symbol, tf):
-    tf_map = {"1m":"1m","5m":"5m","15m":"15m","30m":"30m","1h":"60m","4h":"240m","1d":"1d"}
-    period_map = {"1m":"1d","5m":"5d","15m":"5d","30m":"7d","60m":"1mo","240m":"3mo","1d":"6mo"}
-    iv = tf_map.get(tf,"30m"); pr = period_map.get(iv,"7d")
-    df = yf.download(symbol, period=pr, interval=iv, progress=False)
-    if isinstance(df.columns, pd.MultiIndex): df.columns = df.columns.get_level_values(0)
-    df = df.dropna()
-    df['EMA9'] = df['Close'].ewm(9).mean(); df['EMA21'] = df['Close'].ewm(21).mean(); df['EMA200'] = df['Close'].ewm(200).mean()
-    typical = (df['High']+df['Low']+df['Close'])/3
-    df['VWAP'] = (typical*df['Volume']).cumsum()/df['Volume'].cumsum()
-    delta = df['Close'].diff(); gain = delta.where(delta>0,0).rolling(14).mean(); loss = -delta.where(delta<0,0).rolling(14).mean()
-    rs = gain/loss; df['RSI'] = 100-(100/(1+rs))
-    exp1 = df['Close'].ewm(12).mean(); exp2 = df['Close'].ewm(26).mean()
-    df['MACD'] = exp1-exp2; df['MACD_SIGNAL']=df['MACD'].ewm(9).mean()
-    df['ATR'] = (df['High']-df['Low']).rolling(14).mean()
-    df['SwingHigh']=df['High'].rolling(20).max(); df['SwingLow']=df['Low'].rolling(20).min()
-    df['BOS']=df['Close']>df['SwingHigh'].shift(1)
-    df['LiqSweep']=(df['Low']<df['SwingLow'].shift(1))&(df['Close']>df['SwingLow'].shift(1))
-    return df
+<!-- Features -->
+<div class="grid grid-cols-3 gap-3 mt-4">
+  <div class="bg-[#0B1E35] p-3 rounded-xl text-center">🎯<br>Signals</div>
+  <div class="bg-[#1A1235] p-3 rounded-xl text-center">🧠<br>AI Analysis</div>
+  <div class="bg-[#0B1E35] p-3 rounded-xl text-center">⭐<br>Watchlist</div>
+</div>
 
-df = get_full_data(symbol_map[st.session_state.market], st.session_state.tf)
-if df is not None:
-    last = df.iloc[-1]; price=float(last['Close']); ema9=float(last['EMA9']); ema21=float(last['EMA21']); ema200=float(last['EMA200'])
-    vwap=float(last['VWAP']); rsi=float(last['RSI']); macd=float(last['MACD']); atr=float(last['ATR'])
-    
-    # SCORING - KING V103 x SONA AI LINKED
-    score=0
-    if price>ema9: score+=1
-    if ema9>ema21: score+=1
-    if price>ema200: score+=1
-    if rsi>50: score+=1
-    if macd>float(last['MACD_SIGNAL']): score+=1
-    if price>vwap: score+=1
-    if bool(last['BOS']): score+=1
-    
-    signal = "BUY" if score>=4 else "SELL" if score<=2 else "NEUTRAL"
-    if bool(last['LiqSweep']) and bool(last['BOS']): signal = "STRONG BUY" if score>=4 else "STRONG SELL"
-    
-    change = price - float(df['Close'].iloc[-2])
-    st.markdown(f'<div class="card"><p>💰 {st.session_state.market}</p><div style="font-size:42px; font-weight:bold;">{price:.2f}</div><span style="background:#184A2E; color:#00FF88; padding:4px 10px; border-radius:20px;">↑ {change:+.2f}</span></div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="card"><p>📈 EMA 9/21/200</p><div style="font-size:28px;">{ema9:.1f} / {ema21:.1f} / {ema200:.1f}</div><span style="background:#184A2E; color:#00FF88; padding:4px 10px; border-radius:20px;">↑ Mixed</span></div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="card"><p>📊 RSI14 {rsi:.1f} | MACD {macd:.3f}</p><div style="font-size:32px;">VWAP {vwap:.2f}</div><span style="background:#184A2E; color:#00FF88; padding:4px 10px; border-radius:20px;">↑ ATR {atr:.3f}</span></div>', unsafe_allow_html=True)
-    sl = price - atr*1.5; tp = price + atr*3
-    st.markdown(f'<div class="card"><p>🛑 SL {sl:.2f}</p><div style="font-size:36px; color:#00E396;">TP {tp:.2f}</div><span style="background:#184A2E; color:#00FF88; padding:4px 10px; border-radius:20px;">↑ RR 1:2.0</span></div>', unsafe_allow_html=True)
-    liq_text = "Sweep Detected" if bool(last['LiqSweep']) else "No Sweep"; bos_text = "BOS Confirmed" if bool(last['BOS']) else "No BOS"
-    st.markdown(f'<div class="card"><p>💧 Liquidity</p><div style="font-size:32px;">{liq_text}</div><span style="background:#184A2E; color:#00FF88; padding:4px 10px; border-radius:20px;">↑ {bos_text}</span></div>', unsafe_allow_html=True)
-    
-    # ===== 🔔 KHAPEL ALERT - HAR KALA DA - NEW =====
-    st.divider()
-    st.markdown("### 🔔 KHAPEL ALERT - Har Kala Da - King 103")
-    col1, col2 = st.columns(2)
-    with col1:
-        alert_on = st.toggle("🔔 Alert ON Karo", value=True)
-    with col2:
-        alert_type = st.selectbox("Alert Type", ["BUY/SELL Both", "Only BUY", "Only SELL", "STRONG Only"])
-    
-    alert_trigger = False
-    if "BUY" in signal: alert_trigger = True if alert_type in ["BUY/SELL Both","Only BUY","STRONG Only" if "STRONG" in signal else "BUY/SELL Both"] else False
-    if "SELL" in signal: alert_trigger = True if alert_type in ["BUY/SELL Both","Only SELL"] else False
-    if "STRONG" in signal: alert_trigger = True
-    
-    if alert_trigger:
-        st.markdown(f'<div class="alert-box">🚨 {signal} ALERT - {st.session_state.market} @ {price:.2f} - Score {score}/7 - KING 103 WAR</div>', unsafe_allow_html=True)
-        if signal=="STRONG BUY": st.success(f"✅ STRONG BUY CONFIRMED - Entry {price:.2f} SL {sl:.2f} TP {tp:.2f}")
-        elif signal=="STRONG SELL": st.error(f"▼ STRONG SELL CONFIRMED - Entry {price:.2f} SL {sl:.2f} TP {tp:.2f}")
-    
-    if alert_on and alert_trigger:
-        st.balloons()
-        st.components.v1.html(f"""
-        <script>
-        if (Notification.permission !== 'granted') {{ Notification.requestPermission(); }}
-        if (Notification.permission === 'granted') {{
-            new Notification('👑 {signal} - KING 103!', {{ body: '{st.session_state.market} {price:.2f} Score {score}/7 SL {sl:.2f} TP {tp:.2f}', icon: 'https://cdn-icons-png.flaticon.com/512/1828/1828884.png' }});
-        }}
-        </script>
-        <audio autoplay loop><source src="https://www.soundjay.com/buttons/beep-07a.wav" type="audio/wav"></audio>
-        <h3 style="color:#FFD700; text-align:center;">🔔 {signal} BAJA! - {price:.2f}</h3>
-        """, height=150)
-        st.toast(f"🔔 {signal} ALERT! {price:.2f}", icon="👑")
-    elif alert_on:
-        st.info(f"🔄 Auto Check ON hai - 60 sec me check hoga - Current: {signal} - {st.session_state.market}")
-        time.sleep(60)
-        st.rerun()
-    else:
-        st.warning("⚠️ Alert OFF hai - ON karo taake beep baje!")
-    
-    # CHART
-    fig = make_subplots(rows=3, cols=1, shared_xaxes=True, vertical_spacing=0.05, row_heights=[0.6,0.2,0.2])
-    fig.add_trace(go.Candlestick(x=df.index, open=df['Open'], high=df['High'], low=df['Low'], close=df['Close'], name=st.session_state.market), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df.index, y=df['EMA9'], line=dict(color='#00BFFF'), name='EMA9'), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df.index, y=df['EMA21'], line=dict(color='#FFA500'), name='EMA21'), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df.index, y=df['EMA200'], line=dict(color='#FF00FF', width=2), name='EMA200'), row=1, col=1)
-    fig.add_trace(go.Scatter(x=df.index, y=df['VWAP'], line=dict(color='#FFD700', dash='dot'), name='VWAP'), row=1, col=1)
-    fig.add_hline(y=tp, line_dash="dash", line_color="#00E396", annotation_text=f"TP {tp:.2f}", row=1, col=1)
-    fig.add_hline(y=sl, line_dash="dash", line_color="#FF4560", annotation_text=f"SL {sl:.2f}", row=1, col=1)
-    fig.add_trace(go.Scatter(x=df.index, y=df['RSI'], line=dict(color='#FFD700'), fill='tozeroy', name='RSI14'), row=2, col=1)
-    fig.add_hline(y=70, line_dash="dash", line_color="#FF4560", row=2, col=1); fig.add_hline(y=30, line_dash="dash", line_color="#00E396", row=2, col=1)
-    fig.add_trace(go.Scatter(x=df.index, y=df['MACD'], line=dict(color='#00BFFF'), name='MACD'), row=3, col=1)
-    fig.add_trace(go.Scatter(x=df.index, y=df['MACD_SIGNAL'], line=dict(color='#FFA500'), name='Signal'), row=3, col=1)
-    fig.update_layout(template="plotly_dark", height=900, showlegend=True, xaxis_rangeslider_visible=False, paper_bgcolor="#0E0E0E", plot_bgcolor="#0E0E0E")
-    st.plotly_chart(fig, use_container_width=True)
+<!-- Market Overview -->
+<div class="bg-[#081425] rounded-2xl p-4 mt-4 gold-glow">
+  <div class="flex gap-4">
+    <div class="flex-1">
+      <div class="text-sm text-gray-400">Total Balance 👁️</div>
+      <div class="text-3xl font-extrabold">$ 12,452</div>
+      <div class="text-green-400 text-sm">+4.32% (24h)</div>
+      <div class="mt-2 h-16 bg-gradient-to-t from-cyan-500/30 to-transparent rounded">📈 Chart</div>
+    </div>
+    <div class="flex-1 space-y-3 text-xs">
+      <div class="bg-[#0F2A4A] p-2 rounded-lg">📊 Win Rate 90%<br><b>27W/3L</b></div>
+      <div class="bg-[#0F2A2A] p-2 rounded-lg">🎯 Active Trades<br><b>3</b></div>
+      <div class="bg-[#2A104A] p-2 rounded-lg">💰 Daily Profit<br><b class="text-green-400">+542.17</b></div>
+      <div class="bg-[#0A2A1A] p-2 rounded-lg">🏃 Autotrader Status<br><b id="status" class="text-green-400">Running</b></div>
+      <div class="bg-[#2A1F0A] p-2 rounded-lg border border-yellow-500">🔔 Last Alert<br><b>SELL 4185.50 • Quality 6/7</b></div>
+    </div>
+  </div>
+</div>
 
-st.caption("👑 KING 103 x SONA AI - Har Kala Alert - Munga Kor Wala - Peshawar")
+<!-- Bottom Nav -->
+<div class="flex justify-around mt-6 py-3 bg-[#050E1E] rounded-2xl">
+  <div class="text-cyan-400">🏠<br>Home</div><div>📊 Markets</div><div>🔄 Trade</div><div>🕒 History</div><div>👤 Profile</div>
+</div>
+
+<script>
+// KING V103 x SONA AI LINKED - Quality 90% Logic
+let qualityScore = 0;
+function calculateQuality(data){
+  let score=0;
+  if(data.ema9 > data.ema21 && data.ema21 > data.ema200) score+=1;
+  if(data.close > data.vwap && data.rsi>50) score+=1;
+  if(data.rsi>50 && data.macd>data.signal) score+=1;
+  if(data.sweep && data.bos) score+=2;
+  if(data.ob && data.fvg) score+=1;
+  if(data.atr>8 && data.atr<15) score+=1;
+  return score;
+}
+
+function toggleAuto(){
+  const on = document.getElementById('autoToggle').checked;
+  document.getElementById('status').innerText = on ? 'Running' : 'Paused';
+  if(on) {
+    // Example data from your screenshot - 4185.50
+    const data = {ema9:4191.9, ema21:4192.8, ema200:4182.9, close:4185.5, vwap:4175.17, rsi:44.5, macd:0.410, signal:0.2, sweep:true, bos:true, ob:true, fvg:true, atr:9.25};
+    qualityScore = calculateQuality(data);
+    if(qualityScore >=6){
+      alert('👑🔔 SELL BAJA! - 4185.50 - Score '+qualityScore+'/7 - KING 103 WAR - Autotrader EXECUTED!');
+    } else {
+      alert('Low Quality Skipped - Score '+qualityScore+'/7 - Win Rate protect ke liye block kiya!');
+    }
+  }
+}
+
+function startTrading(){
+  alert('Sona AI Advance Started! KING V103 x SONA AI LINKED Active! Automatic Trading ON - Win Rate 90% Mode');
+  toggleAuto();
+}
+
+// Auto check every 30 sec - 30m timeframe
+setInterval(()=>{ if(document.getElementById('autoToggle').checked) toggleAuto(); }, 30000);
+</script>
+
+</body>
+</html>
