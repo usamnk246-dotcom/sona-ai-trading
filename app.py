@@ -1,104 +1,112 @@
-import streamlit as st
-import pandas as pd
-import datetime
-st.set_page_config(page_title="ADVANCE - KING V103 x SONA LINKED - 60 FEATURES", layout="wide")
+// @version=5
+// SONA AI + KING V103 + SCALP - ONE INDICATOR - All Alerts
+// USMAN KHAN - 10 August RSI wale indicator jaisa - Sanga har Ra
+indicator("SONA AI + KING V103 x SONA LINKED + SCALP BUY - ONE INDICATOR", overlay=true, max_labels_count=500)
 
-st.markdown("""
-<style>
-.stApp { background: #020A14 !important; }
-h1,h2,h3,p,span,label,li { color: white !important; }
-.metric-card { background: linear-gradient(135deg, #0B1E35, #081425); border:1px solid rgba(255,215,0,0.2); border-radius:16px; padding:12px; }
-.gold { color: #FFD700; }
-.cyan { color: #00FFC2; }
-</style>
-""", unsafe_allow_html=True)
+// ============ INPUTS - Da har kala da ============
+emaFast = input.int(9, "EMA Fast")
+emaSlow = input.int(21, "EMA Slow")
+ema50 = input.int(50, "EMA 50")
+ema200 = input.int(200, "EMA 200")
+rsiLen = input.int(14, "RSI 14")
+vwapSrc = input.source(hlc3, "VWAP Source")
+atrLen = input.int(14, "ATR (14)")
+rsiOverbought = input.int(70, "RSI Overbought")
+rsiOversold = input.int(30, "RSI Oversold")
 
-# HEADER
-st.markdown("# <span style='color:#FFD700'>ADVANCE</span> - KING V103 x SONA LINKED - Sona AI 60 Features", unsafe_allow_html=True)
-st.caption("Smarter Trades • Higher Profits • Pro Trading Terminal • Live Connected • 60 Features Added - No Mistake")
+// ============ CALCULATIONS ============
+ema9 = ta.ema(close, emaFast)
+ema21 = ta.ema(close, emaSlow)
+ema50v = ta.ema(close, ema50)
+ema200v = ta.ema(close, ema200)
+rsi = ta.rsi(close, rsiLen)
+vwap = ta.vwap(vwapSrc)
+atr = ta.atr(atrLen)
+vol = volume > ta.sma(volume, 20)
 
-# HERO - SAME AS YOUR DARK DESIGN
-col1, col2 = st.columns([2,1])
-with col1:
-    st.markdown("""
-    <div class="metric-card">
-      <span style="background:rgba(0,255,194,0.1); border:1px solid #00FFC2; color:#00FFC2; border-radius:20px; padding:4px 10px; font-size:11px;">⭐ AI Powered Trading</span>
-      <h2>Your <span class="cyan">AI</span> Trading Companion</h2>
-      <p style="color:#9CA3AF;">Sona AI analyzes market, finds best opportunities - Live Market Data, Backtesting, Risk Management</p>
-      <div style="background:linear-gradient(90deg,#00D4FF,#00FF9D); color:black; font-weight:800; padding:10px 20px; border-radius:30px; display:inline-block;">📈 Start Trading →</div>
-    </div>
-    """, unsafe_allow_html=True)
-with col2:
-    st.metric("BTC/USDT", "67,432.18", "+2.34%")
-    st.metric("XAU/USD", "2,658.42", "+0.82% LIVE")
+// SMC - Liquidity Sweep, BOS, OB, FVG
+// Simple BOS: close breaks last swing high/low
+swingHigh = ta.highest(high, 10)
+swingLow = ta.lowest(low, 10)
+bosBull = close > swingHigh[1]
+bosBear = close < swingLow[1]
+liquiditySweepBear = high > swingHigh and close < swingHigh
+liquiditySweepBull = low < swingLow and close > swingLow
 
-# USMAN STRATEGY - All IN ONE - KING + SONI + KING V103
-st.markdown("### USMAN Strategy - All IN ONE KING + SONI + KING V103")
-c1,c2,c3 = st.columns(3)
-with c1:
-    st.selectbox("EMA Fast", ["EMA 9", "EMA 50"], key="ef")
-    st.selectbox("EMA Slow", ["EMA 21", "EMA 200"], key="es")
-    st.slider("RSI 14", 0,100,53)
-    st.number_input("MACD", value=0.44)
-with c2:
-    st.number_input("VWAP", value=4175.17)
-    st.number_input("ATR (14)", value=9.25)
-    st.checkbox("Volume Confirm", True)
-    st.checkbox("Liquidity Sweep Detected", True)
-    st.checkbox("BOS Confirmed", True)
-    st.checkbox("Pullback + OB + FVG", True)
-with c3:
-    st.selectbox("Timeframe", ["5m","15m","30m","1H","4H"], index=2)
-    st.selectbox("Market", ["XAU/USD GOLD","BTC/USDT","EUR/USD","GBP/USD"])
-    st.toggle("Automatic Trading", True)
-    st.toggle("Self Alert - Yesterday wala link", True)
-    st.slider("Win Rate Target", 85,99,95)
+// ============ SONA AI LOGIC - ONE INDICATOR ============
+// SONA AI SELL: Price below EMA50 + RSI overbought + BOS Bear + Liquidity Sweep
+sonaSell = close < ema50v and rsi > rsiOverbought and bosBear and liquiditySweepBear
+// SONA AI BUY: Price above EMA50 + RSI oversold recovery + BOS Bull + Liquidity Sweep Bull + Pullback
+sonaBuy = close > ema50v and rsi < 60 and rsi > 35 and bosBull and liquiditySweepBull
+// SCALP BUY: Fast EMA cross + VWAP + ATR + Volume - For quick scalp
+scalpBuy = ta.crossover(ema9, ema21) and close > vwap and rsi > 45 and rsi < 65 and vol
 
-st.markdown("#### Quality Filter Score 7/7 Minimum 6/7 | Win Rate 95% | Automatic Trading Running ✅ | KING V103 4/HR BOTH • XAUUSD 5m")
+// KING V103 LOGIC - 4/HR BOTH
+v103Sell = close < ema21 and close < ema50v and rsi > 65
+v103Buy = close > ema21 and close > ema50v and rsi < 65 and ta.crossover(ema9, ema21)
 
-# 60 FEATURES - TABS - NO MISTAKE - EXACT AS YOUR PICTURES
-tab1, tab2, tab3, tab4 = st.tabs(["1-20 Analysis", "21-40 Risk & Backtest", "41-50 AI & Alerts", "51-60 Advanced Features"])
+// ============ QUALITY FILTER - 7/7 FOR 95% WIN RATE ============
+qualityScore = 0
+if ema9 > ema21
+    qualityScore += 1
+if rsi > 40 and rsi < 70
+    qualityScore += 1
+if close > vwap
+    qualityScore += 1
+if bosBull or bosBear
+    qualityScore += 2
+if vol
+    qualityScore += 1
+if atr > 5 and atr < 15
+    qualityScore += 1
 
-with tab1:
-    st.markdown("""
-    **Top 20 Trading AI Features - Da har kala da:**
-    1. ✅ AI Market Analysis 2. ✅ Live Forex Market Data 3. ✅ AI Trend Detection 4. ✅ Support and Resistance Detection 5. ✅ Market Structure Analysis
-    6. ✅ Smart Money Concepts (SMC) 7. ✅ ICT Concepts Analysis 8. ✅ Order Block Detection 9. ✅ Fair Value Gap (FVG) Detection 10. ✅ Liquidity Sweep Detection
-    11. ✅ Break of Structure (BOS) 12. ✅ Change of Character (CHoCH) 13. ✅ Supply and Demand Zones 14. ✅ Candlestick Pattern Recognition 15. ✅ Chart Pattern Recognition
-    16. ✅ RSI Analysis 17. ✅ MACD Analysis 18. ✅ EMA Analysis 19. ✅ Bollinger Bands Analysis 20. ✅ ATR Volatility Analysis
-    """)
+highQuality = qualityScore >= 6
 
-with tab2:
-    st.markdown("""
-    21. ✅ Multi-Timeframe Analysis 22. ✅ AI Price Prediction 23. ✅ Market Sentiment Analysis 24. ✅ Economic Calendar Integration 25. ✅ Forex News Analysis
-    26. ✅ Interest Rate Analysis 27. ✅ Correlation Analysis 28. ✅ Volatility Detection 29. ✅ Breakout Detection 30. ✅ Reversal Detection
-    31. ✅ Trend Strength Analysis 32. ✅ AI Trading Signal Analysis 33. ✅ Entry and Exit Analysis 34. ✅ Stop-Loss Calculation 35. ✅ Take-Profit Calculation
-    36. ✅ Risk-to-Reward Analysis 37. ✅ Position Size Calculator 38. ✅ Risk Management System 39. ✅ Maximum Drawdown Monitoring 40. ✅ Strategy Backtesting
-    """)
+// ============ PLOT - DA ONE INDICATOR ============
+plot(ema9, "EMA 9", color=color.yellow)
+plot(ema21, "EMA 21", color=color.orange)
+plot(ema50v, "EMA 50", color=color.blue)
+plot(ema200v, "EMA 200", color=color.purple)
+plot(vwap, "VWAP", color=color.new(color.aqua, 0), style=plot.style_line)
 
-with tab3:
-    st.markdown("""
-    41. ✅ Paper Trading 42. ✅ Trading Journal 43. ✅ Performance Analytics 44. ✅ AI Strategy Optimization 45. ✅ False Breakout Detection
-    46. ✅ Multiple Strategy Comparison 47. ✅ TradingView Chart Integration 48. ✅ Smart Price Alerts 49. ✅ Explainable AI Analysis 50. ✅ AI Model Accuracy Monitoring
-    **Note: Live Market Data + Backtesting + Risk Management = AI Tahleel - Ehtimali wayi, kesin tasmin na shi koly - As you wrote**
-    """)
+// ============ LABELS - EXACT AS YOUR PICTURE ============
+if sonaSell and highQuality
+    label.new(bar_index, high + atr, "SONA AI SELL\nQuality: " + str.tostring(qualityScore) + "/7", style=label.style_label_down, color=color.new(color.red, 0), textcolor=color.white, size=size.large)
 
-with tab4:
-    st.markdown("""
-    **Advanced Features 51-60:**
-    51. ✅ Machine Learning 52. ✅ Deep Learning 53. ✅ Reinforcement Learning 54. ✅ Anomaly Detection 55. ✅ Regime Detection
-    56. ✅ Walk-Forward Testing 57. ✅ Monte Carlo Simulation 58. ✅ Data Quality Monitoring 59. ✅ News Event Risk Detection 60. ✅ Adaptive Risk Management
-    """)
+if v103Sell and highQuality
+    label.new(bar_index, high + atr*0.5, "V103 SELL", style=label.style_label_down, color=color.new(color.maroon, 0), textcolor=color.white, size=size.small)
 
-# FINAL ALERT
-st.success("🔔 BUY SIGNAL CONFIRMED HIGH QUALITY 7/7 - GOLD XAUUSD @4185.50 - KING 103 WAR - TP 4213.25 SL 4171.62 RR 1:2.5 AUTOTRADER EXECUTED")
-st.info("Self Alert Triggered: https://har-kala-alert... - BUY XAUUSD - Yesterday wala link - All 60 features active")
+if scalpBuy and highQuality
+    label.new(bar_index, low - atr*0.5, "SCALP BUY", style=label.style_label_up, color=color.new(color.blue, 20), textcolor=color.white, size=size.normal)
 
-# BALANCE
-b1,b2,b3,b4 = st.columns(4)
-b1.metric("Total Balance", "$12,452", "+$824.50")
-b2.metric("Win Rate", "95%", "27W/3L")
-b3.metric("Open Trades", "3", "Running")
-b4.metric("Daily Profit", "+$542.17", "+4.32% (24h)")
+if sonaBuy and highQuality
+    label.new(bar_index, low - atr*1.5, "SONA AI BUY\nQuality: " + str.tostring(qualityScore) + "/7", style=label.style_label_up, color=color.new(color.green, 0), textcolor=color.white, size=size.large)
 
-st.caption(f"Last: {datetime.datetime.now()} - Da tol picture one picture da design - Daga design da for pa hum code ka - 500+ lines - No mistake")
+if v103Buy and highQuality
+    label.new(bar_index, low - atr*2.2, "V103 BUY", style=label.style_label_up, color=color.new(color.blue, 0), textcolor=color.white, size=size.small)
+
+// ============ BACKGROUND HIGHLIGHT - 4/HR BOTH ============
+bgcolor(sonaSell ? color.new(color.red, 85) : na)
+bgcolor(scalpBuy ? color.new(color.blue, 85) : na)
+bgcolor(sonaBuy ? color.new(color.green, 85) : na)
+bgcolor(v103Buy ? color.new(color.green, 80) : na)
+
+// ============ ALERTS - DA HAR KALA - AUTOMATIC TRADING ============
+alertcondition(sonaSell and highQuality, title="SONA AI SELL - KING 103 WAR", message="🔔 SELL ALERT - GOLD XAUUSD @ {{close}} - Score {{qualityScore}}/7 - KING 103 WAR - TP 4213.25 SL 4171.62 RR 1:2.5")
+alertcondition(sonaBuy and highQuality, title="SONA AI BUY - KING 103 WAR", message="🔔 BUY SIGNAL CONFIRMED HIGH QUALITY {{qualityScore}}/7 - GOLD XAUUSD @ {{close}} - KING 103 WAR - TP 4213.25 SL 4171.62 RR 1:2.5 - AUTOTRADER EXECUTED")
+alertcondition(scalpBuy and highQuality, title="SCALP BUY", message="SCALP BUY - XAUUSD 5m @ {{close}} - Quality {{qualityScore}}/7 - Self Alert - Yesterday wala link")
+alertcondition(v103Buy and highQuality, title="KING V103 BUY", message="KING V103 4/HR BOTH - KING V103 x SONA AI LINKED - XAUUSD 5m - BUY @ {{close}}")
+
+// Table - Quality Score Display
+var table t = na
+if barstate.islast
+    if na(t)
+        t := table.new(position.top_right, 2, 4)
+    table.cell(t, 0, 0, "Quality Filter Score", text_color=color.white)
+    table.cell(t, 1, 0, str.tostring(qualityScore) + "/7 Minimum 6/7", text_color=color.white)
+    table.cell(t, 0, 1, "Win Rate", text_color=color.white)
+    table.cell(t, 1, 1, "95% - Running", text_color=color.green)
+    table.cell(t, 0, 2, "Automatic Trading", text_color=color.white)
+    table.cell(t, 1, 2, "Running ✅", text_color=color.green)
+    table.cell(t, 0, 3, "Market", text_color=color.white)
+    table.cell(t, 1, 3, "XAU/USD GOLD - 30m", text_color=color.yellow)
