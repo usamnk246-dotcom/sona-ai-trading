@@ -1,168 +1,177 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import datetime
-import plotly.graph_objects as go
 
-st.set_page_config(page_title="Sona AI ADVANCE", layout="wide", page_icon="⚡")
+st.set_page_config(page_title="Sona AI Advance - KING V103.5", layout="wide", page_icon="👑")
 
-# --- HAR KALA DA - SAME DESIGN AS YOUR SCREENSHOT ---
+# === STYLE - PREMIUM GOLD ===
 st.markdown("""
 <style>
-.stApp { background: #030B1A !important; }
-div[data-testid="stHeader"] { display: none; }
-.card { background: linear-gradient(135deg, #0A1930 0%, #061123 100%); border: 1px solid rgba(255,215,0,0.15); border-radius: 18px; padding: 14px; }
-.gold { color: #FFD700 !important; }
-.teal { color: #00FFC2 !important; }
-.live-box { background: rgba(0,255,194,0.08); border: 1px solid rgba(0,255,194,0.3); border-radius: 20px; padding: 4px 14px; font-size: 12px; }
-.market-card { background: #081425; border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 12px; }
+body {background:#060A14;}
+.card {background:linear-gradient(180deg, #111A2A 0%, #0A1220 100%); border:1px solid #D4AF37; border-radius:16px; padding:14px; margin-bottom:10px;}
+.gold {color:#FFD700; font-weight:900;}
+.green {color:#00FF88;}
+.red {color:#FF4D4D;}
+.stApp {background:#060A14;}
 </style>
 """, unsafe_allow_html=True)
 
-# HEADER - Same as image
+# === HEADER ===
 st.markdown("""
-<div style="display:flex; justify-content:space-between; align-items:center;">
-<div style="display:flex; align-items:center; gap:12px;">
-<div style="font-size:42px; color:#FFD700;">⚡</div>
-<div><div style="font-size:34px; font-weight:900; color:white;">Sona <span style="color:#FFD700;">AI</span> <span style="font-size:12px; border:1px solid #FFD700; padding:3px 8px; border-radius:8px;">ADVANCE</span></div>
-<div style="color:#8AA0B8; font-size:13px;">Smarter Trades • Higher Profits</div></div>
+<div style="background:#0A0E1A; border:1px solid #FFD700; border-radius:12px; padding:12px; display:flex; justify-content:space-between; align-items:center;">
+<div style="display:flex; gap:12px; align-items:center;">
+<div style="width:56px; height:56px; background:linear-gradient(135deg, #FFD700, #B8860B); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:28px;">⬡</div>
+<div><div style="color:#FFD700; font-size:22px; font-weight:900;">SONA AI ADVANCE</div><div style="color:#8AA0B8; font-size:10px;">KING V103.5 x SONA AI LINKED • 5m • XAU/USD GOLD</div></div>
 </div>
-<div style="display:flex; gap:18px; align-items:center;"><div style="font-size:22px;">🔔<span style="background:red; color:white; font-size:10px; padding:2px 5px; border-radius:50%; position:relative; top:-10px; left:-8px;">3</span></div><div style="background:#1A2B45; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center;">👤</div></div>
-</div>
-""", unsafe_allow_html=True)
-
-st.markdown("""
-<div style="margin-top:12px;"><span class="live-box" style="color:#00FFC2;">✦ AI Powered Trading</span></div>
-<h1 style="margin:8px 0 0 0; font-size:32px; line-height:1.1;">Your <span style="color:#00FFC2;">AI</span> Trading<br>Companion</h1>
-<p style="color:#8AA0B8; font-size:13px; margin:4px 0 12px 0;">Sona AI analyzes market, finds best opportunities</p>
-<div style="background:linear-gradient(90deg,#1E90FF,#00FFC2); color:white; padding:10px 22px; border-radius:28px; display:inline-block; font-weight:700;">⚡ Start Trading →</div>
-<p style="color:#FFD700; font-size:11px; letter-spacing:1px; margin-top:14px;">● LIVE MARKETS • REAL-TIME</p>
-""", unsafe_allow_html=True)
-
-# MORE TIMEFRAME + DIFFERENT MARKET - Dase nor ma da dar
-c_tf1, c_tf2, c_tf3 = st.columns([2,2,2])
-with c_tf1:
-    timeframe = st.selectbox("Timeframe", ["1 min","5 min","15 min","30 min","1H","4H","1D"], index=1)
-with c_tf2:
-    market = st.selectbox("Market", ["XAU/USD GOLD","BTC/USDT","EUR/USD","GBP/USD","XAUUSD 5m GOLD","NAS100","US30","GBP/JPY"], index=0)
-with c_tf3:
-    win_rate_target = st.slider("Win Rate Target", 85, 98, 90)
-
-# LIVE MARKETS - 4 CARDS - Same as image
-# Simulate live prices based on market selection
-if "BTC" in market:
-    base_price = 67432.18
-elif "XAU" in market or "GOLD" in market:
-    base_price = 4176.07
-elif "EUR" in market:
-    base_price = 1.0874
-else:
-    base_price = 1.2987
-
-st.markdown(f"""
-<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;">
-<div class="market-card"><div style="display:flex; gap:8px; align-items:center;"><span>₿</span><b>BTC/USDT</b></div><div style="font-size:18px; font-weight:800; margin-top:6px;">67,432.18</div><div style="color:#00FF88; font-size:12px;">+2.34% ▲</div></div>
-<div class="market-card"><div style="display:flex; gap:8px;"><span>🪙</span><b>XAU/USD</b></div><div style="font-size:18px; font-weight:800; margin-top:6px;">{base_price:.2f}</div><div style="color:#00FF88; font-size:12px;">+0.82% ▲</div></div>
-<div class="market-card"><div style="display:flex; gap:8px;"><span>€</span><b>EUR/USD</b></div><div style="font-size:18px; font-weight:800;">1.0874</div><div style="color:#00FF88; font-size:12px;">+0.21% ▲</div></div>
-<div class="market-card"><div style="display:flex; gap:8px;"><span>🇬🇧</span><b>GBP/USD</b></div><div style="font-size:18px; font-weight:800;">1.2987</div><div style="color:#00FF88; font-size:12px;">+0.33% ▲</div></div>
+<div style="text-align:right;"><div style="color:#00FF88; font-weight:800;">LIVE AI MODE ACTIVE</div><div style="color:#8AA0B8; font-size:11px;">PESHAWAR • 03:42 AM PKT • SONA AI v10.3</div><div style="color:#FFD700; font-size:10px;">RISK LOW • LEVERAGE 1:100 • BALANCE SECURED</div></div>
 </div>
 """, unsafe_allow_html=True)
 
-# TOGGLES - Same as image
-col1, col2 = st.columns([1.2,2])
-with col1:
-    auto = st.toggle("Automatic Trading", True)
-with col2:
-    st.markdown("""
-    <div style="display:flex; gap:6px;">
-    <div style="background:#1A2B45; border-radius:10px; padding:6px 10px; font-size:10px; border:1px solid gold;">📊 Quality Filter Score<br><b>6/7 Minimum</b></div>
-    <div style="background:#2A1F0A; border-radius:10px; padding:6px 10px; font-size:10px; border:1px solid gold;">⭐ Win Rate<br><b>90%</b></div>
-    <div style="background:#1A1A0A; border-radius:10px; padding:6px 10px; font-size:10px; border:1px solid gold;">🔗 KING V103 x SONA AI<br><b>LINKED Selected</b></div>
-    </div>
-    """, unsafe_allow_html=True)
+# === FAKE LIVE DATA - Replace with TradingView API later ===
+np.random.seed(42)
+dates = pd.date_range("2026-10-20 22:00", "2026-10-21 10:30", freq="5min")
+price = 4160 + np.cumsum(np.random.randn(len(dates))*0.8)
+df = pd.DataFrame({"time": dates, "close": price, "high": price+np.random.rand(len(dates))*2, "low": price-np.random.rand(len(dates))*2, "open": price-np.random.randn(len(dates))*0.3, "volume": np.random.randint(1000,5000,len(dates))})
 
-# SIGNALS + CHART - Tol chart sah monga kala da
-# Generate data based on timeframe
-periods = 100
-if "1 min" in timeframe: freq="1min"
-elif "5 min" in timeframe: freq="5min"
-elif "15 min" in timeframe: freq="15min"
-elif "30 min" in timeframe: freq="30min"
-elif "1H" in timeframe: freq="H"
-elif "4H" in timeframe: freq="4H"
-else: freq="D"
+# === KING V103.5 LOGIC - PYTHON VERSION OF YOUR PINE ===
+def ema(s, n): return s.ewm(span=n, adjust=False).mean()
+def rsi_calc(s, n=14):
+    delta = s.diff()
+    gain = delta.where(delta>0, 0).ewm(alpha=1/n, adjust=False).mean()
+    loss = -delta.where(delta<0, 0).ewm(alpha=1/n, adjust=False).mean()
+    rs = gain/loss
+    return 100 - (100/(1+rs))
 
-dates = pd.date_range(end=datetime.datetime.now(), periods=periods, freq=freq)
-prices = base_price + np.cumsum(np.random.randn(periods)* (0.5 if "GOLD" in market or "XAU" in market else 0.0005))
-df = pd.DataFrame({"time": dates, "close": prices})
-df["ema9"] = df["close"].ewm(span=9).mean()
-df["ema21"] = df["close"].ewm(span=21).mean()
-df["ema50"] = df["close"].ewm(span=50).mean()
-df["rsi"] = 79.0 - np.random.randn(periods)*2
+df["ema9"] = ema(df["close"], 9)
+df["ema21"] = ema(df["close"], 21)
+df["ema50"] = ema(df["close"], 50)
+df["ema200"] = ema(df["close"], 200)
+df["vwap"] = (df["close"]*df["volume"]).cumsum() / df["volume"].cumsum()
+df["rsi"] = rsi_calc(df["close"], 14)
+df["sh"] = df["high"].rolling(10).max()
+df["sl"] = df["low"].rolling(10).min()
+
+df["bosBull"] = df["close"] > df["sh"].shift(1)
+df["bosBear"] = df["close"] < df["sl"].shift(1)
+df["sweepBull"] = (df["low"] < df["sl"]) & (df["close"] > df["sl"])
+df["sweepBear"] = (df["high"] > df["sh"]) & (df["close"] < df["sh"])
+
+df["soniBuy"] = (df["close"] > df["ema50"]) & (df["rsi"] > 35)
+df["sonaBuy"] = (df["close"] > df["ema50"]) & (df["rsi"] < 60)
+df["soniSell"] = (df["close"] < df["ema50"]) & (df["rsi"] > 68)
+df["sonaSell"] = (df["close"] < df["ema50"]) & (df["rsi"] > 70)
+df["v103Buy"] = (df["close"] > df["ema21"]) & (df["close"] > df["ema50"]) & (df["rsi"] > 40)
+df["v103Sell"] = (df["close"] < df["ema21"]) & (df["close"] < df["ema50"])
+df["scalpBuy"] = (df["ema9"] > df["ema21"]) & (df["ema9"].shift(1) <= df["ema21"].shift(1))
+df["scalpSell"] = (df["ema9"] < df["ema21"]) & (df["ema9"].shift(1) >= df["ema21"].shift(1))
+
+# Quality Score 0-7 - YOUR LOGIC
+df["q"] = 0
+df["q"] += (df["ema9"] > df["ema21"]).astype(int)
+df["q"] += ((df["rsi"]>40) & (df["rsi"]<70)).astype(int)
+df["q"] += (df["close"] > df["ema50"]).astype(int)
+df["q"] += (df["close"] > df["ema200"]).astype(int)
+df["q"] += (df["close"] > df["vwap"]).astype(int)
+df["q"] += (df["ema21"] > df["ema50"]).astype(int)
+df["q"] += df["bosBull"].astype(int)
+df["q"] = df["q"].clip(upper=7)
+df["highQ"] = df["q"] >= 6
 
 last = df.iloc[-1]
-# All signals
-soniSell = last["close"] < last["ema50"] and last["rsi"] > 68
-soniBuy = last["close"] > last["ema50"] and last["rsi"] < 80
-scalpBuy = last["ema9"] > last["ema21"]
-v103Buy = True  # For demo show always
-q = 6
+price_now = 4182.23 # from your screenshot
+# === LAYOUT ===
+col1, col2, col3 = st.columns([1, 2, 1])
 
-# CHART - Kom chart sah monga kala da tol o gora
-fig = go.Figure()
-fig.add_trace(go.Scatter(x=df["time"], y=df["close"], name="close", line=dict(color="#1E90FF", width=2)))
-fig.add_trace(go.Scatter(x=df["time"], y=df["ema9"], name="ema9", line=dict(color="#FF6B6B", width=1, dash="dot")))
-fig.add_trace(go.Scatter(x=df["time"], y=df["ema21"], name="ema21", line=dict(color="#87CEEB", width=1)))
-fig.add_trace(go.Scatter(x=df["time"], y=df["ema50"], name="ema50", line=dict(color="#FF0000", width=1)))
-fig.update_layout(height=220, margin=dict(l=0,r=0,t=0,b=0), paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", legend=dict(orientation="h", y=-0.2), font=dict(color="white", size=10))
-st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
-
-# SIGNALS DISPLAY - Same as your working screenshot
-if scalpBuy:
-    st.info(f"🔵 SCALP BUY - Quality {q}/7 - {timeframe} - {market}")
-if v103Buy:
-    st.success(f"🟢 V103 BUY - Quality {q}/7 - {timeframe}")
-if soniBuy:
-    st.success(f"🟢 SONI BUY - Quality {q}/7 - @{last['close']:.2f}")
-if soniSell:
-    st.error(f"🔴 SONI SELL - Quality {q}/7")
-
-if auto and q>=6:
+with col1:
     st.markdown(f"""
-    <div style="background:#0A2E1A; border:1px solid #00FF88; border-radius:14px; padding:12px;">
-    <span style="font-size:18px;">🔔</span> <b style="color:#00FF88;">BUY SIGNAL CONFIRMED {q}/7 - GOLD XAUUSD @{last['close']:.2f} - KING 103 WAR - TP 4213.25 SL 4171.62 - {timeframe} - {market}</b>
+    <div class="card">
+    <div style="color:#8AA0B8; font-size:12px; font-weight:700;">ACCOUNT GROWTH</div>
+    <div style="background:#000; border:1px solid #FFD700; border-radius:12px; padding:12px; margin-top:8px;">
+    <div style="color:#8AA0B8; font-size:11px;">REAL ACCOUNT</div>
+    <div style="color:#FFD700; font-size:34px; font-weight:900;">$10.00</div>
+    <div class="green">+0.00% (24h)</div>
+    <div style="color:white; font-size:12px; margin-top:6px;">Real Account <span class="green">+4.32% ↗</span></div>
+    </div>
+    <div style="margin-top:12px;">
+    <div style="color:#8AA0B8; font-size:11px;">Starting Balance $10</div>
+    <div style="color:#8AA0B8; font-size:11px;">Initial 5 days ago</div>
+    <div style="color:white; font-size:12px; margin-top:8px;">Goal $1000 Target <span style="float:right; color:#FFD700;">1.0%</span></div>
+    <div style="height:8px; background:#222; border-radius:6px; margin-top:4px;"><div style="width:10%; height:8px; background:linear-gradient(90deg, #FFD700, #FFF); border-radius:6px;"></div></div>
+    <div style="font-size:10px; color:#8AA0B8;">1.0% • $10 / $1000 • Days Active: 5 • Daily Target: +$198.00</div>
+    </div>
+    <div style="margin-top:10px; border:1px solid #FFD700; border-radius:8px; padding:8px; font-size:11px;"><span style="color:#FFD700;">KING V103 x SONA LINKED •</span> <span class="green">● Selected</span></div>
     </div>
     """, unsafe_allow_html=True)
 
-# TOTAL BALANCE + STATS - Same as image
-st.markdown("""
-<div style="display:grid; grid-template-columns:2fr 1fr; gap:12px; margin-top:14px;">
-<div class="card">
-<div style="color:#8AA0B8; font-size:12px;">Total Balance 👁️</div>
-<div style="font-size:28px; font-weight:900; color:white;">$ 10.00</div>
-<div style="color:#00FF88; font-size:13px;">+0.00% (24h) - Real Account</div>
-<div style="color:#00FF88; font-size:13px;">+4.32% (24h)</div>
-<div style="height:60px; background:linear-gradient(to top, rgba(0,255,136,0.3), transparent); margin-top:10px; border-radius:8px;"></div>
-</div>
-<div>
-<div class="card" style="margin-bottom:8px; padding:8px;"><div style="font-size:11px;">📊 Win Rate 90%<br><b>27W/3L</b></div></div>
-<div class="card" style="margin-bottom:8px; padding:8px;"><div style="font-size:11px;">🎯 Active Trades<br><b>3</b></div></div>
-<div class="card" style="margin-bottom:8px; padding:8px;"><div style="font-size:11px;">💜 Daily Profit<br><b style="color:#00FF88;">+542.17</b></div></div>
-<div class="card" style="margin-bottom:8px; padding:8px;"><div style="font-size:11px;">🏃 Autotrader Status<br><b style="color:#00FF88;">Running</b></div></div>
-<div class="card" style="padding:8px; border:1px solid gold;"><div style="font-size:10px;">🔔 Last Alert<br><b>SELL 4185.50 • Quality 6/7</b></div></div>
-</div>
-</div>
-""", unsafe_allow_html=True)
+with col2:
+    st.markdown(f"""
+    <div class="card">
+    <div style="display:flex; justify-content:space-between;">
+    <div><div style="color:#FFD700; font-size:11px;">GOLD XAUUSD • XAU/USD GOLD</div><div style="color:#FFD700; font-size:26px; font-weight:900;">GOLD XAUUSD</div><div class="green" style="font-size:14px;">XAUUSD {price_now} +14.21 (+0.34%) • LIVE 5m</div></div>
+    <div style="color:#FFD700; font-size:10px;">KING V103 4/HR BOTH<br>KING V103 x SONA AI LINKED</div>
+    </div>
+    <div style="display:flex; gap:6px; margin-top:10px;">
+    <div style="background:#222; color:white; padding:5px 10px; border-radius:8px; font-size:11px;">1min</div>
+    <div style="background:#FFD700; color:black; padding:5px 10px; border-radius:8px; font-size:11px; font-weight:800;">5min</div>
+    <div style="background:#222; color:white; padding:5px 10px; border-radius:8px; font-size:11px;">15min</div>
+    <div style="background:#222; color:white; padding:5px 10px; border-radius:8px; font-size:11px;">30min</div>
+    <div style="background:#222; color:white; padding:5px 10px; border-radius:8px; font-size:11px;">1H</div>
+    <div style="background:#222; color:white; padding:5px 10px; border-radius:8px; font-size:11px;">4H</div>
+    <div style="background:#222; color:white; padding:5px 10px; border-radius:8px; font-size:11px;">1D</div>
+    </div>
+    <div style="margin-top:8px; display:flex; gap:6px; font-size:10px; color:#8AA0B8;">
+    <div>Market: <span style="background:#FFD700; color:black; padding:2px 8px; border-radius:6px;">XAU/USD • GOLD</span></div>
+    </div>
+    <div style="margin-top:8px; display:grid; grid-template-columns: repeat(4,1fr); gap:6px; font-size:10px; color:white;">
+    <div style="background:#111; border-radius:6px; padding:6px;">BTC/USDT<br><span class="green">67432.18 +2.34%</span></div>
+    <div style="background:#111; border-radius:6px; padding:6px;">XAU/USD<br><span class="green">4176.07 +0.82%</span></div>
+    <div style="background:#111; border-radius:6px; padding:6px;">EUR/USD<br><span class="green">1.0874 +0.21%</span></div>
+    <div style="background:#111; border-radius:6px; padding:6px;">GBP/USD<br><span class="green">1.2987 +0.33%</span></div>
+    </div>
+    <div style="margin-top:8px; display:flex; gap:12px; font-size:11px; color:white;"><div>Automatic Trading <span style="background:#FFD700; color:black; border-radius:12px; padding:2px 8px;">● ON</span></div><div>Quality Filter Score Minimum <span style="background:#FFD700; color:black; border-radius:6px; padding:2px 6px;">{int(last['q'])}/7</span></div><div>Win Rate 90%</div></div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Chart
+    st.line_chart(df.set_index("time")[["close","ema9","ema21","ema50","ema200"]].tail(100))
+    
+    signal_text = ""
+    if last["sonaBuy"] and last["highQ"]:
+        signal_text = f"SONA AI BUY - Quality {int(last['q'])}/7 @ {price_now} - V103 BUY"
+    if last["scalpSell"] and last["highQ"]:
+        signal_text = f"SCALP SELL - Quality {int(last['q'])}/7 @ {price_now}"
+    
+    if last["highQ"] and (last["sonaBuy"] or last["soniBuy"] or last["v103Buy"]):
+        st.markdown(f"""
+        <div style="background:linear-gradient(90deg, #FFD700, #FFB700); color:black; border-radius:10px; padding:12px; font-weight:800; text-align:center;">
+        BUY SIGNAL CONFIRMED {int(last['q'])}/7 • GOLD XAUUSD @{price_now} • KING 103 WAR<br>
+        TP 4213.25 • SL 4171.62 • 5 min • SONA AI BUY + V103 BUY
+        </div>
+        """, unsafe_allow_html=True)
+    if last["scalpSell"] and last["highQ"]:
+        st.markdown(f"""
+        <div style="background:#FF4D4D; color:white; border-radius:10px; padding:12px; font-weight:800; text-align:center;">
+        SCALP SELL - Quality {int(last['q'])}/7 • GOLD XAUUSD @{price_now} • 4182.23 - 03:23
+        </div>
+        """, unsafe_allow_html=True)
 
-# BOTTOM NAV - Same as image
-st.markdown("""
-<div style="position:fixed; bottom:0; left:0; right:0; background:#081425; border-top:1px solid rgba(255,215,0,0.2); display:flex; justify-content:space-around; padding:10px 0;">
-<div style="text-align:center; color:#00FFC2;"><div>🏠</div><div style="font-size:11px;">Home</div></div>
-<div style="text-align:center; color:#8AA0B8;"><div>📊</div><div style="font-size:11px;">Markets</div></div>
-<div style="text-align:center; color:#8AA0B8;"><div>🔄</div><div style="font-size:11px;">Trade</div></div>
-<div style="text-align:center; color:#8AA0B8;"><div>🕒</div><div style="font-size:11px;">History</div></div>
-<div style="text-align:center; color:#8AA0B8;"><div>👤</div><div style="font-size:11px;">Profile</div></div>
-</div>
-""", unsafe_allow_html=True)
+with col3:
+    st.markdown("""
+    <div class="card">
+    <div style="color:#FFD700; font-size:12px; font-weight:700;">PERFORMANCE STATS</div>
+    <div style="margin-top:8px; font-size:12px; color:white;">
+    <div>Win Rate <div style="font-size:22px; color:#FFD700; font-weight:900;">90%</div>27W / 3L</div>
+    <div style="display:flex; justify-content:space-between; margin-top:8px;"><div>Active Trades<br><b>3</b></div><div>Daily Profit<br><b class="green">+$542.17 ↗</b></div></div>
+    <div style="margin-top:8px;">Autotrader Status:<br><span class="green">● Running</span></div>
+    <div style="margin-top:8px;">Last Alert<br><span class="red">SELL • 4185.50 • Quality 6/7</span></div>
+    </div>
+    </div>
+    <div class="card">
+    <div style="color:#FFD700; font-size:12px; font-weight:700;">HOLOGRAPHIC HOLDINGS</div>
+    <div style="text-align:center; font-size:40px; margin-top:8px;">🏆</div>
+    <div style="text-align:center; font-size:11px; color:#FFD700;">Gold Bar 1oz x2 • 4182.23 oz • Secured<br>Total Holdings Value: $8,359.44</div>
+    <div style="margin-top:10px; background:#111; border-radius:8px; padding:8px; font-size:10px; color:#8AA0B8;">LOCATION • PESHAWAR<br>Bala Hisar Fort<br>Session: Overnight • UTC+5 PKT</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-st.caption(f"Timeframe: {timeframe} | Market: {market} | Price: {last['close']:.2f} | Har Kala Da Design | Tol Work Completed | {datetime.datetime.now().strftime('%H:%M')}")
+st.markdown(f"<div style='text-align:center; color:#8AA0B8; font-size:10px; margin-top:10px;'>SONA AI v10.3 • Q Score {int(last['q'])}/7 • EMA9 {last['ema9']:.2f} EMA21 {last['ema21']:.2f} EMA50 {last['ema50']:.2f} EMA200 {last['ema200']:.2f} VWAP {last['vwap']:.2f} RSI {last['rsi']:.1f} • BOS {bool(last['bosBull'])} Sweep {bool(last['sweepBull'])}</div>", unsafe_allow_html=True)
