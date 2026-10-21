@@ -158,3 +158,81 @@ with right:
     """, unsafe_allow_html=True)
 
 st.caption(f"SONA AI v10.3 • {timeframe} • {market} • Quality 6/7 • Win Rate 90% • KING V103 x SONA LINKED • 5 Day Complete Works 100 • Peshawar {now_str}")
+# ============================================================
+# KING V103 - MONG JORA KALAY DA - KHAPEL SONA AI CODE
+# ============================================================
+import numpy as np
+
+def ema(s,n): 
+    return s.ewm(span=n, adjust=False).mean()
+
+def rsi_calc(s,p=14):
+    d=s.diff()
+    g=d.where(d>0,0).ewm(alpha=1/p, adjust=False).mean()
+    l=-d.where(d<0,0).ewm(alpha=1/p, adjust=False).mean()
+    rs=g/l.replace(0,1e-9)
+    return 100-(100/(1+rs))
+
+# === KING V103 CORE LOGIC ===
+def king_v103_indicator(df):
+    # 1. EMA Stack - 9/21/50/200
+    df["ema9"] = ema(df["close"], 9)
+    df["ema21"] = ema(df["close"], 21)
+    df["ema50"] = ema(df["close"], 50)
+    df["ema200"] = ema(df["close"], 200)
+    
+    # 2. RSI
+    df["rsi"] = rsi_calc(df["close"], 14)
+    
+    # 3. Swing High/Low + BOS (Break of Structure)
+    df["sh"] = df["high"].rolling(10).max()
+    df["sl"] = df["low"].rolling(10).min()
+    df["bosBull"] = df["close"] > df["sh"].shift(1)
+    df["bosBear"] = df["close"] < df["sl"].shift(1)
+    
+    # 4. Liquidity Sweep (Equal Highs/Lows)
+    df["sweepHigh"] = (df["high"] > df["sh"]) & (df["high"].shift(1) < df["sh"])
+    df["sweepLow"] = (df["low"] < df["sl"]) & (df["low"].shift(1) > df["sl"])
+    
+    # 5. Premium / Discount (50% zone)
+    df["range"] = df["sh"] - df["sl"]
+    df["premium"] = df["sl"] + df["range"]*0.5
+    df["isDiscount"] = df["close"] < df["premium"]
+    
+    # 6. KING V103 Quality Score 1-7
+    df["q"] = 0
+    df["q"] += (df["ema9"] > df["ema21"]).astype(int)          # 1: Trend
+    df["q"] += (df["close"] > df["ema200"]).astype(int)        # 2: HTF Trend
+    df["q"] += (df["rsi"] > 55).astype(int)                    # 3: RSI
+    df["q"] += df["bosBull"].astype(int)                       # 4: BOS
+    df["q"] += df["isDiscount"].astype(int)                    # 5: Discount Zone
+    df["q"] += (~df["sweepHigh"]).astype(int)                  # 6: No Fake Sweep
+    df["q"] += (df["close"] > df["ema50"]).astype(int)         # 7: EMA50 Filter
+    
+    # 7. KING V103 BUY/SELL
+    df["kingBuy"] = (df["q"] >= 6) & (df["close"] > df["ema200"]) & df["bosBull"]
+    df["kingSell"] = (df["q"] <= 2) & (df["close"] < df["ema200"]) & df["bosBear"]
+    
+    return df
+
+# === CHART PE KING V103 PLOT KARNA ===
+# Tumhare app.py me jahan chart hai, ye add karo:
+
+# df = king_v103_indicator(df)  # Ye line lagao
+# last = df.iloc[-1]
+# q = int(last["q"])
+
+# fig.add_trace(go.Scatter(x=df["time"], y=df["ema9"], name="EMA9", line=dict(color="#E5C07B")))
+# fig.add_trace(go.Scatter(x=df["time"], y=df["ema21"], name="EMA21", line=dict(color="#4FC3F7")))
+# fig.add_trace(go.Scatter(x=df["time"], y=df["ema50"], name="EMA50", line=dict(color="#AB47BC")))
+# fig.add_trace(go.Scatter(x=df["time"], y=df["ema200"], name="EMA200", line=dict(color="#FFD700", width=2, dash="dash")))
+# fig.add_trace(go.Scatter(x=df["time"], y=df["sh"], name="Swing High", line=dict(color="red", dash="dot")))
+# fig.add_trace(go.Scatter(x=df["time"], y=df["premium"], name="Premium/Discount 50%", line=dict(color="gray", dash="dot")))
+
+# === SIGNAL BOX ===
+# if last["kingBuy"]:
+#     st.markdown(f"""
+#     <div style="background:#0A2E1A;border:2px solid #00FF88;border-radius:12px;padding:12px">
+#     🟢 KING V103 BUY - Quality {q}/7 - @{last['close']:.2f}
+#     </div>
+#     """, unsafe_allow_html=True)
