@@ -127,14 +127,12 @@ last=df.iloc[-1]; q=int(last["q"])
 
 # CHART - 2 PANEL - CANDLE + MAC
 fig = make_subplots(rows=3, cols=1, shared_xaxes=True, vertical_spacing=0.05, row_heights=[0.6,0.2,0.2])
-        fig.add_trace(go.Candlestick(x=df["time"], open=df["open"], high=df["high"], low=df["low"], close=df["close"], name="GOLD", increasing_line_color="#E5C07B", decreasing_line_color="#FF4D4D"), row=1,col=1)
-        fig.add_trace(go.Scatter(x=df["time"], y=df["ema9"], name="EMA9", line=dict(color="#E5C07B", width=1.4)), row=1,col=1)
-        fig.add_trace(go.Scatter(x=df["time"], y=df["ema21"], name="EMA21", line=dict(color="#4FC3F7", width=1.4)), row=1,col=1)
-        fig.add_trace(go.Scatter(x=df["time"], y=df["ema50"], name="EMA50", line=dict(color="#AB47BC", width=1.4)), row=1,col=1)
-        fig.add_trace(go.Scatter(x=df["time"], y=df["ema200"], name="EMA200", line=dict(color="#FFD700", width=2, dash="dash")), row=1,col=1)
-        fig.add_trace(go.Scatter(x=df["time"], y=df["vwap"], name="VWAP", line=dict(color="#00FF88", width=1.2)), row=1,col=1)
-        fig.add_trace(go.Scatter(x=df["time"], y=df["sh"], name="Liquidity High", line=dict(color="rgba(255,0,0,0.6)", dash="dot")), row=1,col=1)
-        fig.add_trace(go.Scatter(x=df["time"], y=df["sl"], name="Liquidity Low", line=dict(color="rgba(0,255,136,0.6)", dash="dot")), row=1,col=1)
+fig.add_trace(go.Candlestick(x=df["time"], open=df["open"], high=df["high"], low=df["low"], close=df["close"], name="XAU"), row=1, col=1)
+fig.add_trace(go.Scatter(x=df["time"], y=df["ema9"], name="EMA9"), row=1, col=1)
+fig.add_trace(go.Scatter(x=df["time"], y=df["vwap"], name="VWAP"), row=1, col=1) fig.add_trace(go.Scatter(x=df["time"], y=df["ema200"], name="EMA200", line=dict(color="#FFD700", width=2, dash="dash")), row=1,col=1)
+fig.add_trace(go.Scatter(x=df["time"], y=df["vwap"], name="VWAP", line=dict(color="#00FF88", width=1.2)), row=1,col=1)
+fig.add_trace(go.Scatter(x=df["time"], y=df["sh"], name="Liquidity High", line=dict(color="rgba(255,0,0,0.6)", dash="dot")), row=1,col=1)
+fig.add_trace(go.Scatter(x=df["time"], y=df["sl"], name="Liquidity Low", line=dict(color="rgba(0,255,136,0.6)", dash="dot")), row=1,col=1)
         # BOS MARKERS
         buys=df[df["kingBuy"]]; fig.add_trace(go.Scatter(x=buys["time"], y=buys["low"]-2, mode="markers", marker=dict(symbol="triangle-up", size=10, color="#00FF88"), name="BOS BUY"), row=1,col=1)
            # SL TP BOX
