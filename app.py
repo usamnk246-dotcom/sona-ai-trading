@@ -117,9 +117,7 @@ with tab1:
         df["vwap"]=vwap(df["high"],df["low"],df["close"],df["vol"])
         # BOS + LIQUIDITY SWEEP + PULLBACK
         df["sh"]=df["high"].rolling(20).max(); df["sl"]=df["low"].rolling(20).min()
-        # SL TP - ATR BASED - SMALL LETTERS
-sl_buy = last["close"] - last["atr"] * 2.5
-tp_buy = last["close"] + last["atr"] * 5.75
+        
         df["sweepLow"]=(df["low"]<df["sl"].shift(1)) & (df["low"].shift(1)>df["sl"].shift(1))
         df["pullback"]=(df["close"]<df["ema21"]) & (df["close"]>df["ema50"])
         # QUALITY 1-7
