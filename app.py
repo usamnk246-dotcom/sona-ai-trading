@@ -142,15 +142,25 @@ with tab1:
         fig.update_layout(height=620, paper_bgcolor="#071425", plot_bgcolor="#071425", font=dict(color="#8AA0B8", size=10), margin=dict(l=10,r=50,t=10,b=10), xaxis_rangeslider_visible=False, showlegend=True, legend=dict(orientation="h", y=1.02))
         st.plotly_chart(fig, use_container_width=True, config={"displayModeBar":False})
 
-        # SL TP BOX
-        if last["kingBuy"]:
-            st.markdown(f"""
-            <div style="background: linear-gradient(90deg,#0A2E1A,#123D25); border:2px solid #00FF88; border-radius:14px; padding:12px; display:flex; justify-content:space-between; align-items:center;">
-            <div><b style="color:#00FF88;">BUY SIGNAL CONFIRMED {q}/7 • KING 103 WAR • LIQUIDITY SWEEP + BOS + PULLBACK</b><br>
-            <span style="color:white; font-size:12px;">GOLD XAUUSD @{last['close']:.2f} • EMA9/21/50/200 RSI {last['rsi']:.1f} MACD {last['macd']:.2f} VWAP {last['vwap']:.2f} • Vol {last['vol']}</span></div>
-            <div style="text-align:right;"><div style="color:#FF4D4D; font-weight:800;">SL {sl_buy:.2f}</div><div style="color:#00FF88; font-weight:800;">TP {tp_buy:.2f}</div><div style="color:#8AA0B8; font-size:10px;">ATR {(last['atr']):.2f} • {tf} • {mkt}</div></div>
-            </div>
-            """, unsafe_allow_html=True)
+           # SL TP BOX
+    if last["kingBuy"]:
+        # --- KING V103 TELEGRAM AUTO - WITH REAL SL TP ---
+        try:
+            entry = float(last["close"])
+            atr = float(last["atr"]) if "atr" in last else 1.44
+            sl_price = entry - (atr * 2.5)
+            tp_price = entry + (atr * 5.75)  # RR 1:2.3
+            send_king_v103_alert("XAU/USD", round(entry,2), round(sl_price,2), round(tp_price,2), "6/7")
+        except:
+            send_king_v103_alert()
+
+        st.markdown(f"""
+        <div style="background: linear-gradient(135deg, #0a1f0a, #1a3a1a); border: 2px solid #00FF88; border-radius: 12px; padding: 12px;">
+        <div><b style="color:#00FF88;">BUY SIGNAL - KING V103 CONFIRMED</b></div>
+        <span style="color:white; font-size:12px;">Entry: {entry} | SL: {sl_price:.2f} | TP: {tp_price:.2f}</span>
+        <div style="text-align:right;"><div style="color:#8AA0B8; font-size:10px;">Peshawar Bala Hisar Fort - SONA AI v10.3</div></div>
+        </div>
+        """, unsafe_allow_html=True) 
 
     with right:
         st.markdown(f"""
