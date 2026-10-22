@@ -29,17 +29,16 @@ MARKETS={"XAU/USD • GOLD":4176.07, "BTC/USDT":67432.18, "EUR/USD":1.0874, "GBP
 
 # HEADER ADVANCE v10.3
 st.markdown(f"""<div class="gold-card" style="display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; gap:14px;"><div style="width:64px;height:76px;background:linear-gradient(135deg,#C9A86A,#8B6F47); border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:28px;">⬡</div><div><div style="color:#E5C07B; font-weight:900; font-size:32px; line-height:1;">SONA AI<br>ADVANCE<br>v10.3</div><div style="color:#8AA0B8; margin-top:6px;">KING V103 x SONA LINKED •<br>PINE EDITOR INSIDE</div></div></div><div style="text-align:right;"><div style="color:#00FF88;">||| LIVE AI MODE</div><div style="background:#00FF88; color:black; font-weight:900; padding:4px 14px; border-radius:8px; margin-top:6px; display:inline-block;">ACTIVE</div><div style="color:white; margin-top:8px;">PESHAWAR • {now_pkt.strftime("%H:%M")}<br>AM PKT • 10 MIN<br>READY</div></div></div>""", unsafe_allow_html=True)
-# HEADER ADVANCE v10.3
-st.markdown(f"""<div class="gold-card" s...""", unsafe_allow_html=True)
+
 
 # --- LINE 32 PE YAHAN PASTE KARO ---
-if st.button("📲 TEST TELEGRAM - SEND NOW"):
+
     send_king_v103_alert("XAU/USD", 4176.07, 4170.00, 4195.00, "6/7 TEST")
     st.success("✅ Telegram bheja! Check karo!")
 
 tab1, tab2 = st.tabs(["🔱 SONA AI TRADIN...
 tab1, tab2 = st.tabs(["🔱 SONA AI TRADING TERMINAL", "📝 SONA AI PINE EDITOR (KHAPEL)"])
-with tab1:
+
     st.markdown("""<div class="gold-card"><div style="color:#C9A86A; font-weight:900;">📈 ACCOUNT GROWTH - 5 DAY 100%</div><div style="background:#0a1930; border:1px solid #C9A86A44; border-radius:12px; padding:14px; margin-top:10px;"><div style="color:#8AA0B8;">REAL ACCOUNT</div><div style="color:#E5C07B; font-size:42px; font-weight:900;">$10.00</div><div style="color:#00FF88;">+0.00% (24h) • +4.32% Real</div><div style="display:flex; justify-content:space-between; margin-top:12px; color:#8AA0B8;"><div>Goal $1000</div><div>1.0% $10/$1000</div></div><div style="background:#1a2a4a; height:10px; border-radius:6px; margin-top:6px;"><div style="width:10%; background:#E5C07B; height:10px; border-radius:6px;"></div></div><div style="color:#8AA0B8; margin-top:8px; font-size:13px;">Days Active: 5 • Daily Target: +$198 • KING V103 x SONA LINKED ✓</div></div></div>""", unsafe_allow_html=True)
     tf = st.selectbox("Timeframe", ["1min","5min","15min","1H","4H","1D"], index=1)
     mkt = st.selectbox("Market", list(MARKETS.keys()), index=0)
