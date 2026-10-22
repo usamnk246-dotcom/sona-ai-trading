@@ -13,13 +13,22 @@ now_pkt = datetime.datetime.now(pkt)
 TELEGRAM_TOKEN = "8805943599:AAHs7IPuUqmifjgKPgdPltcXMzRvsCAPkfM"
 TELEGRAM_CHAT_ID = "7994090809"
 
-def send_king_v103_alert(symbol="XAU/USD", entry=0, sl=0, tp=0, quality="6/7"):
-    msg = f"👑 KING V103 BUY CONFIRMED 👑\n\nSymbol: {symbol}\nEntry: {entry}\nSL: {sl} | TP: {tp}\nQuality: {quality}\nPeshawar Bala Hisar - SONA AI v10.3"
+def send_king_v103_alert(symbol="XAU/USD", entry=None, sl=None, tp=None, quality="6/7"):
+    if entry is None or entry == 0 or sl is None:
+        return
+    msg = f"""👑 KING V103 BUY CONFIRMED 👑
+
+Symbol: {symbol}
+Entry: {entry}
+SL: {sl} | TP: {tp}
+Quality: {quality}
+Peshawar Bala Hisar - SONA AI v10.3 - {now_pkt.strftime('%H:%M PKT')}"""
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     try:
         requests.post(url, data={"chat_id": TELEGRAM_CHAT_ID, "text": msg}, timeout=10)
     except:
         pass
+# --- END TELEGRAM ---
 # --- END TELEGRAM ---
         
 # --- CSS WORLD BEST DESIGN - BALA HISAR FORT GOLD ---
@@ -108,8 +117,9 @@ with tab1:
         df["vwap"]=vwap(df["high"],df["low"],df["close"],df["vol"])
         # BOS + LIQUIDITY SWEEP + PULLBACK
         df["sh"]=df["high"].rolling(20).max(); df["sl"]=df["low"].rolling(20).min()
-        df["bosBull"]=df["close"]>df["sh"].shift(1); df["bosBear"]=df["close"]<df["sl"].shift(1)
-        df["sweepHigh"]=(df["high"]>df["sh"].shift(1)) & (df["high"].shift(1)<df["sh"].shift(1))
+        # SL TP - ATR BASED - SMALL LETTERS
+sl_buy = last["close"] - last["atr"] * 2.5
+tp_buy = last["close"] + last["atr"] * 5.75
         df["sweepLow"]=(df["low"]<df["sl"].shift(1)) & (df["low"].shift(1)>df["sl"].shift(1))
         df["pullback"]=(df["close"]<df["ema21"]) & (df["close"]>df["ema50"])
         # QUALITY 1-7
@@ -132,20 +142,27 @@ with tab1:
         fig.add_trace(go.Scatter(x=df["time"], y=df["sl"], name="Liquidity Low", line=dict(color="rgba(0,255,136,0.6)", dash="dot")), row=1,col=1)
         # BOS MARKERS
         buys=df[df["kingBuy"]]; fig.add_trace(go.Scatter(x=buys["time"], y=buys["low"]-2, mode="markers", marker=dict(symbol="triangle-up", size=10, color="#00FF88"), name="BOS BUY"), row=1,col=1)
-        # MACD
-        fig.add_trace(go.Scatter(x=df["time"], y=df["macd"], name="MACD", line=dict(color="#4FC3F7")), row=2,col=1)
-        fig.add_trace(go.Scatter(x=df["time"], y=df["macd_sig"], name="Signal", line=dict(color="#E5C07B")), row=2,col=1)
-        fig.add_trace(go.Bar(x=df["time"], y=df["macd_hist"], name="Hist"), row=2,col=1)
-        # RSI + VOLUME
-        fig.add_trace(go.Scatter(x=df["time"], y=df["rsi"], name="RSI 14", line=dict(color="#AB47BC")), row=3,col=1)
-        fig.add_trace(go.Bar(x=df["time"], y=df["vol"], name="Volume", marker_color="rgba(201,168,106,0.5)"), row=3,col=1)
-        fig.update_layout(height=620, paper_bgcolor="#071425", plot_bgcolor="#071425", font=dict(color="#8AA0B8", size=10), margin=dict(l=10,r=50,t=10,b=10), xaxis_rangeslider_visible=False, showlegend=True, legend=dict(orientation="h", y=1.02))
-        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar":False})
-
            # SL TP BOX
     if last["kingBuy"]:
         try:
-            entry = float(last["Close"])
+            entry = float(last["close"])
+            atr = float(last["atr"])
+            if atr == 0:
+                atr = 1.44
+            sl_price = round(entry - (atr * 2.5), 2)
+            tp_price = round(entry + (atr * 5.75), 2)
+            
+            # Ek hi baar Telegram bhejo - spam rok
+            if "last_sent" not in st.session_state or st.session_state.last_sent != entry:
+                send_king_v103_alert("XAU/USD", entry, sl_price, tp_price, "6/7")
+                st.session_state.last_sent = entry
+        except Exception as e:
+            pass
+            entry = float(last["close"])
+            sl_price = round(entry - 5, 2)
+            tp_price = round(entry + 12, 2)
+
+        st.markdown(f"""
             atr = float(last["ATR"])
             sl_price = round(entry - (atr * 2.5), 2)
             tp_price = round(entry + (atr * 5.75), 2)
@@ -243,7 +260,7 @@ plotshape(sweepHigh, title="Liquidity Sweep", style=shape.triangledown, location
             st.success("✅ Pine Code Compiled - Sona AI me chal raha hai - EMA9/21/50/200 RSI ATR MACD VWAP Volume BOS Sweep Pullback sab active!")
             # Simple parser - agar code me kingBuy hai to signal
             if "kingBuy" in pine_code:
-                st.markdown(f'<div style="background:#0A2E1A; border:2px solid #00FF88; border-radius:12px; padding:12px;"><b style="color:#00FF88;">KING V103 BUY CONFIRMED from Pine Editor • Quality 6/7 • SL TP auto calculated • Liquidity Sweep + BOS + Pullback strategy active</b></div>', unsafe_allow_html=True)
+                
     
     with c2:
         st.markdown("""
