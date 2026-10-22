@@ -144,24 +144,25 @@ with tab1:
 
            # SL TP BOX
     if last["kingBuy"]:
-        # --- KING V103 TELEGRAM AUTO - WITH REAL SL TP ---
         try:
-            entry = float(last["close"])
-            atr = float(last["atr"]) if "atr" in last else 1.44
-            sl_price = entry - (atr * 2.5)
-            tp_price = entry + (atr * 5.75)  # RR 1:2.3
-            send_king_v103_alert("XAU/USD", round(entry,2), round(sl_price,2), round(tp_price,2), "6/7")
+            entry = float(last["Close"])
+            atr = float(last["ATR"])
+            sl_price = round(entry - (atr * 2.5), 2)
+            tp_price = round(entry + (atr * 5.75), 2)
+            send_king_v103_alert("XAU/USD", entry, sl_price, tp_price, "6/7")
         except:
-            send_king_v103_alert()
+            pass
+            entry = float(last["Close"])
+            sl_price = entry - 5
+            tp_price = entry + 12
 
         st.markdown(f"""
-        <div style="background: linear-gradient(135deg, #0a1f0a, #1a3a1a); border: 2px solid #00FF88; border-radius: 12px; padding: 12px;">
-        <div><b style="color:#00FF88;">BUY SIGNAL - KING V103 CONFIRMED</b></div>
-        <span style="color:white; font-size:12px;">Entry: {entry} | SL: {sl_price:.2f} | TP: {tp_price:.2f}</span>
-        <div style="text-align:right;"><div style="color:#8AA0B8; font-size:10px;">Peshawar Bala Hisar Fort - SONA AI v10.3</div></div>
+        <div class="gold-card">
+        <div style="color:#C9A86A; font-weight:800">BUY SIGNAL - KING V103 CONFIRMED</div>
+        <div style="margin-top: 8px;"><div style="color:#00FF88; font-size:14px; font-weight:700">Entry: {entry:.2f} | SL: {sl_price:.2f} | TP: {tp_price:.2f}</div></div>
         </div>
-        """, unsafe_allow_html=True) 
-
+        """, unsafe_allow_html=True)    
+    
     with right:
         st.markdown(f"""
         <div class="gold-card">
