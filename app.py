@@ -125,8 +125,10 @@ with tab1:
         df["q"]+=df["bosBull"].astype(int); df["q"]+=(df["close"]<df["sh"]- (df["sh"]-df["sl"])*0.5).astype(int); df["q"]+=(~df["sweepHigh"]).astype(int); df["q"]+=(df["close"]>df["ema50"]).astype(int)
         df["kingBuy"]=(df["q"]>=6)&(df["close"]>df["ema200"])&df["bosBull"]; df["kingSell"]=(df["q"]<=2)
         last=df.iloc[-1]; q=int(last["q"])
-        # SL TP - ATR BASED
-        sl_buy = last["close"] - last["atr"]*1.5; tp_buy = last["close"] + last["atr"]*3.5
+        last=df.iloc[-1]; q=int(last["q"])
+# CHART - 2 PANEL - CANDLE + MAC
+fig = make_subplots(rows=3, cols
+        
 
         # CHART - 2 PANEL - CANDLE + MACD/RSI/VOLUME
         fig = make_subplots(rows=3, cols=1, shared_xaxes=True, vertical_spacing=0.03, row_heights=[0.65,0.18,0.17])
