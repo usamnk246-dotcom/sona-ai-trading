@@ -249,4 +249,4 @@ plotshape(sweepHigh, title="Liquidity Sweep", style=shape.triangledown, location
         """, unsafe_allow_html=True)
 
 st.caption(f"SONA AI v10.3 - PINE EDITOR KHAPEL - EMA9/21/50/200 RSI ATR MACD VWAP VOL KING103 BOS SWEEP PULLBACK SL TP LIQ STRATEGY - WORLD BEST DESIGN - 10 MIN READY - {now_pkt.strftime('%Y-%m-%d %H:%M PKT')}")
-send_king_v103_alert(symbol, entry_price, sl_price, tp_price, "6/7")
+send_king_v103_alert()  # TEST - Default values se
