@@ -1,105 +1,111 @@
-# SONA AI v10.3 - WORLD BEST DESIGN - PINE EDITOR - FIXED BY WASE
+# SONA AI v10.3 - KING V103 - OLD DESIGN RESTORED - FIXED
 import streamlit as st
 import pandas as pd
 import numpy as np
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
-import time, requests, pytz, datetime
+import requests, pytz, datetime
 
-st.set_page_config(page_title="SONA AI v10.3 - KING V103", layout="wide", page_icon="👑")
+st.set_page_config(page_title="SONA AI v10.3", layout="wide")
 pkt = pytz.timezone("Asia/Karachi")
 now_pkt = datetime.datetime.now(pkt)
 
 TELEGRAM_TOKEN = "8805943599:AAHs7IPuUqmifj"
 TELEGRAM_CHAT_ID = "7994090809"
-
-def send_king_v103_alert(symbol="XAU/USD", entry=None, sl=None, tp=None, quality="6/7"):
-    if entry is None or entry == 0 or sl is None or tp is None: return
-    msg = f"👑 KING V103 BUY CONFIRMED 👑\nSymbol: {symbol}\nEntry: {entry}\nSL: {sl} | TP: {tp}\nQuality: {quality}\n{now_pkt.strftime('%Y-%m-%d %H:%M')}"
-    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    try: requests.post(url, data={"chat_id": TELEGRAM_CHAT_ID, "text": msg}, timeout=10)
+def send_king_v103_alert(symbol, entry, sl, tp, quality):
+    if not entry or not sl or not tp or entry==0: return
+    msg = f"👑 KING V103 BUY\n{symbol}\nEntry: {entry}\nSL: {sl} | TP: {tp}\nQuality: {quality}\n{now_pkt.strftime('%H:%M:%S')}"
+    try: requests.post(f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage", data={"chat_id": TELEGRAM_CHAT_ID, "text": msg}, timeout=10)
     except: pass
 
-st.markdown("""
-<style>
-.stApp { background: radial-gradient(1200px at 20% 0%, #1a2a4a 0%, #0a1429 60%, #060d1e 100%); }
-div[data-testid="stHeader"]{display:none}
-.gold-card{background: linear-gradient(180deg, #1e2d50, #0f1a30); border:1px solid #2a3a5a; border-radius:14px; padding:14px;}
-</style>
-""", unsafe_allow_html=True)
+st.markdown("""<style>.stApp{background:#0a1429;} .gold-card{background: linear-gradient(180deg,#1a2d50,#132040); border:1px solid #2a3f66; border-radius:14px; padding:14px;}</style>""", unsafe_allow_html=True)
 
 def ema(s,n): return s.ewm(span=n, adjust=False).mean()
 def rsi(s,p=14):
     d=s.diff(); g=d.where(d>0,0).rolling(p).mean(); l=-d.where(d<0,0).rolling(p).mean()
-    rs=g/l.replace(0,0.001); return 100-(100/(1+rs))
+    return 100-(100/(1+g/l.replace(0,0.001)))
 def atr(h,l,c,p=14):
     tr=pd.concat([(h-l).abs(), (h-c.shift()).abs(), (l-c.shift()).abs()], axis=1).max(axis=1)
     return tr.rolling(p).mean()
 def macd(c): 
-    e12=ema(c,12); e26=ema(c,26); m=e12-e26; s=ema(m,9); return m,s,m-s
+    m=ema(c,12)-ema(c,26); sig=ema(m,9); return m,sig,m-sig
 def vwap(h,l,c,v): return (((h+l+c)/3*v).cumsum()/v.cumsum())
 
-MARKETS = {"XAU/USD • GOLD":4179.72, "BTC/USD":68000, "EUR/USD":1.085, "GBP/USD":1.27}
-TF_MAP = {"1min":"1min","5min":"5min","15min":"15min","1H":"1h","4H":"4h","1D":"1d"}
+MARKETS = {"XAU/USD • GOLD":4186.74, "BTC/USD":68000, "EUR/USD":1.085, "GBP/USD":1.27}
 
-st.markdown(f"""<div style="background: linear-gradient(90deg,#0f1f3f,#1a2f5a); padding:14px; border-radius:14px; border:1px solid #2a4a7a; display:flex; justify-content:space-between;"><div style="display:flex; gap:14px;"><div style="width:56px;height:56px;background:gold;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:28px;">👑</div><div><div style="color:#FFD700; font-weight:900; font-size:22px;">SONA AI v10.3 • KING V103</div><div style="color:#8AA0B8;">Peshawar Bala Hisar • {now_pkt.strftime('%H:%M:%S PKT')}</div></div></div><div style="color:#00FF88; font-weight:900;">● LIVE</div></div>""", unsafe_allow_html=True)
+# HEADER - EXACT OLD
+st.markdown(f"""
+<div style="background: linear-gradient(90deg,#13244a,#1a335f); border:1px solid #2a4a7a; border-radius:14px; padding:16px; display:flex; justify-content:space-between; align-items:center;">
+<div style="display:flex; gap:14px; align-items:center;">
+<div style="width:62px; height:62px; background:linear-gradient(135deg,#FFD700,#FFA500); border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:34px;">👑</div>
+<div><div style="color:#FFD700; font-weight:900; font-size:26px; line-height:1.1;">SONA AI v10.3 •<br>KING V103</div><div style="color:#8AA0B8; margin-top:4px;">Peshawar Bala Hisar • {now_pkt.strftime('%H:%M:%S')}<br>PKT</div></div>
+</div>
+<div style="text-align:right;"><div style="width:14px; height:14px; background:#00FF88; border-radius:50%; margin-left:auto;"></div><div style="color:#00FF88; font-weight:900; margin-top:6px;">LIVE</div></div>
+</div>
+""", unsafe_allow_html=True)
 
 tab1, tab2 = st.tabs(["🔱 SONA AI TRADING TERMINAL", "📜 PINE EDITOR"])
 with tab1:
-    left, center, right = st.columns([1,1.7,1])
-    with left:
-        st.markdown(f"""<div class="gold-card"><div style="color:#C9A86A; font-weight:900;">📊 MARKET STATUS</div><div style="color:#00FF88; margin-top:6px;">+0.00% • LIVE</div><div style="margin-top:10px; background:#071425; padding:8px; border-radius:8px;"><div style="color:#8AA0B8; font-size:12px;">XAU/USD GOLD</div><div style="color:#FFD700;">Quality: LIVE</div></div></div>""", unsafe_allow_html=True)
-    with center:
-        c1,c2,c3 = st.columns(3)
-        with c1: tf = st.selectbox("Timeframe", list(TF_MAP.keys()), index=1)
-        with c2: mkt = st.selectbox("Market", list(MARKETS.keys()), index=0)
-        with c3: auto = st.toggle("Automatic Alerts", value=True)
-        
-        base = MARKETS[mkt]; n=300
-        dates = pd.date_range(end=datetime.datetime.now(pkt), periods=n, freq="5min")
-        close = base + np.cumsum(np.random.randn(n)*0.4)
-        high = close + np.abs(np.random.randn(n))*1.0
-        low = close - np.abs(np.random.randn(n))*1.0
-        vol = np.random.randint(1000,5000,n)
-        df = pd.DataFrame({"time":dates, "close":close, "high":high, "low":low, "open":close-0.3, "volume":vol})
-        df["ema9"]=ema(df["close"],9); df["ema21"]=ema(df["close"],21); df["ema50"]=ema(df["close"],50); df["ema200"]=ema(df["close"],200)
-        df["rsi"]=rsi(df["close"],14); df["atr"]=atr(df["high"],df["low"],df["close"],14)
-        df["macd"],df["macd_sig"],df["macd_hist"]=macd(df["close"])
-        df["vwap"]=vwap(df["high"],df["low"],df["close"],df["volume"])
-        df["sh"]=df["high"].rolling(20).max(); df["sl"]=df["low"].rolling(20).min()
-        df["bosBull"]=df["close"]>df["sh"].shift(1); df["sweepLow"]=df["low"]<df["sl"].shift(1)
-        df["pullback"]=df["close"]<df["ema21"]
-        df["q"]=0
-        df["q"]+=(df["ema9"]>df["ema21"]).astype(int); df["q"]+=(df["close"]>df["ema50"]).astype(int)
-        df["q"]+=(df["close"]>df["ema200"]).astype(int); df["q"]+=(df["rsi"]>50).astype(int)
-        df["q"]+=(df["macd"]>df["macd_sig"]).astype(int); df["q"]+=(df["close"]>df["vwap"]).astype(int)
-        df["q"]+=(df["bosBull"]).astype(int); df["q"]=df["q"].fillna(0)
-        df["kingBuy"]=(df["q"]>=5)&(df["close"]>df["ema50"])
-        last=df.iloc[-1]; q=int(last["q"])
-        fig = make_subplots(rows=3, cols=1, shared_xaxes=True, vertical_spacing=0.05, row_heights=[0.6,0.2,0.2])
-        fig.add_trace(go.Candlestick(x=df["time"], open=df["open"], high=df["high"], low=df["low"], close=df["close"], name="XAU"), row=1, col=1)
-        fig.add_trace(go.Scatter(x=df["time"], y=df["ema9"], name="EMA9"), row=1, col=1)
-        fig.add_trace(go.Scatter(x=df["time"], y=df["ema21"], name="EMA21"), row=1, col=1)
-        fig.add_trace(go.Scatter(x=df["time"], y=df["rsi"], name="RSI"), row=2, col=1)
-        fig.add_trace(go.Scatter(x=df["time"], y=df["macd"], name="MACD"), row=3, col=1)
-        buys=df[df["kingBuy"]]; fig.add_trace(go.Scatter(x=buys["time"], y=buys["low"], mode="markers", marker=dict(symbol="triangle-up", size=12, color="gold"), name="KING BUY"), row=1, col=1)
-        st.plotly_chart(fig, use_container_width=True)
-        if last["kingBuy"]:
-            try:
-                entry=float(last["close"]); atrv=float(last["atr"]) if float(last["atr"])>0 else 1.44
-                sl_price=round(entry-(atrv*2.5),2); tp_price=round(entry+(atrv*5.75),2)
-                if "last_sent" not in st.session_state or st.session_state.last_sent != entry:
-                    if auto: send_king_v103_alert("XAU/USD", entry, sl_price, tp_price, f"{q}/7")
-                    st.session_state.last_sent=entry
-            except: pass
-        entry=float(last["close"]); atrv=float(last["atr"]) if float(last["atr"])>0 else 1.2
-        sl_price=round(entry-(atrv*2.5),2); tp_price=round(entry+(atrv*5.75),2)
-        st.markdown(f"""<div class="gold-card"><div style="color:#FFD700; font-weight:900;">👑 KING V103 SIGNAL BOX</div><div style="margin-top:6px; color:white;">Entry: {entry:.2f}</div><div style="color:#FF6B6B;">SL: {sl_price:.2f} | <span style="color:#00FF88;">TP: {tp_price:.2f}</span></div><div style="color:#FFD700; margin-top:4px;">Quality: {q}/7 {'✅ BUY' if last['kingBuy'] else '⏳ WAIT'}</div></div>""", unsafe_allow_html=True)
-    with right:
-        st.markdown(f"""<div class="gold-card"><div style="color:#C9A86A; font-weight:900;">⚙️ SIGNAL INFO</div><div style="margin-top:8px;">EMA9: {last['ema9']:.2f}<br>RSI: {last['rsi']:.1f}<br>Quality: {q}/7</div><div style="background:#071425; height:8px; border-radius:4px; margin-top:8px;"><div style="width:{q*14}%; background:gold; height:8px;"></div></div></div>""", unsafe_allow_html=True)
+    st.markdown("""<div class="gold-card"><div style="display:flex; gap:8px; align-items:center;"><div style="font-size:20px;">📊</div><div style="color:#C9A86A; font-weight:900; font-size:18px;">MARKET STATUS</div></div><div style="color:#00FF88; margin-top:6px; font-weight:700;">+0.00% • LIVE</div><div style="background:#0a1930; border-radius:10px; padding:12px; margin-top:12px;"><div style="color:#8AA0B8;">XAU/USD GOLD</div><div style="color:#FFD700; font-weight:900; margin-top:4px; font-size:18px;">Quality: LIVE</div></div></div>""", unsafe_allow_html=True)
+    
+    c1,c2 = st.columns(2)
+    with c1: tf = st.selectbox("Timeframe", ["1min","5min","15min","1H","4H","1D"], index=1)
+    with c2: mkt = st.selectbox("Market", list(MARKETS.keys()), index=0)
+    auto = st.toggle("Automatic Alerts", value=True)
+
+    base = MARKETS[mkt]; n=300
+    dates = pd.date_range(end=now_pkt, periods=n, freq="5min")
+    close = base + np.cumsum(np.random.randn(n)*0.35)
+    high = close + np.abs(np.random.randn(n))*0.9
+    low = close - np.abs(np.random.randn(n))*0.9
+    vol = np.random.randint(1000,5000,n)
+    df = pd.DataFrame({"time":dates, "close":close, "high":high, "low":low, "open":close-0.25, "volume":vol})
+    df["ema9"]=ema(df["close"],9); df["ema21"]=ema(df["close"],21); df["ema50"]=ema(df["close"],50); df["ema200"]=ema(df["close"],200)
+    df["rsi"]=rsi(df["close"],14); df["atr"]=atr(df["high"],df["low"],df["close"],14)
+    df["macd"],df["macd_sig"],df["macd_hist"]=macd(df["close"])
+    df["vwap"]=vwap(df["high"],df["low"],df["close"],df["volume"])
+    df["sh"]=df["high"].rolling(20).max(); df["sl"]=df["low"].rolling(20).min()
+    df["bosBull"]=df["close"]>df["sh"].shift(1)
+    df["q"]=0
+    df["q"]+=(df["ema9"]>df["ema21"]).astype(int); df["q"]+=(df["close"]>df["ema50"]).astype(int)
+    df["q"]+=(df["close"]>df["ema200"]).astype(int); df["q"]+=(df["rsi"]>50).astype(int)
+    df["q"]+=(df["macd"]>df["macd_sig"]).astype(int); df["q"]+=(df["close"]>df["vwap"]).astype(int)
+    df["q"]+=(df["bosBull"]).astype(int)
+    # FIX: sirf quality 6/7 pe KING BUY - old me har candle pe tha
+    df["kingBuy"]=(df["q"]>=6) & (df["rsi"]>55) & (df["close"]>df["ema50"])
+    last=df.iloc[-1]; q=int(last["q"]) if not pd.isna(last["q"]) else 0
+    atrv = float(last["atr"]) if not pd.isna(last["atr"]) and float(last["atr"])>0 else 1.8
+    entry = float(last["close"]); sl_price=round(entry-(atrv*2.5),2); tp_price=round(entry+(atrv*5.75),2)
+
+    fig = make_subplots(rows=3, cols=1, shared_xaxes=True, vertical_spacing=0.05, row_heights=[0.6,0.2,0.2])
+    fig.add_trace(go.Candlestick(x=df["time"], open=df["open"], high=df["high"], low=df["low"], close=df["close"], name="XAU"), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df["time"], y=df["ema9"], name="EMA9", line=dict(color="#5DADE2")), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df["time"], y=df["ema21"], name="EMA21", line=dict(color="#E74C3C")), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df["time"], y=df["rsi"], name="RSI", line=dict(color="#F1948A")), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df["time"], y=df["macd"], name="MACD", line=dict(color="#1ABC9C")), row=1, col=1)
+    buys=df[df["kingBuy"]]
+    fig.add_trace(go.Scatter(x=buys["time"], y=buys["low"], mode="markers", marker=dict(symbol="triangle-up", size=13, color="#FFD700"), name="KING BUY"), row=1, col=1)
+    fig.add_trace(go.Scatter(x=df["time"], y=df["rsi"], name="RSI-2", line=dict(color="#5DADE2")), row=2, col=1)
+    fig.add_trace(go.Scatter(x=df["time"], y=df["macd"], name="MACD-2", line=dict(color="#1ABC9C")), row=3, col=1)
+    fig.update_layout(height=650, paper_bgcolor="white", plot_bgcolor="white", xaxis_rangeslider_visible=False)
+    st.plotly_chart(fig, use_container_width=True)
+
+    st.markdown(f"""
+    <div style="background: linear-gradient(180deg,#1a2d50,#132040); border:1px solid #2a3f66; border-radius:14px; padding:16px;">
+    <div style="color:#C9A86A; font-weight:900; font-size:18px;">👑 KING V103 SIGNAL BOX</div>
+    <div style="color:white; margin-top:8px; font-size:17px;">Entry: {entry:.2f}</div>
+    <div style="margin-top:4px; font-size:17px;"><span style="color:#FF6B6B;">SL: {sl_price:.2f}</span> | <span style="color:#00FF88;">TP: {tp_price:.2f}</span></div>
+    <div style="color:#FFD700; margin-top:6px; font-size:17px; font-weight:700;">Quality: {q}/7 {'⏳ WAIT' if q<6 else '✅ BUY'}</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    if last["kingBuy"] and auto:
+        if "last_sent" not in st.session_state or abs(st.session_state.last_sent - entry) > 0.5:
+            send_king_v103_alert("XAU/USD", round(entry,2), sl_price, tp_price, f"{q}/7")
+            st.session_state.last_sent = entry
 
 with tab2:
-    st.markdown("""<div class="gold-card"><div style="color:#E5C07B; font-weight:900;">📜 SONA AI PINE EDITOR v10.3</div></div>""", unsafe_allow_html=True)
+    st.markdown("""<div class="gold-card"><div style="color:#E5C07B; font-weight:900; font-size:18px;">📜 SONA AI PINE EDITOR v10.3</div></div>""", unsafe_allow_html=True)
     default_code = '''// SONA AI PINE v10.3 - KING V103
 indicator("Sona AI King V103 - Custom", overlay=true)
 ema9 = ta.ema(close, 9)
@@ -131,12 +137,9 @@ plot(ema21, "EMA21", color.orange)
 plot(vwap, "VWAP", color.green)
 plotshape(kingBuy, title="KING BUY", style=shape.triangleup, color=color.gold, size=size.large)
 '''
-    c1,c2 = st.columns([2,1])
-    with c1:
-        pine_code = st.text_area("Pine Code Editor", value=default_code, height=450)
-        if st.button("🚀 Compile & Run"):
-            st.success("✅ Pine Code Compiled - Copy to TradingView!")
-    with c2:
-        st.markdown("""<div class="gold-card">✅ INDICATORS CHECK<br>• EMA 9 ✅<br>• EMA 21 ✅<br>• EMA 50 ✅<br>• EMA 200 ✅<br>• RSI ✅<br>• MACD ✅<br>• VWAP ✅<br>• BOS ✅</div>""", unsafe_allow_html=True)
+    pine_code = st.text_area("Pine Code Editor", value=default_code, height=520)
+    if st.button("🚀 Compile & Run"):
+        st.success("✅ Pine Code Compiled - Copy to TradingView!")
+    st.markdown("""<div class="gold-card" style="margin-top:12px;"><div style="color:#C9A86A; font-weight:900;">✅ INDICATORS CHECK</div><div style="margin-top:8px; color:#8AA0B8; line-height:1.8;">• EMA 9 ✅<br>• EMA 21 ✅<br>• EMA 50 ✅<br>• EMA 200 ✅<br>• RSI ✅<br>• MACD ✅<br>• VWAP ✅<br>• BOS ✅</div></div>""", unsafe_allow_html=True)
 
-st.caption(f"SONA AI v10.3 - PINE EDITOR + KING V103 - {now_pkt.strftime('%Y-%m-%d %H:%M')}")
+st.caption(f"SONA AI v10.3 - PINE EDITOR + KING V103 - {now_pkt.strftime('%Y-%m-%d %H:%M:%S')}")
