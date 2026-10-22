@@ -122,16 +122,11 @@ with tab1:
         df["pullback"]=(df["close"]<df["ema21"]) & (df["close"]>df["ema50"])
         # QUALITY 1-7
         df["q"]=0; df["q"]+=(df["ema9"]>df["ema21"]).astype(int); df["q"]+=(df["close"]>df["ema200"]).astype(int); df["q"]+=(df["rsi"]>55).astype(int)
-        df["q"]+=df["bosBull"].astype(int); df["q"]+=(df["close"]<df["sh"]- (df["sh"]-df["sl"])*0.5).astype(int); df["q"]+=(~df["sweepHigh"]).astype(int); df["q"]+=(df["close"]>df["ema50"]).astype(int)
-        df["kingBuy"]=(df["q"]>=6)&(df["close"]>df["ema200"])&df["bosBull"]; df["kingSell"]=(df["q"]<=2)
-        last=df.iloc[-1]; q=int(last["q"])
-        last=df.iloc[-1]; q=int(last["q"])
-# CHART - 2 PANEL - CANDLE + MAC
-fig = make_subplots(rows=3, cols
-        
+        df["kingBuy"]=(df["q"]>=6)&(df["bosBull"]==True)
+last=df.iloc[-1]; q=int(last["q"])
 
-        # CHART - 2 PANEL - CANDLE + MACD/RSI/VOLUME
-        fig = make_subplots(rows=3, cols=1, shared_xaxes=True, vertical_spacing=0.03, row_heights=[0.65,0.18,0.17])
+# CHART - 2 PANEL - CANDLE + MAC
+fig = make_subplots(rows=3, cols=1, shared_xaxes=True, vertical_spacing=0.05, row_heights=[0.6,0.2,0.2])
         fig.add_trace(go.Candlestick(x=df["time"], open=df["open"], high=df["high"], low=df["low"], close=df["close"], name="GOLD", increasing_line_color="#E5C07B", decreasing_line_color="#FF4D4D"), row=1,col=1)
         fig.add_trace(go.Scatter(x=df["time"], y=df["ema9"], name="EMA9", line=dict(color="#E5C07B", width=1.4)), row=1,col=1)
         fig.add_trace(go.Scatter(x=df["time"], y=df["ema21"], name="EMA21", line=dict(color="#4FC3F7", width=1.4)), row=1,col=1)
