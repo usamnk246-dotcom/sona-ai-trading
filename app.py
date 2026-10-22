@@ -2,11 +2,26 @@
 import streamlit as st, pandas as pd, numpy as np, datetime, pytz, plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import time
+import requests
+import pytz
+import datetime
 
 st.set_page_config(page_title="SONA AI v10.3 - PINE EDITOR", layout="wide", initial_sidebar_state="collapsed")
 pkt = pytz.timezone("Asia/Karachi")
 now_pkt = datetime.datetime.now(pkt)
+# --- SONA KING V103 - TELEGRAM AUTO ALERT - LOCKED ---
+TELEGRAM_TOKEN = "8805943599:AAHs7IPuUqmifjgKPgdPltcXMzRvsCAPkfM"
+TELEGRAM_CHAT_ID = "7994090809"
 
+def send_king_v103_alert(symbol="XAU/USD", entry=0, sl=0, tp=0, quality="6/7"):
+    msg = f"👑 KING V103 BUY CONFIRMED 👑\n\nSymbol: {symbol}\nEntry: {entry}\nSL: {sl} | TP: {tp}\nQuality: {quality}\nPeshawar Bala Hisar - SONA AI v10.3"
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    try:
+        requests.post(url, data={"chat_id": TELEGRAM_CHAT_ID, "text": msg}, timeout=10)
+    except:
+        pass
+# --- END TELEGRAM ---
+        
 # --- CSS WORLD BEST DESIGN - BALA HISAR FORT GOLD ---
 st.markdown("""
 <style>
