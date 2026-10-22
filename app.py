@@ -5,7 +5,7 @@ import requests
 from datetime import datetime
 import pytz
 
-TELEGRAM_TOKEN = "7994090809:AAH_YAHAN_PURA_TOKEN_DALO"
+TELEGRAM_TOKEN = "7994090809:AAH1234abc...tumhara_asli_token"
 TELEGRAM_CHAT_ID = "7994090809"
 
 def send_king_v103_alert(symbol, entry, sl, tp, quality):
