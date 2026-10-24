@@ -47,3 +47,6 @@ else:
                 st.error(f"❌ Telegram Failed: {r.json()}")
         except Exception as e:
             st.error(f"Error: {e}")
+import streamlit as st
+TELEGRAM_TOKEN = st.secrets["TELEGRAM_TOKEN"]
+TELEGRAM_CHAT_ID = st.secrets["TELEGRAM_CHAT_ID"]
