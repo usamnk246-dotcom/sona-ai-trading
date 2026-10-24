@@ -7,19 +7,23 @@ st.set_page_config(page_title="SONA AI ADVANCE v10.4", layout="wide")
 # --- CONFIG ---
 st.markdown("## SONA AI ADVANCE v10.4 - KING V103 x SONA LINKED")
 st.success("KING V103 BUY CONFIRMED logic with LIVE PRICE + RSI Filter + ATR SL TP")
-
-# --- LIVE PRICE FIX ---
-@st.cache_data(ttl=30)
+@st.cache_data(ttl=60)
 def get_live_gold():
     try:
-        data = yf.download("GC=F", period="5d", interval="5m", progress=False)
-        price = float(data['Close'].iloc[-1])
-        return price, data
+        data = yf.download("GC=F", period="5d", interval="5m", progress=False, auto_adjust=True)
+        if len(data) > 0:
+            price = float(data['Close'].iloc[-1])
+            return price, data
+    except:
+        pass
+    # Fallback if yfinance fails
+    try:
+        import requests
+        r = requests.get("https://api.gold-api.com/price/XAU", timeout=5).json()
+        return float(r['price']), None
     except:
         return 3996.0, None
 
-live_price, df = get_live_gold()
-st.metric("XAU/USD LIVE", f"{live_price:.2f}", delta="-3.5% Weekly")
 
 # --- INDICATORS TOGGLES (All your toggles) ---
 with st.expander("INDICATORS TOGGLES - All ✅", expanded=True):
@@ -95,3 +99,5 @@ try:
         st.success("Telegram Sent!")
 except:
     st.warning("Add TELEGRAM_TOKEN in Secrets to enable Telegram")
+TELEGRAM_TOKEN = "tumhara bot token"
+TELEGRAM_CHAT_ID = "tumhara chat id"
