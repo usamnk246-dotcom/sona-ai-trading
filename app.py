@@ -58,9 +58,9 @@ with tab1:
 
     # TIMEFRAME + MARKET SELECTOR
     col_tf, col_mkt = st.columns(2)
-    with col_tf:
-        timeframe = st.selectbox("⏰ Timeframe", ["1m","2m","5m","15m","30m","1H","4H"], index=0)
-    with col_mkt:
+    timeframe = st.selectbox("⏰ Timeframe - Yao", ["1m","2m","5m","15m","30m","1H"], index=0)
+selected_market = st.selectbox("📊 Market - Yao", ["XAU/USD • GOLD","EUR/USD","GBP/USD","BTC/USD","ETH/USD","NAS100","US30","GBP/JPY"], index=0)
+st.markdown(f'<div class="gold-box">✅ Selected: <b>{selected_market}</b> • {timeframe} • ACTIVE</div>', unsafe_allow_html=True)
         market_all = st.selectbox("📊 Market", ["All Markets","XAU/USD • GOLD","EUR/USD","GBP/USD","BTC/USD","ETH/USD","NAS100","US30","GBP/JPY"], index=0)
 
     # AUTO TRADING TOGGLE - TUMHARI PIC JAISA
