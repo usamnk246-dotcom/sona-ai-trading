@@ -11,20 +11,22 @@ import pytz
 
 st.set_page_config(page_title="SONA AI ADVANCE v12.0", layout="wide", page_icon="👑")
 
-# === GOLD + BLACK THEME ===
+# === GOLD + BLACK THEME - FIXED ONE-ONE ===
 st.markdown("""
 <style>
-.stApp {background:#0a0f1a;}
-h1 {color:#FFD700; text-align:center; border:2px solid #FFD700; padding:15px; border-radius:15px; background:#0f1d33;}
-.gold-box {border:2px solid #FFD700; border-radius:15px; padding:15px; background:#112240; margin-bottom:15px;}
-.live-green {color:#00ff88; font-weight:bold; font-size:22px;}
-.buy-badge {background:#00c853; color:white; padding:5px 12px; border-radius:20px;}
-.sell-badge {background:#ff1744; color:white; padding:5px 12px; border-radius:20px;}
+.stApp {background:#020a1a !important;}
+h1,h2,h3,p,div,span,label {color:#FFD700 !important;}
+.stSelectbox label {color:#FFD700 !important; font-weight:bold;}
+.gold-box {border:3px solid #FFD700 !important; border-radius:18px !important; padding:18px !important; background:#0a1e3a !important; margin-bottom:12px; box-shadow:0 0 15px #FFD70055;}
+.live-green {color:#00ff88 !important; font-weight:bold; font-size:26px;}
+.buy-badge {background:#00c853 !important; color:white !important; padding:8px 18px; border-radius:20px; font-weight:bold;}
+.sell-badge {background:#ff1744 !important; color:white !important; padding:8px 18px; border-radius:20px; font-weight:bold;}
+div[data-testid="stButton"] > button {background:white !important; color:black !important; font-weight:bold !important; border:2px solid #FFD700 !important;}
 </style>
 """, unsafe_allow_html=True)
 
 # === HEADER - TUMHARI PIC JAISA ===
-st.markdown("# 👑 SONA AI ADVANCE v12.0")
+st.markdown("# 👑 SONA AI ADVANCE v12.0 ULTRA")
 col1, col2, col3 = st.columns(3)
 with col1:
     st.markdown('<div class="gold-box">🟢 <b>LIVE AI MODE ACTIVE</b></div>', unsafe_allow_html=True)
