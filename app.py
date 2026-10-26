@@ -113,3 +113,19 @@ with tab2:
 
 st.markdown("---")
 st.caption("👑 SONA AI v12.0 ULTRA FINAL - NO ERROR - WORLD NO 1 | " + datetime.now(pytz.timezone('Asia/Karachi')).strftime("%H:%M:%S PKT"))
+from universal import get_gold_price  # universal se link!
+import time
+
+# Auto Trading Loop - App.py se control
+def start_auto_trading():
+    while True:
+        price = get_gold_price()
+        print(f"App.py ko price mila: ${price}")
+        
+        if price > 4020:  # tumhara target
+            print("AUTO BUY kar raha hun!")
+            # yahan tumhara OlympTrade auto buy code chalega
+        time.sleep(3)
+
+if __name__ == "__main__":
+    start_auto_trading()
