@@ -295,4 +295,10 @@ with tab2:
     st.markdown("### 📝 Pine Editor - KING v13.0 - COMPLETELY PAKA")
     st.download_button("📥 DOWNLOAD v13.0 PINE - 95% WIN + LIQUIDITY + VOICE", data=PINE_KING_V13, file_name="SONA_AI_KING_v13_95PCT_LIQUIDITY_VOICE.pine", use_container_width=True, type="primary")
     st.code(PINE_KING_V13, language="pinescript")
-    st.markdown(f'<div class="gold-box">More Timeframe Different Market: 1m 2m 5m 15m 30m 1H - XAU GOLD 4036 EUR GBP BTC ETH NAS100 US30 GBPJPY - Score 7/8 BUY - Amount 280 - Emergency Stop 3 Loss - 11 Baja Report Nan {st.session_state.win_today} win sho {st.session_st
+    # PEHLE GALAT THA:
+# st.markdown(f'<div class="gold-box">More Timeframe Different Market: 1m 2m 5m 15m 30m 1H - XAU GOLD 4036 EUR GBP BTC ETH NAS100 US30 GBPJPY - Score 7/8 BUY - Amount 280 - Emergency Stop 3 Loss - 11 Baja Report Nan {st.session_state.win_today} win sho {st.session_state.loss_today} loss sho</div>', unsafe_allow_html=True)
+
+# AB FIXED — SIMPLE — NO f-string PROBLEM:
+win_t = st.session_state.win_today
+loss_t = st.session_state.loss_today
+st.markdown('<div class="gold-box">More Timeframe Different Market: 1m 2m 5m 15m 30m 1H - XAU GOLD 4036 EUR GBP BTC ETH NAS100 US30 GBPJPY - Score 7/8 BUY - Amount 280 - Emergency Stop 3 Loss - 11 Baja Report Nan ' + str(win_t) + ' win sho ' + str(loss_t) + ' loss sho</div>', unsafe_allow_html=True)
