@@ -1,87 +1,419 @@
 import streamlit as st
-import streamlit.components.v1 as components
+import pandas as pd
+import random
+from datetime import datetime
 
-st.set_page_config(page_title="SONA v22.1 ADVANCE 100 LINE", layout="wide", page_icon="🔥")
-st.markdown("<style>#MainMenu{visibility:hidden}footer{visibility:hidden}.block-container{padding:0;margin:0}header{visibility:hidden}.stApp{padding-top:0}iframe{margin:0}</style>", unsafe_allow_html=True)
+st.set_page_config(
+    page_title="SONA AI Trading Lab",
+    page_icon="🔥",
+    layout="wide"
+)
 
-html_code = """
-<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SONA v22.1 - ADVANCE 100 LINE</title>
+# Initialize application state
+if "balance" not in st.session_state:
+    st.session_state.balance = 3000.0
+
+if "starting_balance" not in st.session_state:
+    st.session_state.starting_balance = 3000.0
+
+if "history" not in st.session_state:
+    st.session_state.history = []
+
+if "price" not in st.session_state:
+    st.session_state.price = 67234.56
+
+if "prices" not in st.session_state:
+    st.session_state.prices = [67234.56]
+
+if "paused" not in st.session_state:
+    st.session_state.paused = True
+
+
+# Application styling
+st.markdown("""
 <style>
-*{box-sizing:border-box;margin:0;padding:0}body{background:#050505;color:#fff;font-family:Arial;padding:6px;text-align:center;overflow-x:hidden}
-.hdr{background:linear-gradient(135deg,#000,#001a00);border:2px solid #0F0;border-radius:12px;padding:10px;margin-bottom:6px}
-.simpleBox{background:linear-gradient(135deg,#001100,#002200);border:2px solid #0F0;border-radius:12px;padding:10px;margin:6px 0}
-.bigNum{font-size:32px;font-weight:900;color:#0F0;margin:4px 0}
-.btn{width:100%;padding:10px;border-radius:8px;border:none;font-weight:900;margin:3px 0;cursor:pointer;font-size:11px}
-.btn-green{background:linear-gradient(90deg,#0F0,#FFD700);color:#000;box-shadow:0 0 8px #0F0}
-.btn-white{background:#1a1a1a;color:#fff;border:1px solid #444;font-size:10px}
-.btn-tab{flex:1;padding:8px;border-radius:8px;border:2px solid #333;background:#111;color:#888;font-weight:900;cursor:pointer;font-size:8px}
-.btn-tab.active{background:linear-gradient(90deg,#0F0,#00cc00);color:#000;border-color:#0F0}
-.card{background:#0f0f0f;border:1px solid #333;border-radius:10px;padding:8px;margin:5px 0;text-align:left}
-.history{max-height:160px;overflow-y:auto;background:#000;border-radius:6px;padding:5px;border:1px solid #333;font-size:9px;text-align:left}
-.tab-content{display:none}.tab-content.active{display:block}
-.detail{font-size:9px;color:#ccc;background:#000;padding:6px;border-radius:5px;margin:4px 0;border-left:3px solid #0F0;text-align:left}
-.detail-gold{border-left-color:#FFD700;background:#1a1a00}
-.detail-blue{border-left-color:#00aaff;background:#001122}
-.detail-red{border-left-color:#F33;background:#1a0000}
-.candle-bar{height:14px;background:#222;border-radius:7px;overflow:hidden;margin:6px 0;border:1px solid #444}
-.candle-fill{height:100%;background:linear-gradient(90deg,#0F0,#FFD700);width:0%;transition:width 0.5s linear}
-.candle-timer{font-size:12px;color:#FFD700;font-weight:900;margin:4px 0}
-.trade-status{font-size:11px;padding:6px;border-radius:7px;margin:4px 0;font-weight:900}
-.status-running{background:#001a00;border:2px solid #0F0;color:#0F0;animation:pulse 1s infinite}
-.status-waiting{background:#1a1a00;border:1px solid #FFD700;color:#FFD700}
-.status-closed{background:#0a0a0a;border:1px solid #444;color:#aaa}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.7}}
-.debug{font-size:8px;color:#777;background:#000;padding:4px;border-radius:4px;margin:3px 0;text-align:left;border:1px dashed #333}
-.price-ticker{font-size:10px;color:#0F0;background:#000;border:1px solid #0F0;border-radius:5px;padding:4px;margin:3px 0}
-.confidence{height:10px;background:#222;border-radius:5px;overflow:hidden;margin:3px 0;border:1px solid #333}
-.confidence-fill{height:100%;background:linear-gradient(90deg,#0F0,#FFD700);transition:width 0.5s}
-.mini-chart{height:60px;background:#000;border:1px solid #333;border-radius:6px;margin:4px 0}
-</style></head>
-<body>
-<div class="hdr"><h1 style="color:#0F0;margin:0;font-size:13px">SONA AI v22.1 - ADVANCE 100 LINE - GHAST EXPLAINED - HISTORY FIX</h1></div>
-<div class="simpleBox"><div style="font-size:9px;color:#888">SONA AI - TOTAL PROFIT - ADVANCE 100 LINE</div><div class="bigNum" id="totalProfit">+621 PKR</div><div style="font-size:12px;color:#FFD700" id="totalProfitUSD">+$2.23 - Advance 100 Line</div>
-<div class="price-ticker" id="priceTicker">LIVE PRICE: BTC $67,234.56 ▲ 1.2% | SONA SIMULATION - GHAST MODE</div>
-<div class="confidence"><div class="confidence-fill" id="confidenceFill" style="width:92%"></div></div>
-<div style="font-size:8px;color:#0F0">CONFIDENCE: <span id="confidenceText">92% - WIN Expected</span> | GHAST: SIMULATION MODE</div>
-<div style="display:flex;gap:4px;margin-top:6px"><div style="flex:1;background:#000;border-radius:8px;padding:6px;border:1px solid #0F0"><div style="font-size:6px;color:#888">START</div><div style="font-size:13px;font-weight:900;color:#FFD700">3000 PKR</div></div><div style="flex:1;background:#000;border-radius:8px;padding:6px;border:2px solid #0F0"><div style="font-size:6px;color:#888">CURRENT BAL</div><div style="font-size:16px;font-weight:900;color:#0F0" id="currentBal">3621 PKR</div></div><div style="flex:1;background:#000;border-radius:8px;padding:6px;border:1px solid #FFD700"><div style="font-size:6px;color:#888">TODAY PROFIT</div><div style="font-size:13px;font-weight:900;color:#FFD700" id="todayProfit">+621 PKR</div></div></div>
-<div class="mini-chart" id="miniChart"><canvas id="chartCanvas" width="300" height="60" style="width:100%;height:100%"></canvas></div></div>
-<div class="simpleBox" style="border-color:#FFD700;background:#1a3300"><div style="font-size:10px;color:#0F0;font-weight:900">5 TRADES/HOUR - 3 WIN 1 LOSS - 12 MIN - ADVANCE 100 LINE</div>
-<div style="display:flex;gap:4px;margin-top:6px"><div style="flex:1;background:#000;border-radius:8px;padding:6px;border:2px solid #0F0"><div style="font-size:16px;font-weight:900;color:#0F0" id="wins">9</div><div style="font-size:7px">WINS 75%</div></div><div style="flex:1;background:#000;border-radius:8px;padding:6px"><div style="font-size:16px;font-weight:900;color:#F33" id="loss">3</div><div style="font-size:7px">LOSS 25%</div></div><div style="flex:1;background:#000;border-radius:8px;padding:6px;border:2px solid #FFD700"><div style="font-size:18px;font-weight:900;color:#FFD700" id="winRate">75%</div><div style="font-size:7px">WIN %</div></div></div>
-<div class="trade-status status-waiting" id="tradeStatus">WAITING - Next Trade Ready - Advance</div>
-<div class="candle-bar"><div class="candle-fill" id="candleFill"></div></div>
-<div class="candle-timer" id="candleTimer">Candle: Ready - Advance - Ghast Mode - 5 Trade/Hour</div>
-<div class="debug" id="debugInfo">Debug: tradesHour 0/5 | cooldown 12min | active false | Advance | Ghast SIM | 92%</div>
-<div style="font-size:8px;color:#888">Pattern: <b style="color:#0F0">WIN WIN WIN LOSS</b> | Next: <b style="color:#0F0" id="nextTrade">WIN (1/3) - Ready</b> | <span id="tradesHour">0/5</span> | <span id="nextIn">Ready</span> | <span id="autoStatus">AUTO ON</span> | Ghast: SIM</div></div>
-<div style="display:flex;gap:3px;margin:5px 0"><button class="btn-tab active" id="tabSimple" onclick="switchTab('simple')">ADVANCE (100 Line)</button><button class="btn-tab" id="tabNexus" onclick="switchTab('nexus')">GHAST EXPLAINED</button><button class="btn-tab" id="tabGhast" onclick="switchTab('ghast')">HISTORY FIX</button><button class="btn-tab" id="tabRisk" onclick="switchTab('risk')">RISK (Advance)</button></div>
-<div id="contentSimple" class="tab-content active"><button class="btn btn-green" id="autoBtn" onclick="toggleAuto()">AUTO ON - Bal 3621 - Profit 621 - ADVANCE 100 LINE</button><div style="display:flex;gap:4px"><button class="btn btn-white" style="flex:1" onclick="openApp()">APP OPEN - 3000 PKR</button><button class="btn btn-white" style="flex:1" onclick="resetAll()">RESET 3000 PKR</button></div><div style="display:flex;gap:3px"><button class="btn btn-green" style="flex:1;font-size:10px" onclick="manualTrade()">MANUAL TRADE - 250 PKR</button><button class="btn btn-white" style="flex:1;font-size:10px" onclick="clearCooldown()">CLEAR COOLDOWN - FORCE FIX</button></div><div style="display:flex;gap:3px"><button class="btn btn-white" style="flex:1;font-size:9px" onclick="exportHistory()">EXPORT HISTORY - CSV</button><button class="btn btn-white" style="flex:1;font-size:9px" onclick="showGhast()">GHAST CHECK - SIM vs REAL</button></div>
-<div class="detail"><b>ADVANCE 100 LINE:</b> Price Ticker BTC/ETH simulation, Confidence 92%, Mini chart canvas, Export CSV, Ghast Check, Performance stats, Real vs Sim, Advanced debug, Profit graph, Better UI - Nor advance - Simple but advance!</div></div>
-<div class="card"><div style="display:flex;justify-content:space-between"><div style="font-size:9px;color:#FFD700;font-weight:900">HISTORY - PKR - ADVANCE 100 LINE - GHAST FIXED - SHOWING</div><button class="btn btn-white" style="width:auto;padding:3px 8px;font-size:8px" onclick="exportHistory()">EXPORT CSV</button></div><div class="history" id="history"></div></div>
-<script>
-function switchTab(tab){document.querySelectorAll('.btn-tab').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));document.getElementById('tab'+tab.charAt(0).toUpperCase()+tab.slice(1)).classList.add('active');document.getElementById('content'+tab.charAt(0).toUpperCase()+tab.slice(1)).classList.add('active');}
-let autoOn=true,wins=9,losses=3,tradesHour=0,lastTrade=0,usdToPKR=278.5,startBal=3000,currBal=3621,totalPL=621,patternCounter=12,historyData=[{time:"8:36:00 AM",result:"WIN",profit:"310",bal:3621},{time:"8:31:00 AM",result:"LOSS",profit:"-90",bal:3531},{time:"8:22:11 AM",result:"WIN",profit:"288",bal:3684},{time:"8:15:00 AM",result:"WIN",profit:"340",bal:3721},{time:"8:02:00 AM",result:"WIN",profit:"295",bal:3381}],tradeActive=false,tradeEndTime=0,tradeStartTime=0,fixedDuration=60000,cooldownDuration=720000,hourStart=Date.now(),priceHistory=[3000,3050,3100,3200,3150,3300,3400,3350,3500,3621],confidence=92,btcPrice=67234.56;
-function rnd(a,b){return Math.random()*(b-a)+a}
-function saveState(){try{localStorage.setItem('sona_v221_bal',currBal);localStorage.setItem('sona_v221_pl',totalPL);localStorage.setItem('sona_v221_wins',wins);localStorage.setItem('sona_v221_losses',losses);localStorage.setItem('sona_v221_pattern',patternCounter);localStorage.setItem('sona_v221_tradesHour',tradesHour);localStorage.setItem('sona_v221_lastTrade',lastTrade);localStorage.setItem('sona_v221_hourStart',hourStart);localStorage.setItem('sona_v221_history',JSON.stringify(historyData));}catch(e){}}
-function loadState(){try{let b=localStorage.getItem('sona_v221_bal');if(b!==null){currBal=parseFloat(b);totalPL=parseFloat(localStorage.getItem('sona_v221_pl')||621);wins=parseInt(localStorage.getItem('sona_v221_wins')||9);losses=parseInt(localStorage.getItem('sona_v221_losses')||3);patternCounter=parseInt(localStorage.getItem('sona_v221_pattern')||12);tradesHour=parseInt(localStorage.getItem('sona_v221_tradesHour')||0);lastTrade=parseInt(localStorage.getItem('sona_v221_lastTrade')||0);hourStart=parseInt(localStorage.getItem('sona_v221_hourStart')||Date.now());let h=localStorage.getItem('sona_v221_history');if(h){historyData=JSON.parse(h);}}}catch(e){}}
-function getNextResult(){return (patternCounter % 4) < 3;}
-function checkHourReset(){let now=Date.now();if(now-hourStart>=3600000){tradesHour=0;hourStart=now;saveState();}}
-function canStartNewTrade(){checkHourReset();if(tradeActive)return false;if(currBal<250)return false;if(currBal<1000)return false;if(tradesHour>=5)return false;if(lastTrade!=0&&Date.now()-lastTrade<cooldownDuration)return false;return true;}
-function startTrade(isManual=false){checkHourReset();if(!canStartNewTrade()){if(isManual){if(tradeActive)alert('Trade running - Wait 65s');else if(tradesHour>=5)alert('5/h limit - Wait 1h');else{let r=Math.max(0,cooldownDuration-(Date.now()-lastTrade));alert('Cooldown - Next in '+Math.floor(r/60000)+'m '+Math.floor((r%60000)/1000)+'s');}}return;}tradeActive=true;tradeStartTime=Date.now();tradeEndTime=tradeStartTime+fixedDuration;document.getElementById('tradeStatus').className='trade-status status-running';document.getElementById('tradeStatus').innerText='TRADE RUNNING - 60s - '+(getNextResult()?'WIN':'LOSS')+' expected - Confidence '+confidence+'%';saveState();}
-function closeTrade(){let isWin=getNextResult();patternCounter++;let p=isWin?rnd(260,390):rnd(-50,-90);currBal+=p;totalPL+=p;priceHistory.push(currBal);if(priceHistory.length>20)priceHistory.shift();if(isWin){wins++;confidence=92;}else{losses++;confidence=45;}tradesHour++;lastTrade=Date.now();tradeActive=false;tradeEndTime=0;tradeStartTime=0;let t=new Date().toLocaleTimeString();historyData.unshift({time:t,result:isWin?'WIN':'LOSS',profit:p.toFixed(0),bal:Math.floor(currBal)});if(historyData.length>20)historyData.pop();updateHistory();updateChart();saveState();document.getElementById('tradeStatus').className='trade-status status-closed';document.getElementById('tradeStatus').innerText='TRADE CLOSED - '+(isWin?'WIN':'LOSS')+' '+(p>=0?'+':'')+p.toFixed(0)+' PKR - Next in 12min - Advance';document.getElementById('candleFill').style.width='0%';render();}
-function toggleAuto(){autoOn=!autoOn;let b=document.getElementById('autoBtn');if(autoOn){b.className='btn btn-green';b.innerText='AUTO ON - Bal '+Math.floor(currBal)+' - Profit '+Math.floor(totalPL)+' - ADVANCE';}else{b.className='btn btn-green off';b.innerText='AUTO OFF - Bal '+Math.floor(currBal)+' - Profit '+Math.floor(totalPL);}}
-function manualTrade(){startTrade(true);}function clearCooldown(){lastTrade=0;tradesHour=0;hourStart=Date.now();tradeActive=false;tradeEndTime=0;tradeStartTime=0;saveState();alert('FORCE FIXED - Advance 100 Line - Ready!');render();}
-function updatePriceTicker(){btcPrice+=rnd(-100,100);let change=rnd(-1.5,1.5);let arrow=change>=0?'▲':'▼';let color=change>=0?'#0F0':'#F33';document.getElementById('priceTicker').innerHTML='LIVE PRICE: BTC $'+btcPrice.toFixed(2)+' <span style="color:'+color+'">'+arrow+' '+Math.abs(change).toFixed(1)+'%</span> | SONA SIMULATION - GHAST MODE - Advance';}
-function updateChart(){let canvas=document.getElementById('chartCanvas');if(!canvas)return;let ctx=canvas.getContext('2d');let w=canvas.width,h=canvas.height;ctx.clearRect(0,0,w,h);if(priceHistory.length<2)return;let max=Math.max(...priceHistory),min=Math.min(...priceHistory),range=max-min||1;ctx.beginPath();ctx.strokeStyle='#0F0';ctx.lineWidth=2;priceHistory.forEach((p,i)=>{let x=(i/(priceHistory.length-1))*w;let y=h-((p-min)/range)*h*0.8 - h*0.1;if(i==0)ctx.moveTo(x,y);else ctx.lineTo(x,y);});ctx.stroke();ctx.lineTo(w,h);ctx.lineTo(0,h);ctx.closePath();ctx.fillStyle='rgba(0,255,0,0.1)';ctx.fill();}
-function exportHistory(){let csv='Time,Result,Profit,Balance,Ghast\\n';historyData.forEach(h=>{csv+=h.time+','+h.result+','+h.profit+','+h.bal+',SIMULATION\\n';});let blob=new Blob([csv],{type:'text/csv'});let url=URL.createObjectURL(blob);let a=document.createElement('a');a.href=url;a.download='sona_history_advance_ghast.csv';a.click();alert('History exported - CSV - Advance - '+historyData.length+' trades!');}
-function showGhast(){alert('GHAST CHECK - HOW SONA TRADING GHAST DA:\\n\\n1) Pattern Fixed WIN WIN WIN LOSS - Real random - SONA Sim => Ghast\\n2) Profit Fixed +260-390/-50-90 - Real market dependent => Ghast\\n3) No real broker - Virtual 3000 PKR => Ghast\\n4) Price Ticker Simulation - No API => Ghast\\n5) 60s Candle Timer - Real market nahi => Ghast\\n\\nGhast = Demo/Practice - Good for learning - No real risk - Educational!');}
-function render(){let now=Date.now();checkHourReset();if(tradeActive){let e=now-tradeStartTime;if(e>65000){closeTrade();return;}let rem=Math.max(0,tradeEndTime-now);let prog=(e/fixedDuration)*100;document.getElementById('candleFill').style.width=Math.min(100,prog)+'%';document.getElementById('candleTimer').innerText='Candle: '+Math.ceil(rem/1000)+'s remaining - '+Math.floor(prog)+'% - Confidence '+confidence+'% - Ghast SIM';if(rem<=0){closeTrade();return;}}else{let nextIn=lastTrade==0?0:Math.max(0,cooldownDuration-(now-lastTrade));document.getElementById('nextIn').innerText=lastTrade==0?'Ready':tradesHour>=5?'5/h limit - '+(60-Math.floor((now-hourStart)/60000))+'m':Math.floor(nextIn/60000)+'m '+Math.floor((nextIn%60000)/1000)+'s left';confidence=getNextResult()?92:45;}document.getElementById('tradesHour').innerText=tradesHour+'/5';document.getElementById('riskBal').innerText=Math.floor(currBal)+' PKR';document.getElementById('currentBal').innerText=Math.floor(currBal)+' PKR';document.getElementById('totalProfit').innerText=(totalPL>=0?'+':'')+Math.floor(totalPL)+' PKR';document.getElementById('todayProfit').innerText=(totalPL>=0?'+':'')+Math.floor(totalPL)+' PKR';document.getElementById('confidenceFill').style.width=confidence+'%';document.getElementById('confidenceText').innerText=confidence+'% - '+(confidence>80?'WIN Expected':'LOSS Expected - Wait')+' - Advance';if(canStartNewTrade()&&autoOn&&!tradeActive){startTrade(false);}}
-function updateHistory(){let total=wins+losses;let rate=total?Math.round(wins/total*100):75;document.getElementById('wins').innerText=wins;document.getElementById('loss').innerText=losses;document.getElementById('winRate').innerText=rate+'%';document.getElementById('todayTrades').innerText=total+' Trades - Advance';let histDiv=document.getElementById('history');if(historyData.length==0){histDiv.innerHTML='<div style="text-align:center;color:#888;padding:10px">No trades yet - Start trading - 5 trade/hour - Advance</div>';return;}let hHtml="";historyData.forEach(h=>{let c=h.result=='WIN'?'#0F0':'#F33';hHtml+='<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #222"><span>'+h.time+' '+h.result+' 250 RS - Advance - Ghast</span><span style="color:'+c+';font-weight:900">'+(Number(h.profit)>=0?'+':'')+h.profit+' PKR | Bal '+h.bal+'</span></div>';});histDiv.innerHTML=hHtml;}
-function openApp(){alert('APP OPEN - ADVANCE 100 LINE - GHAST SIM - HISTORY FIXED!');}function resetAll(){if(!confirm('Reset?'))return;localStorage.clear();currBal=3000;totalPL=0;wins=0;losses=0;tradesHour=0;lastTrade=0;hourStart=Date.now();patternCounter=0;historyData=[];priceHistory=[3000];updateHistory();updateChart();render();}
-loadState();updateHistory();updateChart();render();setInterval(render,500);setInterval(updatePriceTicker,3000);setInterval(updateChart,2000);
-</script>
-</body>
-</html>
-"""
+.stApp {
+    background-color: #070b0a;
+    color: #f4fff7;
+}
 
-components.html(html_code, height=2000, scrolling=False)
+[data-testid="stMetric"] {
+    background: #101a15;
+    border: 1px solid #1d5a36;
+    padding: 14px;
+    border-radius: 12px;
+}
+
+div.stButton > button {
+    border-radius: 9px;
+    font-weight: 700;
+}
+
+.notice {
+    background: #2a2108;
+    border: 1px solid #c99b24;
+    padding: 12px;
+    border-radius: 10px;
+}
+</style>
+""", unsafe_allow_html=True)
+
+
+# Main dashboard
+st.title("🔥 SONA AI — Advanced Trading Lab")
+
+st.caption(
+    "Paper Trading | Risk Management | Trade Journal | CSV Export"
+)
+
+st.markdown("""
+<div class="notice">
+<b>SIMULATION MODE:</b>
+This application uses simulated prices and trade results.
+It does not connect to a live exchange or broker.
+Displayed profits are not real money.
+</div>
+""", unsafe_allow_html=True)
+
+
+# Sidebar settings
+with st.sidebar:
+    st.header("⚙️ Trading Settings")
+
+    starting_balance = st.number_input(
+        "Starting Balance (PKR)",
+        min_value=500.0,
+        max_value=1000000.0,
+        value=float(st.session_state.starting_balance),
+        step=500.0
+    )
+
+    stake = st.number_input(
+        "Stake per Trade (PKR)",
+        min_value=10.0,
+        max_value=100000.0,
+        value=250.0,
+        step=50.0
+    )
+
+    payout_pct = st.slider(
+        "Winning Return (%)",
+        1, 100, 70
+    )
+
+    loss_pct = st.slider(
+        "Loss on Stake (%)",
+        1, 100, 100
+    )
+
+    win_probability = st.slider(
+        "Assumed Win Probability (%)",
+        1, 99, 50
+    )
+
+    max_trades = st.number_input(
+        "Maximum Trades per Session",
+        min_value=1,
+        max_value=500,
+        value=20
+    )
+
+    stop_loss = st.number_input(
+        "Session Stop-Loss (PKR)",
+        min_value=0.0,
+        max_value=1000000.0,
+        value=500.0,
+        step=100.0
+    )
+
+    if st.button("Reset Session", use_container_width=True):
+        st.session_state.balance = float(starting_balance)
+        st.session_state.starting_balance = float(starting_balance)
+        st.session_state.history = []
+        st.session_state.price = 67234.56
+        st.session_state.prices = [67234.56]
+        st.session_state.paused = True
+        st.rerun()
+
+    st.divider()
+
+    st.session_state.paused = st.toggle(
+        "Pause Trading",
+        value=st.session_state.paused
+    )
+
+    st.caption("All trades are simulated.")
+
+
+# Simulated price movement
+st.session_state.price *= (
+    1 + random.uniform(-0.0018, 0.0018)
+)
+
+st.session_state.prices.append(
+    st.session_state.price
+)
+
+st.session_state.prices = (
+    st.session_state.prices[-60:]
+)
+
+
+# Calculate statistics
+balance = float(st.session_state.balance)
+
+net_pnl = (
+    balance - float(st.session_state.starting_balance)
+)
+
+history = st.session_state.history
+
+wins = sum(
+    1 for trade in history
+    if trade["Result"] == "WIN"
+)
+
+losses = sum(
+    1 for trade in history
+    if trade["Result"] == "LOSS"
+)
+
+win_rate = (
+    wins / len(history) * 100
+    if history else 0
+)
+
+
+# Dashboard metrics
+m1, m2, m3, m4 = st.columns(4)
+
+m1.metric(
+    "Paper Balance",
+    f"₨{balance:,.0f}"
+)
+
+m2.metric(
+    "Session P/L",
+    f"₨{net_pnl:+,.0f}"
+)
+
+m3.metric(
+    "Total Trades",
+    len(history),
+    f"{wins} Wins / {losses} Losses"
+)
+
+m4.metric(
+    "Win Rate",
+    f"{win_rate:.1f}%" if history else "—"
+)
+
+
+# Charts
+left, right = st.columns([1.15, 1])
+
+with left:
+    st.subheader("📈 Simulated Price Monitor")
+
+    st.metric(
+        "SIMULATED BTC/USD",
+        f"${st.session_state.price:,.2f}"
+    )
+
+    st.line_chart(
+        pd.DataFrame({
+            "Simulated BTC/USD": st.session_state.prices
+        }),
+        height=230
+    )
+
+    st.caption(
+        "Synthetic price movement. This is not live market data."
+    )
+
+
+with right:
+    st.subheader("🛡️ Risk Management")
+
+    st.write(f"**Stake:** ₨{stake:,.0f}")
+
+    st.write(
+        f"**Potential Simulated Win:** "
+        f"+₨{stake * payout_pct / 100:,.0f}"
+    )
+
+    st.write(
+        f"**Potential Simulated Loss:** "
+        f"−₨{stake * loss_pct / 100:,.0f}"
+    )
+
+    st.write(
+        f"**Assumed Win Probability:** "
+        f"{win_probability}%"
+    )
+
+    expected_value = (
+        (win_probability / 100)
+        * (stake * payout_pct / 100)
+        -
+        ((100 - win_probability) / 100)
+        * (stake * loss_pct / 100)
+    )
+
+    st.write(
+        f"**Modelled Expected Value:** "
+        f"₨{expected_value:+,.2f}"
+    )
+
+    st.caption(
+        "This calculation uses your assumptions. "
+        "It is not a prediction of actual trading results."
+    )
+
+
+# Paper trading
+st.divider()
+
+st.subheader("🎮 Paper Trading")
+
+trades_remaining = (
+    int(max_trades) - len(history)
+)
+
+session_loss = max(
+    0.0,
+    float(st.session_state.starting_balance) - balance
+)
+
+stop_triggered = (
+    stop_loss > 0 and session_loss >= stop_loss
+)
+
+
+if stop_triggered:
+
+    st.error(
+        "Session stop-loss reached. "
+        "Reset the session to start again."
+    )
+
+elif trades_remaining <= 0:
+
+    st.warning(
+        "Session trade limit reached."
+    )
+
+elif st.session_state.paused:
+
+    st.info(
+        "Trading is paused. Turn off Pause Trading "
+        "in the sidebar to enable simulated trades."
+    )
+
+else:
+
+    st.caption(
+        f"{trades_remaining} simulated trades remaining."
+    )
+
+    direction = st.radio(
+        "Practice Direction",
+        ["BUY / LONG", "SELL / SHORT"],
+        horizontal=True
+    )
+
+    if st.button(
+        "Run One Simulated Trade",
+        type="primary",
+        use_container_width=True
+    ):
+
+        if stake > balance:
+
+            st.error(
+                "Your stake exceeds the current paper balance."
+            )
+
+        else:
+
+            is_win = (
+                random.random()
+                < (win_probability / 100)
+            )
+
+            if is_win:
+                pnl = stake * payout_pct / 100
+                result = "WIN"
+            else:
+                pnl = -(stake * loss_pct / 100)
+                result = "LOSS"
+
+            st.session_state.balance = (
+                balance + pnl
+            )
+
+            trade = {
+                "Time": datetime.now().strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                ),
+                "Direction": direction,
+                "Stake (PKR)": round(stake, 2),
+                "Result": result,
+                "P/L (PKR)": round(pnl, 2),
+                "Balance (PKR)": round(
+                    st.session_state.balance, 2
+                ),
+                "Mode": "SIMULATION"
+            }
+
+            st.session_state.history.insert(
+                0, trade
+            )
+
+            st.rerun()
+
+
+# Trade history
+st.divider()
+
+st.subheader("📚 Trade Journal")
+
+if history:
+
+    df = pd.DataFrame(history)
+
+    st.dataframe(
+        df,
+        use_container_width=True,
+        hide_index=True
+    )
+
+    csv_data = df.to_csv(
+        index=False
+    ).encode("utf-8")
+
+    st.download_button(
+        "⬇️ Export Journal as CSV",
+        data=csv_data,
+        file_name="sona_paper_trade_history.csv",
+        mime="text/csv"
+    )
+
+    st.bar_chart(
+        df.iloc[::-1].set_index("Time")["P/L (PKR)"],
+        height=180
+    )
+
+else:
+
+    st.info(
+        "No trades yet. Unpause the simulator "
+        "and run a practice trade to create history."
+    )
+
+
+# Footer
+st.caption(
+    "SONA AI Trading Lab | Educational Simulator | "
+    "No live prices, broker connection, or validated AI predictions."
+)
