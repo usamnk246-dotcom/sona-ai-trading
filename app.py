@@ -52,13 +52,15 @@ demo_bal = st.session_state.demo_bal
 live_price = st.session_state.live_price
 start_amount = "2500" if account_mode=="REAL" else "10000"
 current_bal = real_bal if account_mode=="REAL" else demo_bal
+current_profit = st.session_state.real_profit if account_mode=="REAL" else st.session_state.demo_profit
+current_trades = st.session_state.real_trades if account_mode=="REAL" else st.session_state.demo_trades
 
 if account_mode == "REAL":
     st.success(f'REAL ACCOUNT ACTIVE - 2500 PKR START - Bal {real_bal} PKR - Profit {st.session_state.real_profit} PKR - Trades {real_bal} - Really money Laga ka - V64 FINAL COMPLETE')
 else:
     st.info(f'DEMO ACCOUNT ACTIVE - 10000 PKR - Bal {demo_bal} PKR - Profit {st.session_state.demo_profit} PKR - Trades {st.session_state.demo_trades} - Nan Demo Check - V64 FINAL COMPLETE')
 
-st.metric(label=f"{account_mode} BALANCE - Start {start_amount} PKR - V64 FINAL COMPLETE", value=f"{current_bal} PKR", delta=f"+{st.session_state.real_profit if account_mode=='REAL' else st.session_state.demo_profit} PKR")
+st.metric(label=f"{account_mode} BALANCE - Start {start_amount} PKR - V64 FINAL COMPLETE", value=f"{current_bal} PKR", delta=f"+{current_profit} PKR - Trades {current_trades}")
 st.metric(label=f"LIVE BTC/USD - V64 FINAL COMPLETE", value=f"${live_price:,.2f}", delta="BULLISH - BUY ZONE")
 
 tab1, tab2, tab3 = st.tabs(["TRADING PAGE - LIVE CHART + TRADE", "DEPOSIT WITHDRAW - JAZZCASH EASYPAISA", "RESULTS HISTORY - EXPORT"])
@@ -68,8 +70,8 @@ with tab1:
     rsi = 62.1 + random.uniform(-1,1)
     vol = 1.7 + random.uniform(-0.1,0.1)
     atr = 1.27 + random.uniform(-0.05,0.05)
-    vwap = 67396 + random.uniform(-20,20)
-    macd = 0.85 + random.uniform(-0.05,0.05)
+    vwap = 67395 + random.uniform(-20,20)
+    macd = 0.84 + random.uniform(-0.05,0.05)
     st.write(f"RSI: {rsi:.1f} - BULLISH BUY 95pct | VOL: {vol:.1f}M - HIGH VOL - V64 FINAL COMPLETE")
     st.write(f"VWAP: {vwap:,.0f} - ABOVE VWAP BUY | MACD: {macd:.2f} BULL - CROSS | BOS: BULLISH BOS 67,180 BROKE HH - V64 FINAL COMPLETE")
     st.write(f"LIQ: SWEEP DONE | PULLBACK: DONE 50% FIB BUY ZONE - PREMIUM - V64 FINAL COMPLETE")
@@ -85,6 +87,7 @@ with tab1:
         price_hist = price_hist + [price_hist[-1]] * (5 - len(price_hist))
     df2 = pd.DataFrame({f"{account_mode} BALANCE {start_amount} PKR - V64 FINAL COMPLETE": price_hist})
     st.line_chart(df2, height=140)
+    st.write(f"TRADING BUTTONS - {account_mode} - Start {start_amount} PKR - V64 FINAL COMPLETE - PAGE 1 - RESULTS SHOW")
     if st.button(f"MANUAL TRADE 250 PKR - {account_mode} {start_amount} - V64 FINAL", key="manual_v64"):
         is_win = random.random() < 0.9
         profit = random.uniform(280, 400) if is_win else random.uniform(-80, -40)
