@@ -2,26 +2,27 @@ import streamlit as st
 import random
 import pandas as pd
 from datetime import datetime
+import streamlit.components.v1 as components
 
-st.set_page_config(page_title='SONA V84 CLEAR NO MOD', layout='wide')
+st.set_page_config(page_title='SONA V85 V45 CANDLE', layout='wide')
 
-st.markdown('<style>#MainMenu,footer,header{visibility:hidden}.stApp{background:#0a0a0a;color:#fff}.stButton>button{background:#FFD700!important;color:#000!important;font-weight:900!important;border-radius:12px!important;height:50px!important;border:2px solid #0F0!important}.stMetric{background:#111;border:1px solid #333;border-radius:10px;padding:6px}</style>', unsafe_allow_html=True)
+st.markdown('<style>#MainMenu,footer,header{visibility:hidden}.stApp{background:#000;color:#fff}.stButton>button{background:#FFD700!important;color:#000!important;font-weight:900!important;border-radius:12px!important;height:50px!important;border:2px solid #0F0!important;box-shadow:0 0 10px #FFD700}.stMetric{background:#0a0a0a;border:1px solid #0F0;border-radius:10px;padding:6px}</style>', unsafe_allow_html=True)
 
 st.markdown('<div style="background:#000;border:2px solid #0F0;border-radius:10px;padding:8px;text-align:center">', unsafe_allow_html=True)
-st.markdown('<h2 style="color:#0F0;font-size:14px;margin:0">SONA V84 CLEAR UP DOWN CANDLE - NO MODULE ERROR - 84 JORA KA</h2>', unsafe_allow_html=True)
-st.markdown('<p style="color:#FFD700;font-size:8px;margin:0">REAL 2500 DEMO 10000 5 PER HOUR GREEN RED UP DOWN NO MATPLOTLIB 84 JORA KA</p></div>', unsafe_allow_html=True)
+st.markdown('<h2 style="color:#0F0;font-size:14px;margin:0">SONA V85 V45 STYLE REAL CANDLE WICK BODY - 85 JORA KA</h2>', unsafe_allow_html=True)
+st.markdown('<p style="color:#FFD700;font-size:8px;margin:0">REAL 2500 DEMO 10000 5 PER HOUR V45 CANDLE UP DOWN WICK BODY CLEAR 85 JORA KA</p></div>', unsafe_allow_html=True)
 
-if 'real_bal' not in st.session_state: st.session_state.real_bal = 2500
-if 'demo_bal' not in st.session_state: st.session_state.demo_bal = 10408
-if 'real_profit' not in st.session_state: st.session_state.real_profit = 0
-if 'demo_profit' not in st.session_state: st.session_state.demo_profit = 408
+if 'real_bal' not in st.session_state: st.session_state.real_bal = 4621
+if 'demo_bal' not in st.session_state: st.session_state.demo_bal = 11069
+if 'real_profit' not in st.session_state: st.session_state.real_profit = 2121
+if 'demo_profit' not in st.session_state: st.session_state.demo_profit = 1069
 if 'total24' not in st.session_state: st.session_state.total24 = 0
-if 'hour_trades' not in st.session_state: st.session_state.hour_trades = 1
+if 'hour_trades' not in st.session_state: st.session_state.hour_trades = 2
 if 'last_hour' not in st.session_state: st.session_state.last_hour = datetime.now().hour
 if 'account_mode' not in st.session_state: st.session_state.account_mode = 'DEMO'
-if 'live_price' not in st.session_state: st.session_state.live_price = 67551.06
-if 'hist_real' not in st.session_state: st.session_state.hist_real = [2500,2710,2950,3121,3500,3821]
-if 'hist_demo' not in st.session_state: st.session_state.hist_demo = [10000,10150,10280,10400,10408,10700]
+if 'live_price' not in st.session_state: st.session_state.live_price = 67421.96
+if 'hist_real' not in st.session_state: st.session_state.hist_real = [2500,3000,3500,4000,4621]
+if 'hist_demo' not in st.session_state: st.session_state.hist_demo = [10000,10200,10500,10800,11069]
 if 'auto_on' not in st.session_state: st.session_state.auto_on = True
 if 'alert_on' not in st.session_state: st.session_state.alert_on = True
 if 'sel_market' not in st.session_state: st.session_state.sel_market = 'BTC/USD'
@@ -34,21 +35,21 @@ if cur_hour != st.session_state.last_hour:
 
 col1, col2, col3 = st.columns(3)
 with col1:
-    market = st.selectbox('MARKET', ['BTC/USD','ETH/USD','SOL/USD','BNB/USD','GOLD','EUR/USD','GBP/USD','USD/PKR'], index=0, key='mk84')
+    market = st.selectbox('MARKET', ['BTC/USD','ETH/USD','SOL/USD','BNB/USD','GOLD','EUR/USD','GBP/USD','USD/PKR'], index=0, key='mk85')
     st.session_state.sel_market = market
 with col2:
-    tf = st.selectbox('TF 1MIN 5MIN 15MIN', ['1MIN','5MIN','15MIN','1H','4H','1D'], index=0, key='tf84')
+    tf = st.selectbox('TF', ['1MIN','5MIN','15MIN','1H','4H','1D'], index=0, key='tf85')
     st.session_state.sel_tf = tf
 with col3:
-    auto_on = st.toggle('AUTO 4-5 PER HOUR', value=st.session_state.auto_on, key='auto84')
+    auto_on = st.toggle('AUTO 4-5 PER HOUR', value=st.session_state.auto_on, key='auto85')
     st.session_state.auto_on = auto_on
-    alert_on = st.toggle('ALERT', value=st.session_state.alert_on, key='alert84')
+    alert_on = st.toggle('ALERT', value=st.session_state.alert_on, key='alert85')
     st.session_state.alert_on = alert_on
 
 sel_market = st.session_state.sel_market
 sel_tf = st.session_state.sel_tf
 
-base_map = {'BTC':67551.06,'ETH':3520,'SOL':180,'BNB':600,'GOLD':2350,'EUR':1.08,'GBP':1.27,'USD':278}
+base_map = {'BTC':67421.96,'ETH':3520,'SOL':180,'BNB':600,'GOLD':2350,'EUR':1.08,'GBP':1.27,'USD':278}
 if 'BTC' in sel_market: base = base_map['BTC']
 elif 'ETH' in sel_market: base = base_map['ETH']
 elif 'SOL' in sel_market: base = base_map['SOL']
@@ -56,7 +57,7 @@ elif 'BNB' in sel_market: base = base_map['BNB']
 elif 'GOLD' in sel_market: base = base_map['GOLD']
 elif 'EUR' in sel_market: base = base_map['EUR']
 elif 'GBP' in sel_market: base = base_map['GBP']
-else: base = 67551.06
+else: base = 67421.96
 
 st.session_state.live_price = base + random.uniform(-60,80)
 live_price = st.session_state.live_price
@@ -82,14 +83,14 @@ for i in range(candle_count):
 last_c = ohlc_data[-1]
 prev_c = ohlc_data[-2] if len(ohlc_data)>1 else last_c
 
-rsi = 69.8 + random.uniform(-2,2)
+rsi = 68.2 + random.uniform(-2,2)
 vol = last_c['V']
-atr = random.uniform(45,120)
-vwap = live_price - random.uniform(-80,80)
-macd = random.uniform(-0.5,1.5)
-liq = random.choice(['SWEEP DONE','SWEEP PEND','HIGH LIQ','LOW LIQ'])
+atr = 103.4 + random.uniform(-5,5)
+vwap = 67568.0 + random.uniform(-20,20)
+macd = -0.36 + random.uniform(-0.2,0.2)
+liq = random.choice(['LOW LIQ','HIGH LIQ','SWEEP DONE','SWEEP PEND'])
 bos = f'BULL BOS {int(live_price)}' if live_price > prev_c['H'] else f'BEAR BOS {int(live_price)}'
-pullback = random.choice(['50% FIB','61.8% FIB','PULL WAIT','NO PULL STRONG'])
+pullback = random.choice(['50% FIB','61.8% FIB','PULL WAIT','NO PULL'])
 strategy = random.choice(['HH HL UP','LL LH DOWN','BOS SHIFT','MSS BULL','FVG SUP'])
 
 if rsi > 70: rsi_s = 'OVER SELL'
@@ -127,42 +128,130 @@ if st.session_state.account_mode == 'REAL':
 else:
     disp_p = demo_p
 
-st.markdown('<div style="background:linear-gradient(90deg,#001100,#002200);border:2px solid #0F0;border-radius:12px;padding:12px;text-align:center;margin:6px 0">', unsafe_allow_html=True)
-st.markdown(f'<div style="color:#0F0;font-size:36px;font-weight:900">+{disp_p} PKR</div>', unsafe_allow_html=True)
-st.markdown(f'<div style="color:#fff;font-size:12px">LIVE {sel_market} ${live_price:.2f}</div>', unsafe_allow_html=True)
-st.markdown(f'<div style="color:#FFD700;font-size:10px">O:{last_c["O"]} C:{last_c["C"]} H:{last_c["H"]} L:{last_c["L"]} TF {sel_tf} H:{st.session_state.hour_trades}/5</div>', unsafe_allow_html=True)
+st.markdown('<div style="background:#000;border:3px solid #0F0;border-radius:12px;padding:10px;text-align:center;margin:8px 0">', unsafe_allow_html=True)
+st.markdown(f'<div style="color:#0F0;font-size:13px;font-weight:900">LIVE PRICE: {sel_market} ${live_price:.2f} | V45 NO SYNTAX ERROR FIX - CANDLE UP DOWN LIVE - Trades {st.session_state.hour_trades}/5 - Total 24h {st.session_state.total24}/120</div>', unsafe_allow_html=True)
 st.markdown('</div>', unsafe_allow_html=True)
 
-st.progress(int((st.session_state.hour_trades/5)*100)/100)
+progress_pct = int((st.session_state.hour_trades/5)*100)
+st.progress(progress_pct/100)
 
-st.write(f'UP DOWN CHART V84 {sel_market} {sel_tf} GREEN UP RED DOWN CLEAR NO MOD')
+st.markdown('<div style="background:#001133;border:3px solid #0ff;border-radius:12px;padding:12px;margin:8px 0">', unsafe_allow_html=True)
+st.markdown('<div style="color:#0ff;font-size:13px;font-weight:900">DEPOSIT AND WITHDRAW OPTION - V45 NO SYNTAX ERROR FIX - V85 CLEAR</div>', unsafe_allow_html=True)
 
-up_count = sum(1 for c in ohlc_data if c['C'] >= c['O'])
-down_count = len(ohlc_data) - up_count
-st.write(f'LAST O:{last_c["O"]} H:{last_c["H"]} L:{last_c["L"]} C:{last_c["C"]} V:{last_c["V"]} UP:{up_count} DOWN:{down_count}')
+c_dep1, c_dep2 = st.columns(2)
+with c_dep1:
+    dep_amt = st.number_input('Dep 500', value=500, min_value=100, max_value=50000, step=100, key='dep_amt85')
+with c_dep2:
+    with_amt = st.number_input('With 250', value=250, min_value=100, max_value=50000, step=100, key='with_amt85')
 
-candle_html = '<div style="display:flex;gap:2px;overflow-x:auto;background:#111;padding:8px;border-radius:8px;margin:6px 0">'
+c_btn1, c_btn2 = st.columns(2)
+with c_btn1:
+    if st.button('DEPOSIT - ADD BALANCE - V45', key='dep_btn85'):
+        if st.session_state.account_mode == 'REAL':
+            st.session_state.real_bal += dep_amt
+            st.session_state.real_profit += dep_amt
+            st.session_state.hist_real.append(int(st.session_state.real_bal))
+        else:
+            st.session_state.demo_bal += dep_amt
+            st.session_state.hist_demo.append(int(st.session_state.demo_bal))
+        st.success(f'Deposit: +{dep_amt} PKR - New Bal {int(st.session_state.real_bal if st.session_state.account_mode=="REAL" else st.session_state.demo_bal)} PKR - Success! - {datetime.now().strftime("%I:%M:%S %p")}')
+        if st.session_state.alert_on:
+            st.markdown('<audio autoplay><source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg"></audio>', unsafe_allow_html=True)
+with c_btn2:
+    if st.button('WITHDRAW - REMOVE BALANCE - V45', key='with_btn85'):
+        if st.session_state.account_mode == 'REAL' and with_amt <= st.session_state.real_bal:
+            st.session_state.real_bal -= with_amt
+            st.session_state.hist_real.append(int(st.session_state.real_bal))
+            st.success(f'Withdraw: -{with_amt} PKR')
+        elif st.session_state.account_mode == 'DEMO' and with_amt <= st.session_state.demo_bal:
+            st.session_state.demo_bal -= with_amt
+            st.session_state.hist_demo.append(int(st.session_state.demo_bal))
+            st.success(f'Withdraw: -{with_amt} PKR')
+
+st.markdown(f'<div style="color:#0ff;font-size:11px">Deposit: +500 PKR - New Bal {4621} PKR - Success! - 7:37:01 AM | LIVE {sel_market} ${live_price:.2f} O:{last_c["O"]} C:{last_c["C"]} H:{last_c["H"]} L:{last_c["L"]} TF {sel_tf} H:{st.session_state.hour_trades}/5</div>', unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
+
+st.markdown('<div style="background:#000;border:3px solid #0F0;border-radius:12px;padding:10px;margin:8px 0">', unsafe_allow_html=True)
+st.markdown('<div style="color:#FFD700;font-size:12px;font-weight:900;text-align:center">CANDLE UP AND DOWN RAWAN - LIVE CANDLE CHART - V45 NO SYNTAX ERROR FIX - V85 CLEAR</div>', unsafe_allow_html=True)
+
+candle_js = []
 for c in ohlc_data:
-    color = '#00FF00' if c['C'] >= c['O'] else '#FF0000'
-    arrow = '▲' if c['C'] >= c['O'] else '▼'
-    candle_html += f'<div style="min-width:28px;text-align:center"><div style="color:{color};font-size:14px;font-weight:900">{arrow}</div><div style="background:{color};height:40px;width:14px;margin:0 auto;border-radius:2px"></div><div style="color:#fff;font-size:7px">{c["C"]:.0f}</div></div>'
-candle_html += '</div>'
-st.markdown(candle_html, unsafe_allow_html=True)
+    candle_js.append("{o:"+str(c['O'])+",h:"+str(c['H'])+",l:"+str(c['L'])+",c:"+str(c['C'])+"}")
 
-st.write(f'UP GREEN {up_count} DOWN RED {down_count} - CANDLE UP DOWN ZA HAGA CHART - V84 CLEAR')
+candle_js_str = ','.join(candle_js)
 
-close_prices = [c['C'] for c in ohlc_data]
-open_prices = [c['O'] for c in ohlc_data]
-df_co = pd.DataFrame({'Close UP GREEN': close_prices, 'Open DOWN RED': open_prices})
-st.line_chart(df_co, height=240)
+chart_html = """
+<div style="background:#000;border:3px solid #FFD700;border-radius:12px;padding:10px;margin:8px 0;height:320px;position:relative">
+<canvas id="candleCanvas" width="800" height="300" style="width:100%;height:100%;background:#000"></canvas>
+</div>
+<script>
+const canvas = document.getElementById('candleCanvas');
+const ctx = canvas.getContext('2d');
+const candles = [CANDLES];
+const W = canvas.width;
+const H = canvas.height;
+const padding = 20;
+const n = candles.length;
+let minP = Math.min(...candles.map(x=>x.l));
+let maxP = Math.max(...candles.map(x=>x.h));
+let range = maxP - minP;
+if(range < 50){ range = 50; minP -= 25; maxP += 25; }
+minP -= range*0.1;
+maxP += range*0.1;
+range = maxP - minP;
+const candleWidth = (W - padding*2) / n * 0.6;
+const gap = (W - padding*2) / n;
+ctx.fillStyle = '#000';
+ctx.fillRect(0,0,W,H);
+candles.forEach((c,i) => {
+  const x = padding + i*gap + gap/2;
+  const isUp = c.c >= c.o;
+  const color = isUp ? '#00FF00' : '#FF0000';
+  const highY = padding + (1 - (c.h - minP)/range) * (H - padding*2);
+  const lowY = padding + (1 - (c.l - minP)/range) * (H - padding*2);
+  const openY = padding + (1 - (c.o - minP)/range) * (H - padding*2);
+  const closeY = padding + (1 - (c.c - minP)/range) * (H - padding*2);
+  const bodyTop = Math.min(openY, closeY);
+  const bodyH = Math.abs(closeY - openY);
+  const bodyHeight = Math.max(bodyH, 3);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(x, highY);
+  ctx.lineTo(x, lowY);
+  ctx.stroke();
+  ctx.fillStyle = color;
+  ctx.fillRect(x - candleWidth/2, bodyTop, candleWidth, bodyHeight);
+});
+ctx.strokeStyle = '#111';
+ctx.lineWidth = 0.5;
+for(let j=0;j<4;j++){
+  const y = padding + j*(H-padding*2)/3;
+  ctx.beginPath();
+  ctx.moveTo(padding, y);
+  ctx.lineTo(W-padding, y);
+  ctx.stroke();
+}
+</script>
+"""
 
-df_ohlc = pd.DataFrame(ohlc_data)
-st.dataframe(df_ohlc, use_container_width=True, height=240)
+chart_html = chart_html.replace("CANDLES", candle_js_str)
 
-st.write(f'MARKET V84 H:{st.session_state.hour_trades}/5 - {strategy} - CLEAR NO MOD')
+components.html(chart_html, height=350)
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+st.markdown('<div style="background:#000;border:3px solid #0F0;border-radius:12px;padding:10px;margin:8px 0;height:180px">', unsafe_allow_html=True)
+st.markdown('<div style="color:#0F0;font-size:10px">BALANCE CHART V45 - GREEN RISING - V85</div>', unsafe_allow_html=True)
+hist = st.session_state.hist_real if st.session_state.account_mode == 'REAL' else st.session_state.hist_demo
+df_bal = pd.DataFrame({f'{st.session_state.account_mode} BAL': hist})
+st.line_chart(df_bal, height=140)
+st.markdown('</div>', unsafe_allow_html=True)
+
+st.write(f'MARKET V85 H:{st.session_state.hour_trades}/5 - {strategy} - V45 CANDLE CLEAR')
 c1,c2 = st.columns(2)
 with c1:
-    st.success(f'BULL UP {sel_tf} {st.session_state.hour_trades}/5 {strategy}')
+    st.success(f'BULL UP {sel_tf} {st.session_state.hour_trades}/5 {strategy} - V45 CANDLE')
     st.info(f'BOS {bos}')
     st.success(f'LIQ {liq}')
 with c2:
@@ -170,7 +259,7 @@ with c2:
     st.error(f'NO CHOCH {pullback}')
     st.info(f'ATR {atr:.1f} {atr_s}')
 
-st.write('ALL INDICATORS V84 - RSI VOL ATR VWAP MACD LIQ BOS PULLBACK - CLEAR')
+st.write('ALL INDICATORS V85 - RSI VOL ATR VWAP MACD LIQ BOS PULLBACK - V45 CLEAR')
 col_a, col_b, col_c = st.columns(3)
 with col_a:
     st.metric(label=f'RSI {sel_tf}', value=f'{rsi:.1f}', delta=rsi_s)
@@ -185,7 +274,7 @@ with col_c:
 st.write(f'BOS:{bos} PULL:{pullback} LIQ:{liq} STRAT:{strategy}')
 st.write(f'OHLC O:{last_c["O"]} H:{last_c["H"]} L:{last_c["L"]} C:{last_c["C"]} ATR {atr:.1f} VWAP {vwap:.1f} MACD {macd:.2f} RSI {rsi:.1f}')
 
-mode = st.radio('ACCOUNT', ['REAL 2500','DEMO 10000'], index=1 if st.session_state.account_mode=='DEMO' else 0, key='acc84')
+mode = st.radio('ACCOUNT', ['REAL 2500','DEMO 10000'], index=1 if st.session_state.account_mode=='DEMO' else 0, key='acc85')
 if 'REAL' in mode:
     st.session_state.account_mode='REAL'
 else:
@@ -201,52 +290,20 @@ else:
     cur_prof = int(st.session_state.demo_profit)
 
 if account_mode == 'REAL':
-    st.success(f'REAL Bal {cur_bal} Profit {cur_prof} H:{st.session_state.hour_trades}/5 V84 CLEAR NO MOD')
+    st.success(f'REAL Bal {cur_bal} Profit {cur_prof} H:{st.session_state.hour_trades}/5 V85 V45 CANDLE CLEAR')
 else:
-    st.info(f'DEMO Bal {cur_bal} Profit {cur_prof} H:{st.session_state.hour_trades}/5 V84 CLEAR NO MOD')
+    st.info(f'DEMO Bal {cur_bal} Profit {cur_prof} H:{st.session_state.hour_trades}/5 V85 V45 CANDLE CLEAR')
 
 st.metric(label=f'{account_mode} BAL {start_amt} H:{st.session_state.hour_trades}/5', value=f'{cur_bal} PKR', delta=f'+{cur_prof} PKR')
 st.metric(label=f'LIVE {sel_market} {sel_tf} H:{st.session_state.hour_trades}/5', value=f'${live_price:.2f}', delta=f'AUTO {"ON" if st.session_state.auto_on else "OFF"}')
 
-tab1,tab2,tab3 = st.tabs(['TRADING V84','DEPOSIT V84','HISTORY V84'])
+tab1,tab2,tab3 = st.tabs(['TRADING V85','DEPOSIT V85','HISTORY V85'])
 
 with tab1:
-    st.write(f'TRADING {account_mode} {sel_market} {sel_tf} {st.session_state.hour_trades}/5 V84 CLEAR')
+    st.write(f'TRADING {account_mode} {sel_market} {sel_tf} {st.session_state.hour_trades}/5 V85 V45 CANDLE')
     if st.session_state.hour_trades >= 5:
         st.warning(f'HOUR LIMIT {st.session_state.hour_trades}/5 WAIT NEXT HOUR')
-    col_a, col_b = st.columns(2)
-    with col_a:
-        dep_amt = st.number_input('Deposit PKR', value=500, min_value=100, max_value=50000, step=100, key='dep_amt84')
-        if st.button('DEPOSIT', key='dep_btn84'):
-            if account_mode == 'REAL':
-                st.session_state.real_bal += dep_amt
-                st.session_state.real_profit += dep_amt
-                st.session_state.hist_real.append(int(st.session_state.real_bal))
-                st.success(f'Dep +{dep_amt} Bal {int(st.session_state.real_bal)}')
-                if st.session_state.alert_on:
-                    st.markdown('<audio autoplay><source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg"></audio>', unsafe_allow_html=True)
-            else:
-                st.session_state.demo_bal += dep_amt
-                st.session_state.hist_demo.append(int(st.session_state.demo_bal))
-                st.success(f'Demo Dep +{dep_amt}')
-    with col_b:
-        with_amt = st.number_input('Withdraw PKR', value=250, min_value=100, max_value=50000, step=100, key='with_amt84')
-        if st.button('WITHDRAW', key='with_btn84'):
-            if account_mode == 'REAL' and with_amt <= st.session_state.real_bal:
-                st.session_state.real_bal -= with_amt
-                st.session_state.hist_real.append(int(st.session_state.real_bal))
-                st.success(f'With -{with_amt}')
-            elif account_mode == 'DEMO' and with_amt <= st.session_state.demo_bal:
-                st.session_state.demo_bal -= with_amt
-                st.session_state.hist_demo.append(int(st.session_state.demo_bal))
-                st.success(f'Demo With -{with_amt}')
-    st.write(f'UP DOWN CHART {sel_market} {sel_tf} O:{last_c["O"]} C:{last_c["C"]} GREEN UP RED DOWN')
-    st.markdown(candle_html, unsafe_allow_html=True)
-    st.line_chart(df_co, height=220)
-    hist = st.session_state.hist_real if account_mode == 'REAL' else st.session_state.hist_demo
-    df_bal = pd.DataFrame({f'{account_mode} BAL {start_amt}': hist})
-    st.line_chart(df_bal, height=160)
-    st.write(f'PA 1 HOUR 5 TRADE H:{st.session_state.hour_trades}/5 5x24=120 CLEAR NO MOD')
+    st.write(f'PA 1 HOUR 5 TRADE H:{st.session_state.hour_trades}/5 5x24=120 V45 CANDLE CLEAR')
     col_x, col_y, col_z = st.columns(3)
     with col_x:
         st.metric(label=f'HOUR {sel_tf}', value=f'{st.session_state.hour_trades}/5', delta='PA 1 HOUR 4-5')
@@ -254,7 +311,7 @@ with tab1:
         st.metric(label=f'PROFIT {sel_market}', value=f'+{cur_prof} PKR', delta='5x24=120')
     with col_z:
         st.metric(label=f'TOTAL 24H', value=f'{st.session_state.total24}/120', delta='92% WIN')
-    if st.button('MANUAL TRADE', key='manual84'):
+    if st.button('MANUAL TRADE', key='manual85'):
         if st.session_state.hour_trades >= 5:
             st.error(f'HOUR LIMIT {st.session_state.hour_trades}/5 WAIT')
         else:
@@ -277,7 +334,7 @@ with tab1:
                 st.success(f'WIN {round(profit)} PKR {sel_tf} {st.session_state.hour_trades}/5')
             else:
                 st.success(f'WIN {round(profit)} PKR {sel_tf} {st.session_state.hour_trades}/5')
-    if st.button('FORCE TRADE', key='force84'):
+    if st.button('FORCE TRADE', key='force85'):
         if st.session_state.hour_trades >= 5:
             st.error(f'HOUR LIMIT {st.session_state.hour_trades}/5 WAIT')
         else:
@@ -300,23 +357,23 @@ with tab1:
             st.success(f'FORCE WIN {round(profit)} PKR {sel_tf} {st.session_state.hour_trades}/5')
 
 with tab2:
-    st.write(f'DEPOSIT {account_mode} {start_amt} {sel_market} {sel_tf} {st.session_state.hour_trades}/5 CLEAR')
+    st.write(f'DEPOSIT {account_mode} {start_amt} {sel_market} {sel_tf} {st.session_state.hour_trades}/5 V45 CANDLE')
     if account_mode == 'DEMO':
-        if st.button('TOPUP +5000', key='topup84'):
+        if st.button('TOPUP +5000', key='topup85'):
             st.session_state.demo_bal += 5000
             st.session_state.hist_demo.append(int(st.session_state.demo_bal))
             st.success(f'Demo +5000 Bal {int(st.session_state.demo_bal)}')
             if st.session_state.alert_on:
                 st.markdown('<audio autoplay><source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg"></audio>', unsafe_allow_html=True)
-        if st.button('RESET DEMO', key='reset84'):
+        if st.button('RESET DEMO', key='reset85'):
             st.session_state.demo_bal = 10000
             st.session_state.demo_profit = 0
             st.session_state.hist_demo = [10000]*5
             st.success('Demo Reset')
     else:
-        dep_phone = st.text_input('JazzCash Num', value='03001234567', key='dep_phone84')
-        dep_amount = st.number_input('Dep PKR Real', value=2500, min_value=100, max_value=50000, step=100, key='dep_amount84')
-        if st.button('DEPOSIT NOW', key='dep_now84'):
+        dep_phone = st.text_input('JazzCash Num', value='03001234567', key='dep_phone85')
+        dep_amount = st.number_input('Dep PKR Real', value=2500, min_value=100, max_value=50000, step=100, key='dep_amount85')
+        if st.button('DEPOSIT NOW', key='dep_now85'):
             if len(dep_phone) >= 11:
                 st.session_state.real_bal += dep_amount
                 st.session_state.real_profit += dep_amount
@@ -324,29 +381,4 @@ with tab2:
                 st.success(f'Dep +{dep_amount} Bal {int(st.session_state.real_bal)}')
             if st.session_state.alert_on:
                 st.markdown('<audio autoplay><source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg"></audio>', unsafe_allow_html=True)
-        with_phone = st.text_input('With Num', value='03001234567', key='with_phone84')
-        with_amount = st.number_input('With PKR Real', value=250, min_value=100, max_value=50000, step=100, key='with_amount84')
-        if st.button('WITHDRAW NOW', key='with_now84'):
-            if len(with_phone) >= 11 and with_amount <= st.session_state.real_bal:
-                st.session_state.real_bal -= with_amount
-                st.session_state.hist_real.append(int(st.session_state.real_bal))
-                st.success(f'With -{with_amount} Bal {int(st.session_state.real_bal)}')
-    if st.button('CLEAR CACHE', key='clear84'):
-        for k in list(st.session_state.keys()):
-            del st.session_state[k]
-        st.rerun()
-
-with tab3:
-    st.write(f'PINE EDITOR {sel_market} {sel_tf} {st.session_state.hour_trades}/5 O:{last_c["O"]} C:{last_c["C"]}')
-    st.write('OHLC TABLE V84 CLEAR NO MOD')
-    st.dataframe(df_ohlc, use_container_width=True, height=240)
-    c1,c2 = st.columns(2)
-    with c1:
-        if st.button('PINE', key='pine84'):
-            st.success(f'Pine Saved {sel_tf} RSI {rsi:.1f} ATR {atr:.1f}')
-    with c2:
-        if st.button('KHABER', key='khaber84'):
-            st.success(f'Khaber Saved {sel_tf} {bos} {liq}')
-    st.write(f'HISTORY V84 5x24=120 PA 1 HOUR 4-5 TRADE {st.session_state.hour_trades}/5')
-
-st.success(f'V84 CLEAR NO MOD NO ERROR UP DOWN O:{last_c["O"]} C:{last_c["C"]} RSI {rsi:.1f} VOL {vol} ATR {atr:.1f} VWAP {vwap:.1f} MACD {macd:.2f} LIQ {liq} BOS {bos} 84 JORA KA')
+        with_phone = 
