@@ -246,3 +246,4 @@ else:
 st.markdown("""
 <div style='background:linear-gradient(90deg,#FFD700,#0F0);border-radius:8px;padding:10px;text-align:center;margin-top:10px'>
 <div style='color:#000;font-size:10px;font-weight:900'>V59 FINAL RESULTS SHOW - REAL 2500 PKR START - Really money Laga ka ma ka 2500 pkr nah Star ka - DEMO 10000 PKR NAN DEMO CHECK KO - JAZZCASH EASYPAISA REAL 2500 - LIVE CHART - RSI VOLUME ATR VWAP MACD LIQUIDITY BOS PULLBACK - PREMIUM DESIGN - NO KEYERROR - NO WHITE SCREEN - RESULTS VISIBLE - V45 JORA - DASE
+</div>
