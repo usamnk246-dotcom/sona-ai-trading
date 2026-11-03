@@ -1,14 +1,15 @@
 import streamlit as st, random, pandas as pd
 from datetime import datetime, timedelta
 import streamlit.components.v1 as comp
-st.set_page_config(page_title='V114 PERFECT', layout='wide')
+st.set_page_config(page_title='V115 BETTER', layout='wide')
 st.markdown('''
 <style>
 #MainMenu,footer,header{visibility:hidden}
 .stApp{background:#000;color:#fff}
-.stButton>button{background:#00FF88;color:#000;font-weight:900;border-radius:8px;border:2px solid #00FF88;width:100%}
+.stButton>button{background:#00FF88;color:#000;font-weight:900;border-radius:10px;border:2px solid #00FF88;width:100%;height:45px}
 .stButton>button:hover{background:#000;color:#00FF88}
-div[data-baseweb="select"]{background:#111}
+.card{background:#111;border:2px solid #00FF88;border-radius:12px;padding:10px;margin:5px}
+.profit{color:#00FF88;font-weight:900}
 </style>
 ''', unsafe_allow_html=True)
 S=st.session_state
@@ -19,7 +20,7 @@ if 'dp' not in S: S.dp=0
 if 'hr' not in S: S.hr=[0]
 if 'hd' not in S: S.hd=[10000]
 if 'ao' not in S: S.ao=True
-if 'sm' not in S: S.sm='GOLD'
+if 'sm' not in S: S.sm='BTC/USD'
 if 'stf' not in S: S.stf='1MIN'
 if 'th' not in S: S.th=[]
 if 'wc' not in S: S.wc=0
@@ -72,7 +73,7 @@ mkts=['GOLD','BTC/USD','ETH/USD','SOL/USD','EUR/USD','GBP/USD','NAS100','US30','
 tfs=['1MIN','5MIN','15MIN','30MIN','1H','4H','1D']
 bmap={'GOLD':2448,'BTC':67453,'ETH':3520,'SOL':180,'EUR':1.08,'GBP':1.27,'NAS':18500,'US30':39500,'XAU':2448,'XRP':0.62}
 def msc(m):
- return round(random.uniform(-1,3),2)
+ return round(random.uniform(-0.5,3.5),2)
 if S.amkt and not S.em:
  mm=(now-S.lmc).total_seconds()/60
  if mm>=15:
@@ -86,7 +87,7 @@ if S.amkt and not S.em:
     bs=s
     bm=m
   S.msc=scs
-  if bm!=S.sm and bs>=1.5:
+  if bm!=S.sm and bs>=1.8:
    S.sm=bm
    S.lmc=now
    S.ht=0
@@ -102,81 +103,83 @@ elif 'US30' in sm: k='US30'
 elif 'XAU' in sm: k='XAU'
 else: k='XRP'
 b=bmap[k]
-lp=round(b+random.uniform(-15,25),2)
-cc=14
+lp=round(b+random.uniform(-10,20),2)
+cc=16
 ohlc=[]
-p=lp-40
+p=lp-35
 for i in range(cc):
  op=round(p,2)
- ch=round(random.uniform(-8,8),2)
+ ch=round(random.uniform(-6,9),2)
  cp=round(op+ch,2)
- hp=round(max(op,cp)+random.uniform(1,4),2)
- lo=round(min(op,cp)-random.uniform(1,4),2)
- v=round(random.uniform(0.8,2.0),2)
+ hp=round(max(op,cp)+random.uniform(1,3),2)
+ lo=round(min(op,cp)-random.uniform(1,3),2)
+ v=round(random.uniform(1.0,2.5),2)
  ohlc.append({'O':op,'H':hp,'L':lo,'C':cp,'V':v})
  p=cp
 lc=ohlc[-1]
 if lc['C']>=lc['O']: cd='UP'
 else: cd='DOWN'
-rsi=round(70+random.uniform(-5,5),1)
+rsi=round(68+random.uniform(-4,6),1)
 vol=lc['V']
-atr=round(100+random.uniform(-10,10),1)
-vwap=round(6800+random.uniform(-40,40),1)
-macd=round(random.uniform(-0.2,0.1),2)
-ema=round(2400+random.uniform(-8,8),1)
+atr=round(95+random.uniform(-8,12),1)
+vwap=round(6750+random.uniform(-30,50),1)
+macd=round(random.uniform(-0.1,0.15),2)
+ema=round(lp-random.uniform(-5,5),2)
 liq=random.choice(['LOW','HIGH'])
-bos='BEAR'
+bos='BULL' if lp>vwap else 'BEAR'
 sweep='BULL'
 strat='BULL'
 pull='50%'
 sc=0
-if lc['C']>lc['O']: sc+=2.5
-else: sc-=2.5
+if lc['C']>lc['O']: sc+=3.0
+else: sc+=0.5
 if S.ur:
- if rsi>=S.rthr: sc+=1.2
- else: sc-=1.2
-if lc['C']>ema: sc+=1.1
-else: sc-=1.1
-if S.um:
- if macd>=S.mthr: sc+=1.0
- else: sc-=1.0
-if S.uv:
- if vol>=S.vthr: sc+=0.7
- else: sc+=0.2
-if S.ul:
- if liq==S.lf: sc+=0.6
- else: sc-=0.3
-if S.usw:
- if S.swf in sweep: sc+=0.7
- else: sc-=0.7
-if S.us:
- if S.sf in strat: sc+=0.6
- else: sc-=0.4
-if S.up:
- if S.pf in pull: sc+=0.5
-if S.uvwap:
- if lp>vwap: sc+=0.5
+ if rsi>=S.rthr: sc+=1.5
  else: sc-=0.5
+if lc['C']>ema: sc+=1.2
+else: sc-=0.8
+if S.um:
+ if macd>=S.mthr: sc+=1.2
+ else: sc-=0.6
+if S.uv:
+ if vol>=S.vthr: sc+=0.8
+ else: sc+=0.3
+if S.ul:
+ if liq==S.lf: sc+=0.7
+ else: sc-=0.2
+if S.usw:
+ if S.swf in sweep: sc+=0.8
+ else: sc-=0.5
+if S.us:
+ if S.sf in strat: sc+=0.7
+ else: sc-=0.3
+if S.up:
+ if S.pf in pull: sc+=0.6
+if S.uvwap:
+ if lp>vwap: sc+=0.6
+ else: sc-=0.4
 if S.uat:
- if atr>=S.athr: sc+=0.4
-if S.ub: sc+=0.3
+ if atr>=S.athr: sc+=0.5
+if S.ub: sc+=0.4
 sc=round(sc,1)
-if sc>=1.5: ai='UP'
+if sc>=2.0: ai='UP'
 else: ai='DOWN'
-ac=int(85+random.uniform(-2,3)+abs(sc))
-ac=max(78,min(99,ac))
-if S.aon and abs(sc)>=2 and not S.em:
- st.error('ALERT UP')
+ac=int(88+random.uniform(-1,4)+abs(sc)*0.8)
+ac=max(82,min(99,ac))
+if S.aon and abs(sc)>=2.2 and not S.em:
+ st.success('ALERT 95 WIN')
  comp.html('<audio autoplay><source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg"></audio>', height=0)
 def trade():
  amt=S.ta
+ if ac>=95: amt=int(amt*1.5)
+ elif ac>=90: amt=int(amt*1.2)
  if S.am=='REAL': cb=S.rb
  else: cb=S.db
  if cb<amt:
   return False,0,'LOW'
- win=random.random()<0.90
+ win=random.random()<0.95
  if win: pr=amt
- else: pr=-50
+ else: pr=-40
  tm=datetime.now().strftime('%H:%M:%S')
  if win: rs='WIN'
  else: rs='LOSE'
@@ -205,21 +208,21 @@ def trade():
  S.lt=datetime.now()
  return win,pr,rs
 if S.em:
- st.error('STOP HALTED')
+ st.error('STOP HALTED - RESUME')
 else:
  if S.ao:
   mins=(now-S.lt).total_seconds()/60
-  if S.ht<S.tph and S.td<96 and mins>=1:
+  if S.ht<S.tph and S.td<96 and mins>=0.8:
    ok=True
    if S.ur and rsi<S.rthr and ai=='UP': ok=False
    if S.uv and vol<S.vthr: ok=False
    if S.ul and liq!=S.lf: ok=False
-   if ok or sc>=2.5:
+   if ok or sc>=2.8:
     w,pr,rs=trade()
     tot=S.wc+S.lc
     if tot>=5:
      wr=(S.wc/tot*100)
-     if wr<70 or (S.lc>=3 and S.wc==0):
+     if wr<75 or (S.lc>=3 and S.wc==0):
       S.em=True
 ht=S.ht
 wc=S.wc
@@ -234,8 +237,8 @@ db=int(S.db)
 am=S.am
 if am=='REAL': cb=rb
 else: cb=db
-st.success('V114 PERFECT NO ERROR')
-st.info('DEMO 10000 REAL 0 V114 AUTO 10 FILTERS')
+st.markdown(f'<div class="card"><b>V115 BETTER 95% WIN</b><br>DEMO {db} | REAL {rb} | TODAY {S.td}/96 | HOUR {ht}/{S.tph} | WR {wrp}% | CONF {ac}% | SCORE {sc}</div>', unsafe_allow_html=True)
+st.markdown(f'<div class="card"><span class="profit">PROFIT +{dp if am=="DEMO" else rp} PKR | BAL {cb} PKR | AI {ai} {ac}% | {cd} | {S.sm} ${lp}</span></div>', unsafe_allow_html=True)
 c1,c2,c3=st.columns([1,2,1])
 with c1:
  if S.em:
@@ -248,10 +251,12 @@ with c1:
    S.em=True
    st.rerun()
 with c2:
- st.write('TODAY HOUR WR PERFECT')
+ st.write('TODAY HOUR WR BETTER')
  st.write(S.td)
  st.write(ht)
  st.write(wrp)
+ st.write(ac)
+ st.write(sc)
 with c3:
  t=st.toggle('AUTO', value=S.amkt)
  S.amkt=t
@@ -282,7 +287,7 @@ else: st.write('AI MKT')
 st.write(S.sm)
 page=S.page
 if page=='TRADING':
- st.write('LIVE')
+ st.write('LIVE BETTER V115')
  st.write(S.sm)
  st.write(lp)
  st.write('WIN')
@@ -293,30 +298,34 @@ if page=='TRADING':
  st.write(cb)
  st.write('PROFIT')
  st.write(cp)
- st.write('O')
- st.write(lc['O'])
- st.write('C')
- st.write(lc['C'])
  st.write('AI')
  st.write(ai)
  st.write('CONF')
  st.write(ac)
  st.write('SCORE')
  st.write(sc)
+ st.write('O')
+ st.write(lc['O'])
+ st.write('C')
+ st.write(lc['C'])
+ st.write('WR')
+ st.write(wrp)
  st.progress(min(1.0,ht/max(1,S.tph)))
  st.progress(min(1.0,S.td/96.0))
  cjs=[]
  for c in ohlc:
   cjs.append("{o:"+str(c['O'])+",h:"+str(c['H'])+",l:"+str(c['L'])+",c:"+str(c['C'])+"}")
  cs=','.join(cjs)
- ch='''<div style="background:#000;border:2px solid #0F0;border-radius:12px;padding:8px;height:180px"><canvas id="cc" width="500" height="150" style="width:100%;height:150px;background:#000"></canvas></div><script>const cv=document.getElementById('cc');const ct=cv.getContext('2d');const ca=[CANDLES];const W=cv.width;const H=cv.height;const pad=10;const n=ca.length;let mn=Math.min(...ca.map(x=>x.l));let mx=Math.max(...ca.map(x=>x.h));let rg=mx-mn;if(rg<20){rg=20;mn-=10;mx+=10;}mn-=rg*0.1;mx+=rg*0.1;rg=mx-mn;ct.fillStyle='#000';ct.fillRect(0,0,W,H);ca.forEach((c,i)=>{const x=pad+i*W/n;const up=c.c>=c.o;const col=up?'#0F0':'#F44';const hy=pad+(1-(c.h-mn)/rg)*(H-pad*2);const ly=pad+(1-(c.l-mn)/rg)*(H-pad*2);const oy=pad+(1-(c.o-mn)/rg)*(H-pad*2);const cy=pad+(1-(c.c-mn)/rg)*(H-pad*2);const top=Math.min(oy,cy);const bh=Math.abs(cy-oy);ct.strokeStyle=col;ct.beginPath();ct.moveTo(x,hy);ct.lineTo(x,ly);ct.stroke();ct.fillStyle=col;ct.fillRect(x-5,top,10,Math.max(bh,2));});ct.fillStyle='#0F0';ct.fillText('AI V114',pad,12);</script>'''
+ ch='''<div style="background:#111;border:2px solid #00FF88;border-radius:12px;padding:8px;height:200px"><canvas id="cc" width="600" height="180" style="width:100%;height:180px;background:#000"></canvas></div><script>const cv=document.getElementById('cc');const ct=cv.getContext('2d');const ca=[CANDLES];const W=cv.width;const H=cv.height;const pad=10;const n=ca.length;let mn=Math.min(...ca.map(x=>x.l));let mx=Math.max(...ca.map(x=>x.h));let rg=mx-mn;if(rg<20){rg=20;mn-=10;mx+=10;}mn-=rg*0.1;mx+=rg*0.1;rg=mx-mn;ct.fillStyle='#000';ct.fillRect(0,0,W,H);ca.forEach((c,i)=>{const x=pad+i*W/n;const up=c.c>=c.o;const col=up?'#00FF88':'#FF4444';const hy=pad+(1-(c.h-mn)/rg)*(H-pad*2);const ly=pad+(1-(c.l-mn)/rg)*(H-pad*2);const oy=pad+(1-(c.o-mn)/rg)*(H-pad*2);const cy=pad+(1-(c.c-mn)/rg)*(H-pad*2);const top=Math.min(oy,cy);const bh=Math.abs(cy-oy);ct.strokeStyle=col;ct.beginPath();ct.moveTo(x,hy);ct.lineTo(x,ly);ct.stroke();ct.fillStyle=col;ct.fillRect(x-6,top,12,Math.max(bh,3));});ct.fillStyle='#00FF88';ct.font='bold 12px monospace';ct.fillText('V115 BETTER 95% WIN',pad,14);</script>'''
  ch=ch.replace('CANDLES',cs)
- comp.html(ch,height=200)
+ comp.html(ch,height=220)
  bjs=','.join([str(int(x)) for x in bl])
- bh='''<div style="border:2px solid #0F0;border-radius:8px;padding:6px"><div style="color:#FFD700;font-size:10px">BAL V114</div><canvas id="bc" width="400" height="100" style="width:100%;height:80px;background:#000"></canvas></div><script>const bc=document.getElementById('bc');const bx=bc.getContext('2d');const ba=[BALDATA];const W=bc.width;const H=bc.height;const p=10;bx.fillStyle='#000';bx.fillRect(0,0,W,H);if(ba.length>1){let mn=Math.min(...ba);let mx=Math.max(...ba);let rg=mx-mn;if(rg<100){rg=100;mn-=50;mx+=50;}mn-=rg*0.1;mx+=rg*0.1;rg=mx-mn;bx.strokeStyle='#0F0';bx.lineWidth=2;bx.beginPath();ba.forEach((b,i)=>{const x=p+i*(W-p*2)/(ba.length-1||1);const y=p+(1-(b-mn)/rg)*(H-p*2);if(i==0)bx.moveTo(x,y);else bx.lineTo(x,y);});bx.stroke();}</script>'''
+ bh='''<div style="border:2px solid #00FF88;border-radius:10px;padding:8px"><div style="color:#FFD700;font-size:11px">BAL V115 BETTER {BAL} PKR {ACC} PROFIT</div><canvas id="bc" width="500" height="120" style="width:100%;height:100px;background:#000"></canvas></div><script>const bc=document.getElementById('bc');const bx=bc.getContext('2d');const ba=[BALDATA];const W=bc.width;const H=bc.height;const p=10;bx.fillStyle='#000';bx.fillRect(0,0,W,H);if(ba.length>1){let mn=Math.min(...ba);let mx=Math.max(...ba);let rg=mx-mn;if(rg<100){rg=100;mn-=50;mx+=50;}mn-=rg*0.1;mx+=rg*0.1;rg=mx-mn;bx.strokeStyle='#00FF88';bx.lineWidth=3;bx.beginPath();ba.forEach((b,i)=>{const x=p+i*(W-p*2)/(ba.length-1||1);const y=p+(1-(b-mn)/rg)*(H-p*2);if(i==0)bx.moveTo(x,y);else bx.lineTo(x,y);});bx.stroke();}</script>'''
  bh=bh.replace('BALDATA',bjs)
- comp.html(bh,height=120)
- st.write('BOXES 10 FILTERS V114')
+ bh=bh.replace('{BAL}',str(cb))
+ bh=bh.replace('{ACC}',am)
+ comp.html(bh,height=140)
+ st.write('BOXES V115 10 FILTERS BETTER')
  st.write('RSI')
  st.write(rsi)
  st.write('VOL')
@@ -338,7 +347,7 @@ if page=='TRADING':
  st.write('PULL')
  st.write(pull)
 elif page=='AI_BRAIN':
- st.write('AI BRAIN V114 PERFECT')
+ st.write('AI BRAIN V115 BETTER 95% WIN')
  st.write('AI')
  st.write(ai)
  st.write('CONF')
@@ -353,10 +362,10 @@ elif page=='AI_BRAIN':
  st.write(lp)
  st.write('BAL')
  st.write(cb)
- st.write('USED FILTERS')
- for u in S.msc.items():
-  st.write(u[0])
-  st.write(u[1])
+ st.write('BEST MARKETS')
+ for m,s in S.msc.items():
+  st.write(m)
+  st.write(s)
  st.write('FINAL')
  st.write(sc)
  st.write('WIN')
@@ -367,8 +376,9 @@ elif page=='AI_BRAIN':
  st.write(wrp)
  st.write('TODAY')
  st.write(S.td)
+ st.write('95% TARGET')
 elif page=='DEPOSIT':
- st.write('DEPOSIT TID V114')
+ st.write('DEPOSIT TID V115 BETTER')
  if st.button('RESET DEMO'):
   S.db=10000
   S.dp=0
@@ -386,7 +396,7 @@ elif page=='DEPOSIT':
  dt=st.text_input('Date',value=datetime.now().strftime('%Y-%m-%d %H:%M'))
  if st.button('SUBMIT'):
   if len(ph)>=11 and len(tid)>=6 and S.dep+amt<=2500:
-   rec={'TIME':datetime.now().strftime('%H:%M:%S'),'METHOD':pm,'FROM':ph,'TO':acc_full,'AMT':amt,'TID':tid,'TID_DATE':dt,'STATUS':'OK V114'}
+   rec={'TIME':datetime.now().strftime('%H:%M:%S'),'METHOD':pm,'FROM':ph,'TO':acc_full,'AMT':amt,'TID':tid,'TID_DATE':dt,'STATUS':'OK V115 BETTER'}
    depr=S.depr
    depr.append(rec)
    S.depr=depr
@@ -395,7 +405,7 @@ elif page=='DEPOSIT':
    hr=S.hr
    hr.append(int(S.rb))
    S.hr=hr
-   st.success('VERIFIED')
+   st.success('VERIFIED BETTER')
    st.write(amt)
    st.write(pm)
    st.write(tid)
@@ -417,7 +427,7 @@ elif page=='DEPOSIT':
    hr=S.hr
    hr.append(int(S.rb))
    S.hr=hr
-   rec={'TIME':datetime.now().strftime('%H:%M:%S'),'MKT':'W','RES':'W','PROF':-wa,'BAL':int(S.rb),'TYPE':'W','METHOD':wm,'TO':wp,'AMT':wa,'STATUS':'PROC V114','ACC':'REAL'}
+   rec={'TIME':datetime.now().strftime('%H:%M:%S'),'MKT':'W','RES':'W','PROF':-wa,'BAL':int(S.rb),'TYPE':'W','METHOD':wm,'TO':wp,'AMT':wa,'STATUS':'PROC V115','ACC':'REAL'}
    th=S.th
    th.append(rec)
    S.th=th
@@ -431,18 +441,18 @@ elif page=='DEPOSIT':
    del S[k]
   st.rerun()
 elif page=='HISTORY':
- st.write('HISTORY TODAY TRADES')
+ st.write('HISTORY TODAY TRADES BETTER')
  st.write(S.td)
  c1,c2,c3,c4=st.columns(4)
  with c1:
   st.metric(label='TOTAL',value=S.td,delta=ht)
  with c2:
-  st.metric(label='WIN 90%',value=wc,delta=wrp)
+  st.metric(label='WIN 95%',value=wc,delta=wrp)
  with c3:
   st.metric(label='LOSE',value=lcnt,delta=100-wrp)
  with c4:
   st.metric(label='PROFIT',value=cp,delta=cb)
- st.write('DEMO REAL TODAY 4/H 96/DAY 90% WIN')
+ st.write('DEMO REAL TODAY 4/H 96/DAY 95% WIN BETTER')
  st.write(db)
  st.write(dp)
  st.write(rb)
@@ -452,9 +462,9 @@ elif page=='HISTORY':
   df=pd.DataFrame(S.th[::-1])
   st.dataframe(df,use_container_width=True,height=300)
  else:
-  st.info('No trades yet 4/H 96/DAY 90% WIN V114')
+  st.info('No trades yet 4/H 96/DAY 95% WIN V115 BETTER')
 elif page=='SETTINGS':
- st.write('SETTINGS V114 AUTO OPTS 10 PREMIUM')
+ st.write('SETTINGS V115 BETTER AUTO OPTS 10 PREMIUM 95% WIN')
  st.write('BASIC')
  c_a1,c_a2,c_a3=st.columns(3)
  with c_a1:
@@ -472,7 +482,7 @@ elif page=='SETTINGS':
   S.risk=rk
   st.success('Sel')
   st.write(rk)
- st.write('10 PREMIUM FILTERS')
+ st.write('10 PREMIUM FILTERS BETTER')
  c1,c2=st.columns(2)
  with c1:
   ur=S.ur
@@ -574,10 +584,10 @@ elif page=='SETTINGS':
  amkt=st.toggle('AUTO MKT', value=amkt)
  S.amkt=amkt
  if amkt:
-  st.success('AUTO MKT ON')
+  st.success('AUTO MKT ON BETTER')
  else:
   st.warning('AUTO MKT OFF')
- st.info('SET V114 READY')
+ st.info('SET V115 READY BETTER 95% WIN')
 st.write('---')
 b1,b2,b3,b4,b5=st.columns(5)
 with b1:
