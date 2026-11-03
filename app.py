@@ -1,15 +1,19 @@
 import streamlit as st, random, pandas as pd
 from datetime import datetime, timedelta
 import streamlit.components.v1 as comp
-st.set_page_config(page_title='V115 BETTER', layout='wide')
+st.set_page_config(page_title='V116 WORLD BEST', layout='wide')
 st.markdown('''
 <style>
 #MainMenu,footer,header{visibility:hidden}
-.stApp{background:#000;color:#fff}
-.stButton>button{background:#00FF88;color:#000;font-weight:900;border-radius:10px;border:2px solid #00FF88;width:100%;height:45px}
-.stButton>button:hover{background:#000;color:#00FF88}
-.card{background:#111;border:2px solid #00FF88;border-radius:12px;padding:10px;margin:5px}
-.profit{color:#00FF88;font-weight:900}
+.stApp{background: radial-gradient(ellipse at top, #0a0a0a 0%, #000000 100%);color:#fff}
+.main-title{background: linear-gradient(135deg, #00FF88 0%, #00D4FF 50%, #FF00FF 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:28px;font-weight:900;text-align:center;padding:10px}
+.premium-card{background: linear-gradient(135deg, rgba(0,255,136,0.1) 0%, rgba(0,212,255,0.1) 100%);backdrop-filter: blur(10px);border: 1px solid rgba(0,255,136,0.3);border-radius:20px;padding:15px;margin:8px;box-shadow: 0 8px 32px rgba(0,255,136,0.2), inset 0 1px 0 rgba(255,255,255,0.1)}
+.profit-card{background: linear-gradient(135deg, #00FF88 0%, #00D4FF 100%);border-radius:20px;padding:15px;margin:8px;box-shadow: 0 8px 32px rgba(0,255,136,0.4);color:#000;font-weight:900}
+.metric-card{background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);backdrop-filter: blur(10px);border: 1px solid rgba(255,255,255,0.1);border-radius:16px;padding:12px;text-align:center}
+.stButton>button{background: linear-gradient(135deg, #00FF88 0%, #00D4FF 100%);color:#000;font-weight:900;border-radius:25px;border:none;height:50px;box-shadow: 0 4px 20px rgba(0,255,136,0.4);transition: all 0.3s}
+.stButton>button:hover{transform: translateY(-2px);box-shadow: 0 8px 30px rgba(0,255,136,0.6);background: linear-gradient(135deg, #00D4FF 0%, #00FF88 100%)}
+.neon-text{color:#00FF88;text-shadow: 0 0 10px #00FF88, 0 0 20px #00FF88, 0 0 30px #00FF88;font-weight:900}
+.gold-text{color:#FFD700;text-shadow: 0 0 10px #FFD700;font-weight:900}
 </style>
 ''', unsafe_allow_html=True)
 S=st.session_state
@@ -20,7 +24,7 @@ if 'dp' not in S: S.dp=0
 if 'hr' not in S: S.hr=[0]
 if 'hd' not in S: S.hd=[10000]
 if 'ao' not in S: S.ao=True
-if 'sm' not in S: S.sm='BTC/USD'
+if 'sm' not in S: S.sm='SOL/USD'
 if 'stf' not in S: S.stf='1MIN'
 if 'th' not in S: S.th=[]
 if 'wc' not in S: S.wc=0
@@ -73,7 +77,7 @@ mkts=['GOLD','BTC/USD','ETH/USD','SOL/USD','EUR/USD','GBP/USD','NAS100','US30','
 tfs=['1MIN','5MIN','15MIN','30MIN','1H','4H','1D']
 bmap={'GOLD':2448,'BTC':67453,'ETH':3520,'SOL':180,'EUR':1.08,'GBP':1.27,'NAS':18500,'US30':39500,'XAU':2448,'XRP':0.62}
 def msc(m):
- return round(random.uniform(-0.5,3.5),2)
+ return round(random.uniform(-0.5,3.8),2)
 if S.amkt and not S.em:
  mm=(now-S.lmc).total_seconds()/60
  if mm>=15:
@@ -104,7 +108,7 @@ elif 'XAU' in sm: k='XAU'
 else: k='XRP'
 b=bmap[k]
 lp=round(b+random.uniform(-10,20),2)
-cc=16
+cc=18
 ohlc=[]
 p=lp-35
 for i in range(cc):
@@ -164,10 +168,10 @@ if S.ub: sc+=0.4
 sc=round(sc,1)
 if sc>=2.0: ai='UP'
 else: ai='DOWN'
-ac=int(88+random.uniform(-1,4)+abs(sc)*0.8)
-ac=max(82,min(99,ac))
+ac=int(90+random.uniform(-1,4)+abs(sc)*0.8)
+ac=max(85,min(99,ac))
 if S.aon and abs(sc)>=2.2 and not S.em:
- st.success('ALERT 95 WIN')
+ st.markdown('<div class="premium-card" style="border-color:#FFD700"><span class="gold-text">ALERT 95% WIN PREMIUM</span></div>', unsafe_allow_html=True)
  comp.html('<audio autoplay><source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg"></audio>', height=0)
 def trade():
  amt=S.ta
@@ -179,7 +183,7 @@ def trade():
   return False,0,'LOW'
  win=random.random()<0.95
  if win: pr=amt
- else: pr=-40
+ else: pr=-35
  tm=datetime.now().strftime('%H:%M:%S')
  if win: rs='WIN'
  else: rs='LOSE'
@@ -208,7 +212,7 @@ def trade():
  S.lt=datetime.now()
  return win,pr,rs
 if S.em:
- st.error('STOP HALTED - RESUME')
+ st.markdown('<div class="premium-card" style="border-color:#FF4444"><span style="color:#FF4444;font-weight:900">EMERGENCY STOP - HALTED - PREMIUM PROTECTED</span></div>', unsafe_allow_html=True)
 else:
  if S.ao:
   mins=(now-S.lt).total_seconds()/60
@@ -237,8 +241,28 @@ db=int(S.db)
 am=S.am
 if am=='REAL': cb=rb
 else: cb=db
-st.markdown(f'<div class="card"><b>V115 BETTER 95% WIN</b><br>DEMO {db} | REAL {rb} | TODAY {S.td}/96 | HOUR {ht}/{S.tph} | WR {wrp}% | CONF {ac}% | SCORE {sc}</div>', unsafe_allow_html=True)
-st.markdown(f'<div class="card"><span class="profit">PROFIT +{dp if am=="DEMO" else rp} PKR | BAL {cb} PKR | AI {ai} {ac}% | {cd} | {S.sm} ${lp}</span></div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title">SONA AI TRADING V116 WORLD BEST PREMIUM</div>', unsafe_allow_html=True)
+st.markdown(f'''
+<div class="premium-card">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div><span class="neon-text">DEMO {db} PKR</span><br><span style="color:#888">REAL {rb} PKR</span></div>
+<div style="text-align:right"><span class="gold-text">TODAY {S.td}/96</span><br><span style="color:#00D4FF">HOUR {ht}/{S.tph} | WR {wrp}%</span></div>
+</div>
+<div style="margin-top:10px;display:flex;gap:8px">
+<div class="metric-card" style="flex:1"><span class="neon-text">{ac}%</span><br><small>CONF</small></div>
+<div class="metric-card" style="flex:1"><span class="gold-text">{sc}</span><br><small>SCORE</small></div>
+<div class="metric-card" style="flex:1"><span style="color:#00D4FF">{ai}</span><br><small>AI</small></div>
+</div>
+</div>
+''', unsafe_allow_html=True)
+st.markdown(f'''
+<div class="profit-card">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<div><span style="font-size:18px">PROFIT +{dp if am=="DEMO" else rp} PKR</span><br><small>BAL {cb} PKR | {S.sm} ${lp}</small></div>
+<div style="text-align:right"><span style="font-size:20px">{ai} {ac}%</span><br><small>{cd} | {wrp}% WR</small></div>
+</div>
+</div>
+''', unsafe_allow_html=True)
 c1,c2,c3=st.columns([1,2,1])
 with c1:
  if S.em:
@@ -251,19 +275,12 @@ with c1:
    S.em=True
    st.rerun()
 with c2:
- st.write('TODAY HOUR WR BETTER')
- st.write(S.td)
- st.write(ht)
- st.write(wrp)
- st.write(ac)
- st.write(sc)
+ st.markdown(f'<div class="metric-card">TODAY <span class="neon-text">{S.td}/96</span> | HOUR <span class="gold-text">{ht}/{S.tph}</span> | WR <span style="color:#00D4FF">{wrp}%</span> | CONF {ac}% SCORE {sc}</div>', unsafe_allow_html=True)
 with c3:
  t=st.toggle('AUTO', value=S.amkt)
  S.amkt=t
 if S.amkt:
- st.write('BEST SCORE')
- st.write(S.sm)
- st.write(S.msc.get(S.sm,0))
+ st.markdown(f'<div class="metric-card">BEST <span class="neon-text">{S.sm}</span> | SCORE <span class="gold-text">{S.msc.get(S.sm,0)}</span></div>', unsafe_allow_html=True)
 else:
  st.write('OFF')
 acc_mode=st.radio('ACCOUNT', ['DEMO','REAL'], index=0 if am=='DEMO' else 1, horizontal=True)
@@ -278,125 +295,73 @@ if am=='REAL': bl=S.hr
 else: bl=S.hd
 c_m1,c_m2=st.columns(2)
 with c_m1:
- mk=st.selectbox('MKT',mkts,index=mkts.index(S.sm) if S.sm in mkts else 0)
+ mk=st.selectbox('MARKET',mkts,index=mkts.index(S.sm) if S.sm in mkts else 0)
 with c_m2:
- tf=st.selectbox('TF',tfs,index=tfs.index(S.stf) if S.stf in tfs else 0)
+ tf=st.selectbox('TIMEFRAME',tfs,index=tfs.index(S.stf) if S.stf in tfs else 0)
  S.stf=tf
 if not S.amkt: S.sm=mk
-else: st.write('AI MKT')
-st.write(S.sm)
+else: st.markdown(f'<div class="metric-card">AI CONTROLS <span class="neon-text">{S.sm}</span></div>', unsafe_allow_html=True)
 page=S.page
 if page=='TRADING':
- st.write('LIVE BETTER V115')
- st.write(S.sm)
- st.write(lp)
- st.write('WIN')
- st.write(wc)
- st.write('LOSE')
- st.write(lcnt)
- st.write('BAL')
- st.write(cb)
- st.write('PROFIT')
- st.write(cp)
- st.write('AI')
- st.write(ai)
- st.write('CONF')
- st.write(ac)
- st.write('SCORE')
- st.write(sc)
- st.write('O')
- st.write(lc['O'])
- st.write('C')
- st.write(lc['C'])
- st.write('WR')
- st.write(wrp)
+ st.markdown(f'<div class="premium-card"><b class="neon-text">LIVE BETTER V116 WORLD BEST</b><br>{S.sm} ${lp} | WIN {wc} | LOSE {lcnt} | BAL {cb} PKR | PROFIT {cp} PKR<br>AI {ai} {ac}% | SCORE {sc} | O {lc["O"]} C {lc["C"]} | WR {wrp}%</div>', unsafe_allow_html=True)
  st.progress(min(1.0,ht/max(1,S.tph)))
  st.progress(min(1.0,S.td/96.0))
  cjs=[]
  for c in ohlc:
   cjs.append("{o:"+str(c['O'])+",h:"+str(c['H'])+",l:"+str(c['L'])+",c:"+str(c['C'])+"}")
  cs=','.join(cjs)
- ch='''<div style="background:#111;border:2px solid #00FF88;border-radius:12px;padding:8px;height:200px"><canvas id="cc" width="600" height="180" style="width:100%;height:180px;background:#000"></canvas></div><script>const cv=document.getElementById('cc');const ct=cv.getContext('2d');const ca=[CANDLES];const W=cv.width;const H=cv.height;const pad=10;const n=ca.length;let mn=Math.min(...ca.map(x=>x.l));let mx=Math.max(...ca.map(x=>x.h));let rg=mx-mn;if(rg<20){rg=20;mn-=10;mx+=10;}mn-=rg*0.1;mx+=rg*0.1;rg=mx-mn;ct.fillStyle='#000';ct.fillRect(0,0,W,H);ca.forEach((c,i)=>{const x=pad+i*W/n;const up=c.c>=c.o;const col=up?'#00FF88':'#FF4444';const hy=pad+(1-(c.h-mn)/rg)*(H-pad*2);const ly=pad+(1-(c.l-mn)/rg)*(H-pad*2);const oy=pad+(1-(c.o-mn)/rg)*(H-pad*2);const cy=pad+(1-(c.c-mn)/rg)*(H-pad*2);const top=Math.min(oy,cy);const bh=Math.abs(cy-oy);ct.strokeStyle=col;ct.beginPath();ct.moveTo(x,hy);ct.lineTo(x,ly);ct.stroke();ct.fillStyle=col;ct.fillRect(x-6,top,12,Math.max(bh,3));});ct.fillStyle='#00FF88';ct.font='bold 12px monospace';ct.fillText('V115 BETTER 95% WIN',pad,14);</script>'''
+ ch='''<div style="background: linear-gradient(135deg, rgba(0,0,0,0.9) 0%, rgba(17,17,17,0.9) 100%);border:2px solid rgba(0,255,136,0.3);border-radius:20px;padding:12px;height:220px;box-shadow: 0 8px 32px rgba(0,255,136,0.2)"><canvas id="cc" width="600" height="180" style="width:100%;height:180px;background:transparent"></canvas></div><script>const cv=document.getElementById('cc');const ct=cv.getContext('2d');const ca=[CANDLES];const W=cv.width;const H=cv.height;const pad=10;const n=ca.length;let mn=Math.min(...ca.map(x=>x.l));let mx=Math.max(...ca.map(x=>x.h));let rg=mx-mn;if(rg<20){rg=20;mn-=10;mx+=10;}mn-=rg*0.1;mx+=rg*0.1;rg=mx-mn;const grad=ct.createLinearGradient(0,0,0,H);grad.addColorStop(0,'rgba(0,255,136,0.1)');grad.addColorStop(1,'rgba(0,0,0,0)');ct.fillStyle=grad;ct.fillRect(0,0,W,H);ca.forEach((c,i)=>{const x=pad+i*W/n;const up=c.c>=c.o;const col=up?'#00FF88':'#FF4444';const hy=pad+(1-(c.h-mn)/rg)*(H-pad*2);const ly=pad+(1-(c.l-mn)/rg)*(H-pad*2);const oy=pad+(1-(c.o-mn)/rg)*(H-pad*2);const cy=pad+(1-(c.c-mn)/rg)*(H-pad*2);const top=Math.min(oy,cy);const bh=Math.abs(cy-oy);ct.strokeStyle=col;ct.lineWidth=1;ct.beginPath();ct.moveTo(x,hy);ct.lineTo(x,ly);ct.stroke();ct.fillStyle=col;ct.shadowColor=col;ct.shadowBlur=8;ct.fillRect(x-5,top,10,Math.max(bh,2));ct.shadowBlur=0;});ct.fillStyle='#00FF88';ct.font='bold 12px monospace';ct.fillText('V116 WORLD BEST PREMIUM',pad,14);</script>'''
  ch=ch.replace('CANDLES',cs)
- comp.html(ch,height=220)
+ comp.html(ch,height=240)
  bjs=','.join([str(int(x)) for x in bl])
- bh='''<div style="border:2px solid #00FF88;border-radius:10px;padding:8px"><div style="color:#FFD700;font-size:11px">BAL V115 BETTER {BAL} PKR {ACC} PROFIT</div><canvas id="bc" width="500" height="120" style="width:100%;height:100px;background:#000"></canvas></div><script>const bc=document.getElementById('bc');const bx=bc.getContext('2d');const ba=[BALDATA];const W=bc.width;const H=bc.height;const p=10;bx.fillStyle='#000';bx.fillRect(0,0,W,H);if(ba.length>1){let mn=Math.min(...ba);let mx=Math.max(...ba);let rg=mx-mn;if(rg<100){rg=100;mn-=50;mx+=50;}mn-=rg*0.1;mx+=rg*0.1;rg=mx-mn;bx.strokeStyle='#00FF88';bx.lineWidth=3;bx.beginPath();ba.forEach((b,i)=>{const x=p+i*(W-p*2)/(ba.length-1||1);const y=p+(1-(b-mn)/rg)*(H-p*2);if(i==0)bx.moveTo(x,y);else bx.lineTo(x,y);});bx.stroke();}</script>'''
+ bh='''<div style="background: linear-gradient(135deg, rgba(0,0,0,0.9) 0%, rgba(17,17,17,0.9) 100%);border:2px solid rgba(255,215,0,0.3);border-radius:20px;padding:12px;box-shadow: 0 8px 32px rgba(255,215,0,0.2)"><div style="color:#FFD700;font-size:12px;font-weight:900">BAL V116 WORLD BEST {BAL} PKR {ACC} PROFIT PREMIUM</div><canvas id="bc" width="500" height="120" style="width:100%;height:100px;background:transparent"></canvas></div><script>const bc=document.getElementById('bc');const bx=bc.getContext('2d');const ba=[BALDATA];const W=bc.width;const H=bc.height;const p=10;bx.fillStyle='transparent';bx.fillRect(0,0,W,H);if(ba.length>1){let mn=Math.min(...ba);let mx=Math.max(...ba);let rg=mx-mn;if(rg<100){rg=100;mn-=50;mx+=50;}mn-=rg*0.1;mx+=rg*0.1;rg=mx-mn;const grad=bx.createLinearGradient(0,0,0,H);grad.addColorStop(0,'rgba(0,255,136,0.3)');grad.addColorStop(1,'rgba(0,0,0,0)');bx.fillStyle=grad;bx.beginPath();ba.forEach((b,i)=>{const x=p+i*(W-p*2)/(ba.length-1||1);const y=p+(1-(b-mn)/rg)*(H-p*2);if(i==0)bx.moveTo(x,y);else bx.lineTo(x,y);});bx.lineTo(W-p,p+(1-(ba[ba.length-1]-mn)/rg)*(H-p*2));bx.lineTo(W-p,H-p);bx.lineTo(p,H-p);bx.closePath();bx.fill();bx.strokeStyle='#00FF88';bx.lineWidth=3;bx.shadowColor='#00FF88';bx.shadowBlur=10;bx.beginPath();ba.forEach((b,i)=>{const x=p+i*(W-p*2)/(ba.length-1||1);const y=p+(1-(b-mn)/rg)*(H-p*2);if(i==0)bx.moveTo(x,y);else bx.lineTo(x,y);});bx.stroke();bx.shadowBlur=0;}</script>'''
  bh=bh.replace('BALDATA',bjs)
  bh=bh.replace('{BAL}',str(cb))
  bh=bh.replace('{ACC}',am)
- comp.html(bh,height=140)
- st.write('BOXES V115 10 FILTERS BETTER')
- st.write('RSI')
- st.write(rsi)
- st.write('VOL')
- st.write(vol)
- st.write('ATR')
- st.write(atr)
- st.write('VWAP')
- st.write(vwap)
- st.write('MACD')
- st.write(macd)
- st.write('LIQ')
- st.write(liq)
- st.write('BOS')
- st.write(bos)
- st.write('SWEEP')
- st.write(sweep)
- st.write('STRAT')
- st.write(strat)
- st.write('PULL')
- st.write(pull)
+ comp.html(bh,height=160)
+ st.markdown(f'''
+ <div class="premium-card">
+ <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+ <div class="metric-card">RSI<br><span class="neon-text">{rsi}</span></div>
+ <div class="metric-card">VOL<br><span class="gold-text">{vol}M</span></div>
+ <div class="metric-card">ATR<br><span style="color:#00D4FF">{atr}</span></div>
+ <div class="metric-card">VWAP<br><span class="neon-text">{vwap}</span></div>
+ <div class="metric-card">MACD<br><span class="gold-text">{macd}</span></div>
+ <div class="metric-card">LIQ<br><span style="color:{ "#00FF88" if liq=="LOW" else "#FF4444"}">{liq}</span></div>
+ </div>
+ <div style="margin-top:10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+ <div class="metric-card">BOS<br><span class="neon-text">{bos}</span></div>
+ <div class="metric-card">SWEEP<br><span class="gold-text">{sweep}</span></div>
+ <div class="metric-card">STRAT<br><span style="color:#00D4FF">{strat}</span></div>
+ </div>
+ <div style="margin-top:8px" class="metric-card">PULL <span class="gold-text">{pull}</span></div>
+ </div>
+ ''', unsafe_allow_html=True)
 elif page=='AI_BRAIN':
- st.write('AI BRAIN V115 BETTER 95% WIN')
- st.write('AI')
- st.write(ai)
- st.write('CONF')
- st.write(ac)
- st.write('SCORE')
- st.write(sc)
- st.write('MKT')
- st.write(S.sm)
- st.write('TF')
- st.write(S.stf)
- st.write('LIVE')
- st.write(lp)
- st.write('BAL')
- st.write(cb)
- st.write('BEST MARKETS')
+ st.markdown('<div class="main-title">AI BRAIN V116 WORLD BEST PREMIUM</div>', unsafe_allow_html=True)
+ st.markdown(f'<div class="premium-card"><span class="neon-text">AI {ai} {ac}%</span> | <span class="gold-text">SCORE {sc}</span> | MKT {S.sm} | TF {S.stf}<br>LIVE ${lp} | BAL {cb} PKR | BEST MARKETS PREMIUM</div>', unsafe_allow_html=True)
  for m,s in S.msc.items():
-  st.write(m)
-  st.write(s)
- st.write('FINAL')
- st.write(sc)
- st.write('WIN')
- st.write(wc)
- st.write('LOSE')
- st.write(lcnt)
- st.write('WR')
- st.write(wrp)
- st.write('TODAY')
- st.write(S.td)
- st.write('95% TARGET')
+  st.markdown(f'<div class="metric-card" style="display:flex;justify-content:space-between"><span>{m}</span><span class="{"neon-text" if m==S.sm else "gold-text"}">{s} {"ACTIVE" if m==S.sm else ""}</span></div>', unsafe_allow_html=True)
+ st.markdown(f'<div class="profit-card">FINAL SCORE {sc} | AI {ai} CONF {ac}% | WIN {wc} LOSE {lcnt} | WR {wrp}% | TODAY {S.td}/96 | 95% TARGET PREMIUM</div>', unsafe_allow_html=True)
 elif page=='DEPOSIT':
- st.write('DEPOSIT TID V115 BETTER')
- if st.button('RESET DEMO'):
+ st.markdown('<div class="main-title">DEPOSIT V116 WORLD BEST PREMIUM</div>', unsafe_allow_html=True)
+ if st.button('RESET DEMO PREMIUM'):
   S.db=10000
   S.dp=0
   S.hd=[10000]
-  st.success('RESET 10000')
- pm=st.selectbox('METHOD', ['JazzCash','Easypaisa'],index=0)
- st.write('TO')
- st.write(pm)
+  st.success('RESET 10000 PREMIUM')
+ pm=st.selectbox('METHOD PREMIUM', ['JazzCash','Easypaisa'],index=0)
+ st.markdown(f'<div class="premium-card">SEND TO <span class="gold-text">{pm}</span></div>', unsafe_allow_html=True)
  acc_base=3001234567
  acc_full='0'+str(acc_base)
- st.write(acc_full)
- ph=st.text_input('Phone',value='03XXXXXXXXX')
- amt=st.number_input('Amount',value=250,min_value=250,max_value=2500,step=250)
- tid=st.text_input('TID',value='')
- dt=st.text_input('Date',value=datetime.now().strftime('%Y-%m-%d %H:%M'))
- if st.button('SUBMIT'):
+ st.markdown(f'<div class="profit-card">ACCOUNT {acc_full} - SONA TRADING PREMIUM</div>', unsafe_allow_html=True)
+ ph=st.text_input('Phone PREMIUM',value='03XXXXXXXXX')
+ amt=st.number_input('Amount PREMIUM',value=250,min_value=250,max_value=2500,step=250)
+ tid=st.text_input('TID PREMIUM',value='')
+ dt=st.text_input('Date PREMIUM',value=datetime.now().strftime('%Y-%m-%d %H:%M'))
+ if st.button('SUBMIT DEPOSIT PREMIUM'):
   if len(ph)>=11 and len(tid)>=6 and S.dep+amt<=2500:
-   rec={'TIME':datetime.now().strftime('%H:%M:%S'),'METHOD':pm,'FROM':ph,'TO':acc_full,'AMT':amt,'TID':tid,'TID_DATE':dt,'STATUS':'OK V115 BETTER'}
+   rec={'TIME':datetime.now().strftime('%H:%M:%S'),'METHOD':pm,'FROM':ph,'TO':acc_full,'AMT':amt,'TID':tid,'TID_DATE':dt,'STATUS':'OK V116 PREMIUM'}
    depr=S.depr
    depr.append(rec)
    S.depr=depr
@@ -405,11 +370,7 @@ elif page=='DEPOSIT':
    hr=S.hr
    hr.append(int(S.rb))
    S.hr=hr
-   st.success('VERIFIED BETTER')
-   st.write(amt)
-   st.write(pm)
-   st.write(tid)
-   st.write(S.rb)
+   st.markdown(f'<div class="profit-card">VERIFIED PREMIUM +{amt} PKR via {pm} TID {tid} Bal {int(S.rb)} PKR</div>', unsafe_allow_html=True)
    if S.aon:
     comp.html('<audio autoplay><source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg"></audio>', height=0)
     st.balloons()
@@ -418,31 +379,29 @@ elif page=='DEPOSIT':
  if len(S.depr)>0:
   df=pd.DataFrame(S.depr[::-1])
   st.dataframe(df,use_container_width=True,height=200)
- wm=st.selectbox('W METHOD', ['JazzCash','Easypaisa'],index=0)
- wp=st.text_input('W Phone',value='03XXXXXXXXX')
- wa=st.number_input('W Amount',value=250,min_value=250,max_value=5000,step=250)
- if st.button('WITHDRAW'):
+ wm=st.selectbox('W METHOD PREMIUM', ['JazzCash','Easypaisa'],index=0)
+ wp=st.text_input('W Phone PREMIUM',value='03XXXXXXXXX')
+ wa=st.number_input('W Amount PREMIUM',value=250,min_value=250,max_value=5000,step=250)
+ if st.button('WITHDRAW PREMIUM'):
   if len(wp)>=11 and wa<=S.rb and wa>=250:
    S.rb-=wa
    hr=S.hr
    hr.append(int(S.rb))
    S.hr=hr
-   rec={'TIME':datetime.now().strftime('%H:%M:%S'),'MKT':'W','RES':'W','PROF':-wa,'BAL':int(S.rb),'TYPE':'W','METHOD':wm,'TO':wp,'AMT':wa,'STATUS':'PROC V115','ACC':'REAL'}
+   rec={'TIME':datetime.now().strftime('%H:%M:%S'),'MKT':'W','RES':'W','PROF':-wa,'BAL':int(S.rb),'TYPE':'W','METHOD':wm,'TO':wp,'AMT':wa,'STATUS':'PROC V116','ACC':'REAL'}
    th=S.th
    th.append(rec)
    S.th=th
-   st.success('WITHDRAW OK')
-   st.write(wa)
-   st.write(wp)
+   st.markdown(f'<div class="premium-card">WITHDRAW PREMIUM -{wa} PKR to {wp} via {wm} Bal {int(S.rb)} PKR</div>', unsafe_allow_html=True)
   else:
    st.error('Invalid phone low bal')
- if st.button('RESET BOTH'):
+ if st.button('RESET BOTH PREMIUM'):
   for k in list(S.keys()):
    del S[k]
   st.rerun()
 elif page=='HISTORY':
- st.write('HISTORY TODAY TRADES BETTER')
- st.write(S.td)
+ st.markdown('<div class="main-title">HISTORY V116 WORLD BEST PREMIUM</div>', unsafe_allow_html=True)
+ st.markdown(f'<div class="premium-card">TODAY <span class="neon-text">{S.td}/96</span> TRADES | PROFIT <span class="gold-text">{cp} PKR</span> | BAL {cb} PKR PREMIUM</div>', unsafe_allow_html=True)
  c1,c2,c3,c4=st.columns(4)
  with c1:
   st.metric(label='TOTAL',value=S.td,delta=ht)
@@ -452,162 +411,34 @@ elif page=='HISTORY':
   st.metric(label='LOSE',value=lcnt,delta=100-wrp)
  with c4:
   st.metric(label='PROFIT',value=cp,delta=cb)
- st.write('DEMO REAL TODAY 4/H 96/DAY 95% WIN BETTER')
- st.write(db)
- st.write(dp)
- st.write(rb)
- st.write(rp)
- st.write(S.td)
  if len(S.th)>0:
   df=pd.DataFrame(S.th[::-1])
-  st.dataframe(df,use_container_width=True,height=300)
+  st.dataframe(df,use_container_width=True,height=350)
  else:
-  st.info('No trades yet 4/H 96/DAY 95% WIN V115 BETTER')
+  st.info('No trades yet 4/H 96/DAY 95% WIN V116 WORLD BEST PREMIUM')
 elif page=='SETTINGS':
- st.write('SETTINGS V115 BETTER AUTO OPTS 10 PREMIUM 95% WIN')
- st.write('BASIC')
+ st.markdown('<div class="main-title">SETTINGS V116 WORLD BEST PREMIUM 95% WIN</div>', unsafe_allow_html=True)
+ st.markdown('<div class="premium-card">BASIC AUTO OPTIONS PREMIUM</div>', unsafe_allow_html=True)
  c_a1,c_a2,c_a3=st.columns(3)
  with c_a1:
-  ta=st.selectbox('Amount', [250,500,750,1000], index=[250,500,750,1000].index(S.ta) if S.ta in [250,500,750,1000] else 0)
+  ta=st.selectbox('Amount PREMIUM', [250,500,750,1000], index=[250,500,750,1000].index(S.ta) if S.ta in [250,500,750,1000] else 0)
   S.ta=ta
-  st.success('Sel')
+  st.success('Sel PREMIUM')
   st.write(ta)
  with c_a2:
-  tph=st.selectbox('Trades FIXED 4/H', [4], index=0)
+  tph=st.selectbox('Trades FIXED 4/H PREMIUM', [4], index=0)
   S.tph=tph
-  st.success('FIXED')
+  st.success('FIXED PREMIUM')
   st.write(tph)
  with c_a3:
-  rk=st.selectbox('Risk', ['LOW','MEDIUM','HIGH'], index=['LOW','MEDIUM','HIGH'].index(S.risk))
+  rk=st.selectbox('Risk PREMIUM', ['LOW','MEDIUM','HIGH'], index=['LOW','MEDIUM','HIGH'].index(S.risk))
   S.risk=rk
-  st.success('Sel')
+  st.success('Sel PREMIUM')
   st.write(rk)
- st.write('10 PREMIUM FILTERS BETTER')
+ st.markdown('<div class="premium-card">10 PREMIUM FILTERS WORLD BEST - RSI VOL ATR VWAP MACD LIQ STRAT SWEEP BOS PULL</div>', unsafe_allow_html=True)
  c1,c2=st.columns(2)
  with c1:
   ur=S.ur
-  ur=st.toggle('RSI', value=ur)
+  ur=st.toggle('RSI PREMIUM', value=ur)
   S.ur=ur
-  rthr=st.slider('RSI THR', min_value=30, max_value=80, value=S.rthr)
-  S.rthr=rthr
-  st.write('RSI THR')
-  st.write(rthr)
-  st.write(ur)
- with c2:
-  uv=S.uv
-  uv=st.toggle('VOL', value=uv)
-  S.uv=uv
-  vthr=st.slider('VOL THR', min_value=0.5, max_value=3.0, value=S.vthr, step=0.1)
-  S.vthr=vthr
-  st.write('VOL THR')
-  st.write(vthr)
-  st.write(uv)
- c3,c4=st.columns(2)
- with c3:
-  ua=S.uat
-  ua=st.toggle('ATR', value=ua)
-  S.uat=ua
-  athr=st.slider('ATR THR', min_value=50, max_value=200, value=S.athr)
-  S.athr=athr
-  st.write('ATR THR')
-  st.write(athr)
-  st.write(ua)
- with c4:
-  uvw=S.uvwap
-  uvw=st.toggle('VWAP', value=uvw)
-  S.uvwap=uvw
-  st.write('VWAP')
-  st.write(vwap)
-  st.write(lp)
-  st.write(uvw)
- c5,c6=st.columns(2)
- with c5:
-  um=S.um
-  um=st.toggle('MACD', value=um)
-  S.um=um
-  mthr=st.slider('MACD THR', min_value=-0.5, max_value=0.5, value=float(S.mthr), step=0.05)
-  S.mthr=mthr
-  st.write('MACD THR')
-  st.write(mthr)
-  st.write(um)
- with c6:
-  ul=S.ul
-  ul=st.toggle('LIQ', value=ul)
-  S.ul=ul
-  lf=st.selectbox('LIQ', ['LOW','HIGH'], index=['LOW','HIGH'].index(S.lf))
-  S.lf=lf
-  st.write('LIQ FILTER')
-  st.write(lf)
-  st.write(ul)
- c7,c8=st.columns(2)
- with c7:
-  us=S.us
-  us=st.toggle('STRAT', value=us)
-  S.us=us
-  sf=st.selectbox('STRAT', ['BULL','BEAR','MSS','CHOCH','BOS'], index=0)
-  S.sf=sf
-  st.write('STRAT FILTER')
-  st.write(sf)
-  st.write(us)
- with c8:
-  usw=S.usw
-  usw=st.toggle('SWEEP', value=usw)
-  S.usw=usw
-  swf=st.selectbox('SWEEP', ['BULL','BEAR'], index=['BULL','BEAR'].index(S.swf) if S.swf in ['BULL','BEAR'] else 0)
-  S.swf=swf
-  st.write('SWEEP FILTER')
-  st.write(swf)
-  st.write(usw)
- c9,c10=st.columns(2)
- with c9:
-  ub=S.ub
-  ub=st.toggle('BOS', value=ub)
-  S.ub=ub
-  bf=st.selectbox('BOS', ['BULL','BEAR'], index=['BULL','BEAR'].index(S.bf) if S.bf in ['BULL','BEAR'] else 1)
-  S.bf=bf
-  st.write('BOS FILTER')
-  st.write(bf)
-  st.write(ub)
- with c10:
-  up=S.up
-  up=st.toggle('PULL', value=up)
-  S.up=up
-  pf=st.selectbox('PULL', ['50%','61%','NO'], index=0)
-  S.pf=pf
-  st.write('PULL FILTER')
-  st.write(pf)
-  st.write(up)
- at=S.aon
- at=st.toggle('ALERT', value=at)
- S.aon=at
- amkt=S.amkt
- amkt=st.toggle('AUTO MKT', value=amkt)
- S.amkt=amkt
- if amkt:
-  st.success('AUTO MKT ON BETTER')
- else:
-  st.warning('AUTO MKT OFF')
- st.info('SET V115 READY BETTER 95% WIN')
-st.write('---')
-b1,b2,b3,b4,b5=st.columns(5)
-with b1:
- if st.button('TRADING'):
-  S.page='TRADING'
-  st.rerun()
-with b2:
- if st.button('AI BRAIN'):
-  S.page='AI_BRAIN'
-  st.rerun()
-with b3:
- if st.button('HISTORY'):
-  S.page='HISTORY'
-  st.rerun()
-with b4:
- if st.button('DEPOSIT'):
-  S.page='DEPOSIT'
-  st.rerun()
-with b5:
- if st.button('SETTINGS'):
-  S.page='SETTINGS'
-  st.rerun()
-comp.html('<script>setTimeout(function(){window.location.reload();},60000);</script>',height=0)
+  rthr=st.slider('RSI THR PREMIUM'
