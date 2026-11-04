@@ -1,8 +1,24 @@
 import streamlit as st, random, pandas as pd
 from datetime import datetime, timedelta
 import streamlit.components.v1 as comp
-st.set_page_config(page_title='V127 AUTO ONLY', layout='wide')
-st.markdown('<style>#MainMenu,footer,header{visibility:hidden}.stApp{background:#000;color:#fff}.card{background:#111;border:1px solid #0F0;border-radius:14px;padding:10px;margin:5px}.profit{background:#0F0;border-radius:14px;padding:10px;margin:5px;color:#000;font-weight:900}.metric{background:#222;border-radius:10px;padding:8px;text-align:center}.stButton>button{background:#0F0;color:#000;font-weight:900;border-radius:18px;height:42px;width:100%}.open{background:#332;border:1px solid #FD0;border-radius:10px;padding:8px;margin:5px}.ai{background:#112;border:1px solid #0FF;border-radius:14px;padding:10px;margin:5px}</style>', unsafe_allow_html=True)
+st.set_page_config(page_title='V129 PREMIUM BEST', layout='wide')
+st.markdown('''<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;900&display=swap');
+#MainMenu,footer,header{visibility:hidden}
+.stApp{background: radial-gradient(ellipse at top, #0f2027 0%, #000000 100%);color:#fff;font-family:'Poppins',sans-serif}
+.card{background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);backdrop-filter: blur(12px);-webkit-backdrop-filter: blur(12px);border:1px solid rgba(0,255,136,0.3);border-radius:20px;padding:14px;margin:8px;box-shadow: 0 8px 32px rgba(0,255,136,0.15), inset 0 1px 0 rgba(255,255,255,0.1);transition: all 0.3s ease}
+.card:hover{transform: translateY(-2px);box-shadow: 0 12px 40px rgba(0,255,136,0.25);border:1px solid rgba(0,255,136,0.5)}
+.profit{background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);border-radius:20px;padding:14px;margin:8px;color:#000;font-weight:900;font-size:15px;box-shadow: 0 8px 32px rgba(0,255,136,0.4), 0 0 20px rgba(0,255,136,0.3);animation: glow 2s ease-in-out infinite alternate}
+@keyframes glow{from{box-shadow:0 8px 32px rgba(0,255,136,0.4)}to{box-shadow:0 12px 40px rgba(0,255,136,0.6), 0 0 30px rgba(0,255,136,0.5)}}
+.metric{background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);backdrop-filter: blur(8px);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:10px;text-align:center;box-shadow: inset 0 1px 0 rgba(255,255,255,0.1)}
+.open{background: linear-gradient(135deg, rgba(255,215,0,0.15) 0%, rgba(255,165,0,0.08) 100%);backdrop-filter: blur(8px);border:1px solid rgba(255,215,0,0.4);border-radius:16px;padding:12px;margin:8px;box-shadow: 0 4px 20px rgba(255,215,0,0.2);animation: pulse 2s infinite}
+@keyframes pulse{0%,100%{border-color:rgba(255,215,0,0.4)}50%{border-color:rgba(255,215,0,0.8)}}
+.ai{background: linear-gradient(135deg, rgba(0,255,255,0.12) 0%, rgba(0,150,255,0.06) 100%);backdrop-filter: blur(10px);border:1px solid rgba(0,255,255,0.3);border-radius:18px;padding:12px;margin:8px;box-shadow: 0 4px 20px rgba(0,255,255,0.15)}
+.stButton>button{background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%)!important;color:#000!important;font-weight:900!important;border-radius:24px!important;height:46px!important;width:100%!important;border:none!important;box-shadow: 0 4px 20px rgba(0,255,136,0.4)!important;font-family:'Poppins',sans-serif!important;transition: all 0.3s ease!important}
+.stButton>button:hover{transform: translateY(-2px)!important;box-shadow: 0 8px 30px rgba(0,255,136,0.6)!important}
+.stSelectbox, .stNumberInput, .stTextInput{border-radius:14px!important}
+h1,h2,h3{font-family:'Poppins',sans-serif;font-weight:900}
+</style>''', unsafe_allow_html=True)
 def pkt():
  return datetime.utcnow()+timedelta(hours=5)
 def tfm(t):
@@ -23,7 +39,7 @@ init('rp',0)
 init('dp',0)
 init('hr',[0])
 init('hd',[10000])
-init('sm','GBP/USD')
+init('sm','SOL/USD')
 init('stf','5MIN')
 init('th',[])
 init('ot',[])
@@ -105,16 +121,16 @@ elif 'XAU' in sm: k='XAU'
 else: k='XRP'
 b=bmap[k]
 lp=round(b+random.uniform(-10,20),2)
-cc=10
+cc=12
 ohlc=[]
-p=lp-25
+p=lp-28
 for i in range(cc):
  op=round(p,2)
- ch=round(random.uniform(-4,7),2)
+ ch=round(random.uniform(-5,9),2)
  cp=round(op+ch,2)
- hp=round(max(op,cp)+1,2)
- lo=round(min(op,cp)-1,2)
- v=round(random.uniform(1,2.5),2)
+ hp=round(max(op,cp)+1.5,2)
+ lo=round(min(op,cp)-1.5,2)
+ v=round(random.uniform(1,2.8),2)
  ohlc.append({'O':op,'H':hp,'L':lo,'C':cp,'V':v})
  p=cp
 lc=ohlc[-1]
@@ -193,9 +209,9 @@ S['ot']=new_ot
 if len(closed)>0:
  for cn in closed:
   if cn['RES']=='WIN':
-   st.markdown(f'<div class="profit">WIN +{cn["PROF"]} {cn["MKT"]} {cn["TF"]} {cn["ENTRY_TIME"]}->{cn["EXIT_TIME"]} BAL {cn["BAL"]} PKT TF FIX</div>', unsafe_allow_html=True)
+   st.markdown(f'<div class="profit">WIN +{cn["PROF"]} {cn["MKT"]} {cn["TF"]} {cn["ENTRY_TIME"]}->{cn["EXIT_TIME"]} BAL {cn["BAL"]} AUTO ONLY PREMIUM</div>', unsafe_allow_html=True)
   else:
-   st.markdown(f'<div class="card"><span style="color:#F44">LOSE {cn["PROF"]} {cn["MKT"]} {cn["TF"]} {cn["ENTRY_TIME"]}->{cn["EXIT_TIME"]}</span></div>', unsafe_allow_html=True)
+   st.markdown(f'<div class="card"><span style="color:#FF4444">LOSE {cn["PROF"]} {cn["MKT"]} {cn["TF"]}</span></div>', unsafe_allow_html=True)
 def trade():
  amt=S['ta']
  if ac>=95: amt=int(amt*1.5)
@@ -213,7 +229,6 @@ def trade():
  S['td']+=1
  S['lt']=now
  return True
-# AUTO ONLY - NO STOP - ALWAYS TRADE
 tf_m=tfm(S['stf'])
 mins=(now-S['lt']).total_seconds()/60
 if S['ht']<S['tph'] and S['td']<96 and mins>=tf_m:
@@ -241,22 +256,22 @@ if am=='REAL': cb=rb
 else: cb=db
 pkt_str=now.strftime('%H:%M:%S PKT')
 oc=len(S['ot'])
-st.markdown('<div class="card">SONA V127 AUTO ONLY NO STOP FINAL</div>', unsafe_allow_html=True)
-st.markdown(f'<div class="card">DEMO {db} REAL {rb}<br>TODAY {S["td"]}/96 TOTAL {S["tt"]} HOUR {ht}/{S["tph"]} WR {wrp}%<br>CONF {ac}% SCORE {sc} AI {ai} OPEN {oc} TIME {pkt_str} PKT TF FIX AUTO ONLY</div>', unsafe_allow_html=True)
-st.markdown(f'<div class="profit">PROFIT +{dp if am=="DEMO" else rp} BAL {cb} {S["sm"]} {lp} {ai} {ac}% TF {S["stf"]} {tfm(S["stf"])}MIN OPEN {oc} AUTO ONLY</div>', unsafe_allow_html=True)
+st.markdown('<div class="card" style="background: linear-gradient(135deg, rgba(0,255,136,0.15) 0%, rgba(0,200,255,0.1) 100%);border:2px solid rgba(0,255,136,0.5);text-align:center;font-size:18px;font-weight:900;letter-spacing:1px">SONA V129 PREMIUM WORLD BEST DESIGN AUTO ONLY NO STOP</div>', unsafe_allow_html=True)
+st.markdown(f'<div class="card">DEMO {db} REAL {rb}<br>TODAY {S["td"]}/96 TOTAL {S["tt"]} HOUR {ht}/{S["tph"]} WR {wrp}%<br>CONF {ac}% SCORE {sc} AI {ai} OPEN {oc} TIME {pkt_str} PKT PREMIUM</div>', unsafe_allow_html=True)
+st.markdown(f'<div class="profit">PROFIT +{dp if am=="DEMO" else rp} BAL {cb} {S["sm"]} {lp} {ai} {ac}% TF {S["stf"]} {tfm(S["stf"])}MIN OPEN {oc} PREMIUM WORLD BEST</div>', unsafe_allow_html=True)
 if oc>0:
  for o in S['ot']:
   es=o['EXP'].strftime('%H:%M:%S PKT')
-  st.markdown(f'<div class="open">OPEN {o["MKT"]} {o["TF"]} ENTRY {o["ENTRY"]} PRED {o["PRED"]} {o["TIME"]}->EXP {es} AMT {o["AMT"]} WAIT {tfm(o["TF"])}MIN AUTO</div>', unsafe_allow_html=True)
+  st.markdown(f'<div class="open">OPEN {o["MKT"]} {o["TF"]} ENTRY {o["ENTRY"]} PRED {o["PRED"]} {o["TIME"]}->EXP {es} AMT {o["AMT"]} WAIT {tfm(o["TF"])}MIN PREMIUM AUTO</div>', unsafe_allow_html=True)
 else:
- st.markdown('<div class="card">NO OPEN - FIRST TRADE STARTING NOW AUTO ONLY - PKT</div>', unsafe_allow_html=True)
+ st.markdown('<div class="card" style="text-align:center">NO OPEN - FIRST TRADE STARTING NOW PREMIUM AUTO ONLY - PKT WORLD BEST</div>', unsafe_allow_html=True)
 c1,c2=st.columns(2)
 with c1:
- st.markdown(f'<div class="metric">TODAY {S["td"]}/96 TOTAL {S["tt"]} HOUR {ht}/{S["tph"]} WR {wrp}% OPEN {oc} TIME {pkt_str} TF {S["stf"]} AUTO ONLY</div>', unsafe_allow_html=True)
+ st.markdown(f'<div class="metric">TODAY {S["td"]}/96 TOTAL {S["tt"]} HOUR {ht}/{S["tph"]} WR {wrp}% OPEN {oc} TIME {pkt_str} TF {S["stf"]} PREMIUM</div>', unsafe_allow_html=True)
 with c2:
- t=st.toggle('AUTO MKT', value=S['amkt'])
+ t=st.toggle('AUTO MKT PREMIUM', value=S['amkt'], key='auto_mkt_main')
  S['amkt']=t
-acc_mode=st.radio('ACCOUNT', ['DEMO','REAL'], index=0 if am=='DEMO' else 1, horizontal=True)
+acc_mode=st.radio('ACCOUNT PREMIUM', ['DEMO','REAL'], index=0 if am=='DEMO' else 1, horizontal=True, key='acc_mode_main')
 if 'REAL' in acc_mode: S['am']='REAL'
 else: S['am']='DEMO'
 am=S['am']
@@ -268,74 +283,75 @@ if am=='REAL': bl=S['hr']
 else: bl=S['hd']
 c_m1,c_m2=st.columns(2)
 with c_m1:
- mk=st.selectbox('MKT',mkts,index=mkts.index(S['sm']) if S['sm'] in mkts else 0)
+ mk=st.selectbox('MKT PREMIUM',mkts,index=mkts.index(S['sm']) if S['sm'] in mkts else 0, key='mkt_main')
 with c_m2:
- tf=st.selectbox('TF',tfs,index=tfs.index(S['stf']) if S['stf'] in tfs else 0)
+ tf=st.selectbox('TF PREMIUM',tfs,index=tfs.index(S['stf']) if S['stf'] in tfs else 0, key='tf_main')
  S['stf']=tf
 if not S['amkt']: S['sm']=mk
 pg=S['pg']
 if pg=='TRADING':
- st.markdown(f'<div class="card">LIVE V127 AUTO ONLY {S["sm"]} {lp} WIN {wc} LOSE {lcnt} BAL {cb} PROFIT {cp} AI {ai} {ac}% SCORE {sc} O {lc["O"]} C {lc["C"]} WR {wrp}% HOUR {ht}/{S["tph"]} TF {S["stf"]} {tfm(S["stf"])}MIN OPEN {oc} TOTAL {S["tt"]} AUTO ONLY NO STOP</div>', unsafe_allow_html=True)
+ st.markdown(f'<div class="card">LIVE V129 PREMIUM {S["sm"]} {lp} WIN {wc} LOSE {lcnt} BAL {cb} PROFIT {cp} AI {ai} {ac}% SCORE {sc} O {lc["O"]} C {lc["C"]} WR {wrp}% HOUR {ht}/{S["tph"]} TF {S["stf"]} {tfm(S["stf"])}MIN OPEN {oc} TOTAL {S["tt"]} PREMIUM WORLD BEST NO STOP</div>', unsafe_allow_html=True)
  st.progress(min(1.0,ht/max(1,S['tph'])))
  st.progress(min(1.0,S['td']/96.0))
  cjs=[]
  for c in ohlc:
   cjs.append("{o:"+str(c['O'])+",h:"+str(c['H'])+",l:"+str(c['L'])+",c:"+str(c['C'])+"}")
  cs=','.join(cjs)
- ch='''<div style="background:#111;border:1px solid #0F0;border-radius:12px;padding:5px;height:160px"><canvas id="cc" width="350" height="100" style="width:100%;height:100px;background:#000"></canvas></div><script>const cv=document.getElementById('cc');const ct=cv.getContext('2d');const ca=[CANDLES];const W=cv.width;const H=cv.height;const pad=10;const n=ca.length;let mn=Math.min(...ca.map(x=>x.l));let mx=Math.max(...ca.map(x=>x.h));let rg=mx-mn;if(rg<20){rg=20;mn-=10;mx+=10;}mn-=rg*0.1;mx+=rg*0.1;rg=mx-mn;ca.forEach((c,i)=>{const x=pad+i*W/n;const up=c.c>=c.o;const col=up?'#0F0':'#F44';const hy=pad+(1-(c.h-mn)/rg)*(H-pad*2);const ly=pad+(1-(c.l-mn)/rg)*(H-pad*2);const oy=pad+(1-(c.o-mn)/rg)*(H-pad*2);const cy=pad+(1-(c.c-mn)/rg)*(H-pad*2);const top=Math.min(oy,cy);const bh=Math.abs(cy-oy);ct.strokeStyle=col;ct.beginPath();ct.moveTo(x,hy);ct.lineTo(x,ly);ct.stroke();ct.fillStyle=col;ct.fillRect(x-3,top,6,Math.max(bh,2));});ct.fillStyle='#0F0';ct.fillText('V127 AUTO ONLY NO STOP',pad,12);</script>'''
+ ch='''<div style="background: linear-gradient(135deg, rgba(0,0,0,0.8) 0%, rgba(20,20,30,0.9) 100%);border:1px solid rgba(0,255,136,0.4);border-radius:20px;padding:8px;height:180px;box-shadow: 0 8px 32px rgba(0,255,136,0.2)"><canvas id="cc" width="400" height="120" style="width:100%;height:120px;background:transparent"></canvas></div><script>const cv=document.getElementById('cc');const ct=cv.getContext('2d');const ca=[CANDLES];const W=cv.width;const H=cv.height;const pad=14;const n=ca.length;let mn=Math.min(...ca.map(x=>x.l));let mx=Math.max(...ca.map(x=>x.h));let rg=mx-mn;if(rg<20){rg=20;mn-=10;mx+=10;}mn-=rg*0.15;mx+=rg*0.15;rg=mx-mn;ca.forEach((c,i)=>{const x=pad+i*(W-pad*2)/n;const up=c.c>=c.o;const col=up?'#00ff88':'#ff4444';const hy=pad+(1-(c.h-mn)/rg)*(H-pad*2);const ly=pad+(1-(c.l-mn)/rg)*(H-pad*2);const oy=pad+(1-(c.o-mn)/rg)*(H-pad*2);const cy=pad+(1-(c.c-mn)/rg)*(H-pad*2);const top=Math.min(oy,cy);const bh=Math.abs(cy-oy);ct.shadowColor=col;ct.shadowBlur=8;ct.strokeStyle=col;ct.lineWidth=1.2;ct.beginPath();ct.moveTo(x,hy);ct.lineTo(x,ly);ct.stroke();ct.shadowBlur=0;ct.fillStyle=col;ct.fillRect(x-3.5,top,7,Math.max(bh,3));});ct.fillStyle='#00ff88';ct.font='bold 12px Poppins';ct.fillText('V129 PREMIUM WORLD BEST',pad,16);</script>'''
  ch=ch.replace('CANDLES',cs)
- comp.html(ch,height=180)
+ comp.html(ch,height=200)
  bjs=','.join([str(int(x)) for x in bl])
- bh='''<div style="border:1px solid #FD0;border-radius:12px;padding:5px"><div style="color:#FD0">BAL V127 AUTO ONLY {BAL} {ACC} {TIME} TOTAL {TOT}</div><canvas id="bc" width="250" height="60" style="width:100%;height:50px;background:#000"></canvas></div><script>const bc=document.getElementById('bc');const bx=bc.getContext('2d');const ba=[BALDATA];const W=bc.width;const H=bc.height;const p=10;bx.fillStyle='#000';bx.fillRect(0,0,W,H);if(ba.length>1){let mn=Math.min(...ba);let mx=Math.max(...ba);let rg=mx-mn;if(rg<100){rg=100;mn-=50;mx+=50;}mn-=rg*0.1;mx+=rg*0.1;rg=mx-mn;bx.strokeStyle='#0F0';bx.lineWidth=2;bx.beginPath();ba.forEach((b,i)=>{const x=p+i*(W-p*2)/(ba.length-1||1);const y=p+(1-(b-mn)/rg)*(H-p*2);if(i==0)bx.moveTo(x,y);else bx.lineTo(x,y);});bx.stroke();}</script>'''
+ bh='''<div style="background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(20,20,10,0.7) 100%);border:1px solid rgba(255,215,0,0.4);border-radius:18px;padding:8px;box-shadow: 0 4px 20px rgba(255,215,0,0.15)"><div style="color:#FFD700;font-weight:900;font-family:Poppins">BAL V129 PREMIUM {BAL} {ACC} {TIME} TOTAL {TOT} WORLD BEST</div><canvas id="bc" width="300" height="70" style="width:100%;height:60px;background:transparent"></canvas></div><script>const bc=document.getElementById('bc');const bx=bc.getContext('2d');const ba=[BALDATA];const W=bc.width;const H=bc.height;const p=12;bx.fillStyle='transparent';bx.fillRect(0,0,W,H);if(ba.length>1){let mn=Math.min(...ba);let mx=Math.max(...ba);let rg=mx-mn;if(rg<100){rg=100;mn-=50;mx+=50;}mn-=rg*0.1;mx+=rg*0.1;rg=mx-mn;let grad=bx.createLinearGradient(0,0,W,0);grad.addColorStop(0,'#00ff88');grad.addColorStop(1,'#FFD700');bx.strokeStyle=grad;bx.lineWidth=3;bx.shadowColor='#00ff88';bx.shadowBlur=10;bx.beginPath();ba.forEach((b,i)=>{const x=p+i*(W-p*2)/(ba.length-1||1);const y=p+(1-(b-mn)/rg)*(H-p*2);if(i==0)bx.moveTo(x,y);else bx.lineTo(x,y);});bx.stroke();bx.shadowBlur=0;}</script>'''
  bh=bh.replace('BALDATA',bjs)
  bh=bh.replace('{BAL}',str(cb))
  bh=bh.replace('{ACC}',am)
  bh=bh.replace('{TIME}',pkt_str)
  bh=bh.replace('{TOT}',str(S['tt']))
- comp.html(bh,height=100)
- st.markdown(f'<div class="card">RSI {rsi} VOL {vol} ATR {atr} VWAP {vwap} MACD {macd} LIQ {liq} BOS {bos} TF {S["stf"]} {tfm(S["stf"])}MIN OPEN {oc} AUTO ONLY</div>', unsafe_allow_html=True)
+ comp.html(bh,height=110)
+ st.markdown(f'<div class="card">RSI {rsi} VOL {vol} ATR {atr} VWAP {vwap} MACD {macd} LIQ {liq} BOS {bos} TF {S["stf"]} {tfm(S["stf"])}MIN OPEN {oc} PREMIUM WORLD BEST</div>', unsafe_allow_html=True)
 elif pg=='AI_BRAIN':
- st.markdown('<div class="card">AI BRAIN V127 AUTO ONLY</div>', unsafe_allow_html=True)
- st.markdown(f'<div class="ai">AI {ai} {ac}% SCORE {sc} MKT {S["sm"]} TF {S["stf"]} {tfm(S["stf"])}MIN LIVE {lp} BAL {cb} TIME {pkt_str} OPEN {oc} TOTAL {S["tt"]} AUTO ONLY</div>', unsafe_allow_html=True)
- st.markdown('<div class="card">BEST MARKET SCORES PKT AUTO</div>', unsafe_allow_html=True)
+ st.markdown('<div class="card" style="border:2px solid rgba(0,255,255,0.5);text-align:center;font-weight:900">AI BRAIN V129 PREMIUM WORLD BEST</div>', unsafe_allow_html=True)
+ st.markdown(f'<div class="ai">AI {ai} {ac}% SCORE {sc} MKT {S["sm"]} TF {S["stf"]} {tfm(S["stf"])}MIN LIVE {lp} BAL {cb} TIME {pkt_str} OPEN {oc} TOTAL {S["tt"]} PREMIUM WORLD BEST</div>', unsafe_allow_html=True)
+ st.markdown('<div class="card" style="text-align:center">BEST MARKET SCORES PKT PREMIUM WORLD BEST</div>', unsafe_allow_html=True)
  for m,s in S['msc'].items():
-  st.markdown(f'<div class="ai">{m} SCORE {s} PKT {pkt_str}</div>', unsafe_allow_html=True)
+  col='#00ff88' if s>=2.5 else '#FFD700' if s>=1.5 else '#fff'
+  st.markdown(f'<div class="ai">{m} SCORE <span style="color:{col};font-weight:900">{s}</span> PKT {pkt_str}</div>', unsafe_allow_html=True)
  if len(S['msc'])==0:
-  st.markdown('<div class="ai">GOLD 2.5 BTC/USD 1.2 ETH/USD 3.1 SOL/USD 0.8 EUR/USD 2.9 GBP/USD 3.3 NAS100 1.5 US30 2.1 XAU/USD 2.7 XRP/USD 1.0 SCANNING AUTO ONLY...</div>', unsafe_allow_html=True)
- st.markdown(f'<div class="profit">FINAL SCORE {sc} AI {ai} CONF {ac}% WIN {wc} LOSE {lcnt} WR {wrp}% TODAY {S["td"]}/96 TOTAL {S["tt"]} 95% 4/H TF {S["stf"]} {tfm(S["stf"])}MIN AUTO ONLY</div>', unsafe_allow_html=True)
+  st.markdown('<div class="ai">GOLD 2.5 BTC/USD 1.2 ETH/USD 3.1 SOL/USD 0.8 EUR/USD 2.9 GBP/USD 3.3 NAS100 1.5 US30 2.1 XAU/USD 2.7 XRP/USD 1.0 SCANNING PREMIUM WORLD BEST...</div>', unsafe_allow_html=True)
+ st.markdown(f'<div class="profit">FINAL SCORE {sc} AI {ai} CONF {ac}% WIN {wc} LOSE {lcnt} WR {wrp}% TODAY {S["td"]}/96 TOTAL {S["tt"]} 95% 4/H TF {S["stf"]} {tfm(S["stf"])}MIN PREMIUM WORLD BEST</div>', unsafe_allow_html=True)
 elif pg=='HISTORY':
- st.markdown('<div class="card">HISTORY V127 AUTO ONLY FULL TOL UMAR</div>', unsafe_allow_html=True)
- st.markdown(f'<div class="card">TODAY {S["td"]}/96 TOTAL {S["tt"]} PROFIT {cp} BAL {cb} TIME {pkt_str} OPEN {oc} PKT FULL HISTORY AUTO ONLY</div>', unsafe_allow_html=True)
+ st.markdown('<div class="card" style="border:2px solid rgba(255,215,0,0.5);text-align:center;font-weight:900">HISTORY V129 PREMIUM WORLD BEST FULL TOL UMAR</div>', unsafe_allow_html=True)
+ st.markdown(f'<div class="card">TODAY {S["td"]}/96 TOTAL {S["tt"]} PROFIT {cp} BAL {cb} TIME {pkt_str} OPEN {oc} PKT FULL HISTORY PREMIUM WORLD BEST</div>', unsafe_allow_html=True)
  if oc>0:
-  st.markdown('<div class="card">OPEN TRADES WAIT TF AUTO ONLY</div>', unsafe_allow_html=True)
+  st.markdown('<div class="card" style="text-align:center">OPEN TRADES WAIT TF PREMIUM WORLD BEST</div>', unsafe_allow_html=True)
   for o in S['ot']:
    es=o['EXP'].strftime('%H:%M:%S PKT')
-   st.markdown(f'<div class="open">OPEN {o["MKT"]} {o["TF"]} {o["TIME"]}-> {es} ENTRY {o["ENTRY"]} PRED {o["PRED"]} AMT {o["AMT"]} WAIT {tfm(o["TF"])}MIN AUTO</div>', unsafe_allow_html=True)
+   st.markdown(f'<div class="open">OPEN {o["MKT"]} {o["TF"]} {o["TIME"]}-> {es} ENTRY {o["ENTRY"]} PRED {o["PRED"]} AMT {o["AMT"]} WAIT {tfm(o["TF"])}MIN PREMIUM</div>', unsafe_allow_html=True)
  if len(S['th'])>0:
-  st.markdown('<div class="card">CLOSED TRADES TOL UMAR AUTO ONLY</div>', unsafe_allow_html=True)
+  st.markdown('<div class="card" style="text-align:center">CLOSED TRADES TOL UMAR PREMIUM WORLD BEST</div>', unsafe_allow_html=True)
   df=pd.DataFrame(S['th'][::-1])
   st.dataframe(df,use_container_width=True,height=400)
  else:
-  st.info('No trades yet V127 AUTO ONLY - FIRST TRADE AUTO STARTING - TODAY 0 TOTAL 0 OPEN 0 - AUTO ONLY NO STOP')
+  st.info('No trades yet V129 PREMIUM WORLD BEST - FIRST TRADE AUTO STARTING - TODAY 0 TOTAL 0 OPEN 0 - AUTO ONLY NO STOP PREMIUM')
 elif pg=='DEPOSIT':
- st.markdown('<div class="card">DEPOSIT V127 AUTO ONLY - DEPOSIT & WITHDRAW</div>', unsafe_allow_html=True)
- if st.button('RESET DEMO'):
+ st.markdown('<div class="card" style="border:2px solid rgba(0,255,136,0.5);text-align:center;font-weight:900">DEPOSIT V129 PREMIUM WORLD BEST - DEPOSIT & WITHDRAW</div>', unsafe_allow_html=True)
+ if st.button('RESET DEMO PREMIUM', key='reset_demo_dep'):
   S['db']=10000
   S['dp']=0
   S['hd']=[10000]
-  st.success('RESET DEMO 10000 AUTO ONLY')
- pm=st.selectbox('METHOD', ['JazzCash','Easypaisa'], index=0)
- st.markdown(f'<div class="card">TO {pm} PKT {pkt_str} - DEPOSIT AUTO ONLY</div>', unsafe_allow_html=True)
+  st.success('RESET DEMO 10000 PREMIUM WORLD BEST')
+ pm=st.selectbox('METHOD PREMIUM', ['JazzCash','Easypaisa'], index=0, key='pm_dep')
+ st.markdown(f'<div class="card">TO {pm} PKT {pkt_str} - DEPOSIT PREMIUM WORLD BEST</div>', unsafe_allow_html=True)
  acc_base=3001234567
  acc_full='0'+str(acc_base)
- st.markdown(f'<div class="profit">TO {acc_full} SONA PREMIUM PKT {pkt_str} AUTO ONLY</div>', unsafe_allow_html=True)
- ph=st.text_input('Phone FROM', value='03XXXXXXXXX', key='ph_dep')
- amt=st.number_input('Amount DEPOSIT', value=250, min_value=250, max_value=2500, step=250, key='amt_dep')
- tid=st.text_input('TID', value='', key='tid_dep')
- dt=st.text_input('Date', value=pkt().strftime('%Y-%m-%d %H:%M PKT'), key='dt_dep')
- if st.button('SUBMIT DEPOSIT'):
+ st.markdown(f'<div class="profit">TO {acc_full} SONA PREMIUM PKT {pkt_str} PREMIUM WORLD BEST</div>', unsafe_allow_html=True)
+ ph=st.text_input('Phone FROM PREMIUM', value='03XXXXXXXXX', key='ph_dep')
+ amt=st.number_input('Amount DEPOSIT PREMIUM', value=250, min_value=250, max_value=2500, step=250, key='amt_dep')
+ tid=st.text_input('TID PREMIUM', value='', key='tid_dep')
+ dt=st.text_input('Date PREMIUM', value=pkt().strftime('%Y-%m-%d %H:%M PKT'), key='dt_dep')
+ if st.button('SUBMIT DEPOSIT PREMIUM', key='sub_dep'):
   if len(ph)>=11 and len(tid)>=6 and S['dep']+amt<=2500:
-   rec={'TIME':pkt().strftime('%H:%M:%S PKT'),'METHOD':pm,'FROM':ph,'TO':acc_full,'AMT':amt,'TID':tid,'TID_DATE':dt,'STATUS':'OK V127 DEPOSIT AUTO ONLY'}
+   rec={'TIME':pkt().strftime('%H:%M:%S PKT'),'METHOD':pm,'FROM':ph,'TO':acc_full,'AMT':amt,'TID':tid,'TID_DATE':dt,'STATUS':'OK V129 PREMIUM DEPOSIT WORLD BEST'}
    depr=S['depr']
    depr.append(rec)
    S['depr']=depr
@@ -344,132 +360,41 @@ elif pg=='DEPOSIT':
    hr=S['hr']
    hr.append(int(S['rb']))
    S['hr']=hr
-   st.markdown(f'<div class="profit">VERIFIED DEPOSIT +{amt} {pm} {tid} Bal REAL {int(S["rb"])} TIME {pkt_str} AUTO ONLY</div>', unsafe_allow_html=True)
+   st.markdown(f'<div class="profit">VERIFIED DEPOSIT +{amt} {pm} {tid} Bal REAL {int(S["rb"])} TIME {pkt_str} PREMIUM WORLD BEST</div>', unsafe_allow_html=True)
    st.balloons()
   else:
-   st.error('Enter phone 11 digits TID 6 digits LIMIT 2500')
+   st.error('Enter phone 11 digits TID 6 digits LIMIT 2500 PREMIUM')
  if len(S['depr'])>0:
-  st.markdown('<div class="card">DEPOSIT HISTORY - TOL UMAR AUTO ONLY</div>', unsafe_allow_html=True)
+  st.markdown('<div class="card">DEPOSIT HISTORY - TOL UMAR PREMIUM WORLD BEST</div>', unsafe_allow_html=True)
   df=pd.DataFrame(S['depr'][::-1])
   st.dataframe(df, use_container_width=True, height=200)
- st.markdown('<div class="card">WITHDRAW V127 - WITHDRAW REAL AUTO ONLY</div>', unsafe_allow_html=True)
- wm=st.selectbox('W METHOD', ['JazzCash','Easypaisa'], index=0, key='wm_wd')
- wp=st.text_input('W Phone TO', value='03XXXXXXXXX', key='wp_wd')
- wa=st.number_input('W Amount WITHDRAW', value=250, min_value=250, max_value=5000, step=250, key='wa_wd')
- if st.button('WITHDRAW REAL'):
+ st.markdown('<div class="card" style="border:2px solid rgba(255,100,100,0.4);text-align:center">WITHDRAW V129 PREMIUM WORLD BEST - WITHDRAW REAL</div>', unsafe_allow_html=True)
+ wm=st.selectbox('W METHOD PREMIUM', ['JazzCash','Easypaisa'], index=0, key='wm_wd')
+ wp=st.text_input('W Phone TO PREMIUM', value='03XXXXXXXXX', key='wp_wd')
+ wa=st.number_input('W Amount WITHDRAW PREMIUM', value=250, min_value=250, max_value=5000, step=250, key='wa_wd')
+ if st.button('WITHDRAW REAL PREMIUM', key='wd_real'):
   if len(wp)>=11 and wa<=S['rb'] and wa>=250:
    S['rb']-=wa
    hr=S['hr']
    hr.append(int(S['rb']))
    S['hr']=hr
-   rec={'TIME':pkt().strftime('%H:%M:%S PKT'),'MKT':'WITHDRAW','RES':'W','PROF':-wa,'BAL':int(S['rb']),'TYPE':'W','METHOD':wm,'TO':wp,'AMT':wa,'STATUS':'PROC V127 WITHDRAW AUTO ONLY','ACC':'REAL'}
+   rec={'TIME':pkt().strftime('%H:%M:%S PKT'),'MKT':'WITHDRAW','RES':'W','PROF':-wa,'BAL':int(S['rb']),'TYPE':'W','METHOD':wm,'TO':wp,'AMT':wa,'STATUS':'PROC V129 PREMIUM WITHDRAW WORLD BEST','ACC':'REAL'}
    th=S['th']
    th.append(rec)
    S['th']=th
    wd=S['wd']
    wd.append(rec)
    S['wd']=wd
-   st.markdown(f'<div class="card">WITHDRAW -{wa} to {wp} via {wm} Bal REAL {int(S["rb"])} TIME {pkt_str} AUTO ONLY</div>', unsafe_allow_html=True)
+   st.markdown(f'<div class="card">WITHDRAW -{wa} to {wp} via {wm} Bal REAL {int(S["rb"])} TIME {pkt_str} PREMIUM WORLD BEST</div>', unsafe_allow_html=True)
   else:
-   st.error('Invalid phone low bal REAL - Need REAL balance AUTO ONLY')
+   st.error('Invalid phone low bal REAL - Need REAL balance PREMIUM')
  if len(S['wd'])>0:
-  st.markdown('<div class="card">WITHDRAW HISTORY - TOL UMAR AUTO ONLY</div>', unsafe_allow_html=True)
+  st.markdown('<div class="card">WITHDRAW HISTORY - TOL UMAR PREMIUM WORLD BEST</div>', unsafe_allow_html=True)
   df2=pd.DataFrame(S['wd'][::-1])
   st.dataframe(df2, use_container_width=True, height=200)
- if st.button('RESET BOTH DEMO REAL'):
+ if st.button('RESET BOTH DEMO REAL PREMIUM', key='reset_both'):
   for k in list(S.keys()):
    del S[k]
   st.rerun()
 elif pg=='SETTINGS':
- st.markdown('<div class="card">SETTINGS V127 AUTO ONLY 95% WIN FIX NO STOP</div>', unsafe_allow_html=True)
- st.markdown(f'<div class="card">TIME {pkt_str} TF {S["stf"]} {tfm(S["stf"])}MIN OPEN {oc} TOTAL {S["tt"]} PKT FIX AUTO ONLY NO STOP</div>', unsafe_allow_html=True)
- c_a1,c_a2=st.columns(2)
- with c_a1:
-  ta=st.selectbox('Amount', [250,500,750,1000], index=[250,500,750,1000].index(S['ta']) if S['ta'] in [250,500,750,1000] else 0)
-  S['ta']=ta
-  st.write(ta)
- with c_a2:
-  tph=st.selectbox('Trades FIXED 4/H', [4], index=0)
-  S['tph']=tph
-  st.write(tph)
- c1,c2=st.columns(2)
- with c1:
-  ur=S['ur']
-  ur=st.toggle('RSI', value=ur)
-  S['ur']=ur
-  rv=S['rthr']
-  rv=st.slider('RSI',30,80,rv)
-  S['rthr']=rv
-  st.write(rv)
- with c2:
-  uv=S['uv']
-  uv=st.toggle('VOL', value=uv)
-  S['uv']=uv
-  vv=S['vthr']
-  vv=st.slider('VOL',5,30,int(vv*10))
-  vv=vv/10
-  S['vthr']=vv
-  st.write(vv)
- c3,c4=st.columns(2)
- with c3:
-  ua=S['uat']
-  ua=st.toggle('ATR', value=ua)
-  S['uat']=ua
-  av=S['athr']
-  av=st.slider('ATR',50,200,av)
-  S['athr']=av
-  st.write(av)
- with c4:
-  um=S['um']
-  um=st.toggle('MACD', value=um)
-  S['um']=um
-  mv=S['mthr']
-  mv=st.slider('MACD',-50,50,int(mv*100))
-  mv=mv/100
-  S['mthr']=mv
-  st.write(mv)
- c5,c6=st.columns(2)
- with c5:
-  ul=S['ul']
-  ul=st.toggle('LIQ', value=ul)
-  S['ul']=ul
-  lf=st.selectbox('LIQ', ['LOW','HIGH'], index=['LOW','HIGH'].index(S['lf']))
-  S['lf']=lf
-  st.write(lf)
- with c6:
-  up=S['up']
-  up=st.toggle('PULL', value=up)
-  S['up']=up
-  pf=st.selectbox('PULL', ['50%','61%','NO'], index=0)
-  S['pf']=pf
-  st.write(pf)
- al=S['aon']
- al=st.toggle('ALERT', value=al)
- S['aon']=al
- amkt=S['amkt']
- amkt=st.toggle('AUTO MKT', value=amkt)
- S['amkt']=amkt
- st.markdown(f'<div class="card">SET V127 READY 95% WIN AUTO ONLY - TODAY {S["td"]} TOTAL {S["tt"]} OPEN {oc} TIME {pkt_str} - 1MIN=1MIN 5MIN=5MIN - AUTO ONLY NO STOP - ALWAYS TRADING</div>', unsafe_allow_html=True)
-st.write('---')
-b1,b2,b3,b4,b5=st.columns(5)
-with b1:
- if st.button('TRADING'):
-  S['pg']='TRADING'
-  st.rerun()
-with b2:
- if st.button('AI BRAIN'):
-  S['pg']='AI_BRAIN'
-  st.rerun()
-with b3:
- if st.button('HISTORY'):
-  S['pg']='HISTORY'
-  st.rerun()
-with b4:
- if st.button('DEPOSIT'):
-  S['pg']='DEPOSIT'
-  st.rerun()
-with b5:
- if st.button('SETTINGS'):
-  S['pg']='SETTINGS'
-  st.rerun()
-comp.html('<script>setTimeout(function(){window.location.reload();},10000);</script>',height=0)
+ st.markdown('<div class="card" style="border:2px solid rgba(255,215,0,0.5);text-align:center;font-weight:900">SETTINGS V129 PREMIUM WORLD BEST 95% WIN FIX
