@@ -2,7 +2,7 @@ import streamlit as st
 import random, pandas as pd
 from datetime import datetime, timedelta
 import streamlit.components.v1 as comp
-st.set_page_config(page_title='V130',layout='wide')
+st.set_page_config(page_title='V131',layout='wide')
 C='<div class="card">'
 P='<div class="profit">'
 O='<div class="open">'
@@ -303,7 +303,7 @@ if am=='REAL': cb=rb
 else: cb=db
 pkt_str=now.strftime('%H:%M:%S PKT')
 oc=len(S['ot'])
-st.markdown(C+'SONA V130 NO CUT'+E,unsafe_allow_html=True)
+st.markdown(C+'SONA V131 NO DUP'+E,unsafe_allow_html=True)
 t=C+'DEMO '+str(db)+' REAL '+str(rb)+E
 st.markdown(t,unsafe_allow_html=True)
 t=C+'TODAY '+str(S['td'])+'/96 TOTAL '+str(S['tt'])
@@ -332,9 +332,9 @@ with c1:
  t='<div class="metric">TODAY '+str(S['td'])+E
  st.markdown(t,unsafe_allow_html=True)
 with c2:
- t=st.toggle('AUTO MKT',value=S['amkt'],key='am1')
+ t=st.toggle('AUTO MKT TOP',value=S['amkt'],key='am_top')
  S['amkt']=t
-acc=st.radio('ACCOUNT',['DEMO','REAL'],horizontal=True,key='ac1')
+acc=st.radio('ACCOUNT TOP',['DEMO','REAL'],horizontal=True,key='ac_top')
 if 'REAL' in acc: S['am']='REAL'
 else: S['am']='DEMO'
 am=S['am']
@@ -346,14 +346,14 @@ if am=='REAL': bl=S['hr']
 else: bl=S['hd']
 c_m1,c_m2=st.columns(2)
 with c_m1:
- mk=st.selectbox('MKT',mkts,key='mk1')
+ mk=st.selectbox('MKT TOP',mkts,key='mk_top')
 with c_m2:
- tf=st.selectbox('TF',tfs,key='tf1')
+ tf=st.selectbox('TF TOP',tfs,key='tf_top')
  S['stf']=tf
 if not S['amkt']: S['sm']=mk
 pg=S['pg']
 if pg=='TRADING':
- t=C+'LIVE V130 '+S['sm']+' '+str(lp)+' WIN '+str(wc)+E
+ t=C+'LIVE V131 '+S['sm']+' '+str(lp)+' WIN '+str(wc)+E
  st.markdown(t,unsafe_allow_html=True)
  t=C+'BAL '+str(cb)+' PROFIT '+str(cp)+' AI '+ai
  t+=' '+str(ac)+'% SCORE '+str(sc)+E
@@ -387,13 +387,13 @@ if pg=='TRADING':
  ch+='ct.beginPath();ct.moveTo(x,hy);ct.lineTo(x,ly);'
  ch+='ct.stroke();ct.fillStyle=col;ct.fillRect('
  ch+='x-3,top,6,Math.max(bh,2));});ct.fillStyle='
- ch+=" '#0F0';ct.fillText('V130 NO CUT',pad,12);"
+ ch+=" '#0F0';ct.fillText('V131 NO DUP',pad,12);"
  ch+='</script>'
  ch=ch.replace('CANDLES',cs)
  comp.html(ch,height=180)
  bjs=','.join([str(int(x)) for x in bl])
  bh='<div style="border:1px solid #FD0"'
- bh+='><div>BAL V130 '+str(cb)+' '+am+'</div>'
+ bh+='><div>BAL V131 '+str(cb)+' '+am+'</div>'
  bh+='<canvas id="bc" width="250" height="60"'
  bh+=' style="width:100%;height:50px"></canvas>'
  bh+='</div><script>const bc=document.'
@@ -418,7 +418,7 @@ if pg=='TRADING':
  t=C+'BOS '+bos+' TF '+S['stf']+' OPEN '+str(oc)+E
  st.markdown(t,unsafe_allow_html=True)
 elif pg=='AI_BRAIN':
- st.markdown(C+'AI BRAIN V130'+E,unsafe_allow_html=True)
+ st.markdown(C+'AI BRAIN V131'+E,unsafe_allow_html=True)
  t=A1+'AI '+ai+' '+str(ac)+'% SCORE '+str(sc)+E
  st.markdown(t,unsafe_allow_html=True)
  t=A1+'MKT '+S['sm']+' TF '+S['stf']+' LIVE '+str(lp)+E
@@ -435,7 +435,7 @@ elif pg=='AI_BRAIN':
  t=P+'FINAL SCORE '+str(sc)+' AI '+ai+' CONF '+str(ac)+E
  st.markdown(t,unsafe_allow_html=True)
 elif pg=='HISTORY':
- st.markdown(C+'HISTORY V130 TOL UMAR'+E,unsafe_allow_html=True)
+ st.markdown(C+'HISTORY V131 TOL UMAR'+E,unsafe_allow_html=True)
  t=C+'TODAY '+str(S['td'])+'/96 TOTAL '+str(S['tt'])+E
  st.markdown(t,unsafe_allow_html=True)
  t=C+'PROFIT '+str(cp)+' BAL '+str(cb)+' OPEN '+str(oc)+E
@@ -453,25 +453,25 @@ elif pg=='HISTORY':
   df=pd.DataFrame(S['th'][::-1])
   st.dataframe(df,use_container_width=True,height=400)
  else:
-  st.info('No trades yet V130 AUTO ONLY')
+  st.info('No trades yet V131 AUTO ONLY')
 elif pg=='DEPOSIT':
- st.markdown(C+'DEPOSIT V130'+E,unsafe_allow_html=True)
- if st.button('RESET DEMO',key='rd1'):
+ st.markdown(C+'DEPOSIT V131'+E,unsafe_allow_html=True)
+ if st.button('RESET DEMO',key='rd_dep'):
   S['db']=10000
   S['dp']=0
   S['hd']=[10000]
   st.success('RESET 10000')
- pm=st.selectbox('METHOD',['JazzCash','Easypaisa'],key='pm1')
+ pm=st.selectbox('METHOD DEP',['JazzCash','Easypaisa'],key='pm_dep')
  t=C+'TO '+pm+' PKT '+pkt_str+E
  st.markdown(t,unsafe_allow_html=True)
  acc_full='03001234567'
  t=P+'TO '+acc_full+' SONA PREMIUM'+E
  st.markdown(t,unsafe_allow_html=True)
- ph=st.text_input('Phone FROM',value='03XXXXXXXXX',key='ph1')
- amt=st.number_input('Amount',value=250,key='amt1')
- tid=st.text_input('TID',value='',key='tid1')
- dt=st.text_input('Date',value=pkt().strftime('%Y-%m-%d'),key='dt1')
- if st.button('SUBMIT DEPOSIT',key='sd1'):
+ ph=st.text_input('Phone FROM DEP',value='03XXXXXXXXX',key='ph_dep')
+ amt=st.number_input('Amount DEP',value=250,key='amt_dep')
+ tid=st.text_input('TID DEP',value='',key='tid_dep')
+ dt=st.text_input('Date DEP',value=pkt().strftime('%Y-%m-%d'),key='dt_dep')
+ if st.button('SUBMIT DEPOSIT',key='sd_dep'):
   if len(ph)>=11 and len(tid)>=6 and S['dep']+amt<=2500:
    rec={'TIME':pkt().strftime('%H:%M:%S PKT')}
    rec['METHOD']=pm
@@ -480,7 +480,7 @@ elif pg=='DEPOSIT':
    rec['AMT']=amt
    rec['TID']=tid
    rec['TID_DATE']=dt
-   rec['STATUS']='OK V130'
+   rec['STATUS']='OK V131'
    depr=S['depr']
    depr.append(rec)
    S['depr']=depr
@@ -498,11 +498,11 @@ elif pg=='DEPOSIT':
   st.markdown(C+'DEPOSIT HISTORY'+E,unsafe_allow_html=True)
   df=pd.DataFrame(S['depr'][::-1])
   st.dataframe(df,use_container_width=True,height=200)
- st.markdown(C+'WITHDRAW V130'+E,unsafe_allow_html=True)
- wm=st.selectbox('W METHOD',['JazzCash','Easypaisa'],key='wm1')
- wp=st.text_input('W Phone',value='03XXXXXXXXX',key='wp1')
- wa=st.number_input('W Amount',value=250,key='wa1')
- if st.button('WITHDRAW REAL',key='wd1'):
+ st.markdown(C+'WITHDRAW V131'+E,unsafe_allow_html=True)
+ wm=st.selectbox('W METHOD WD',['JazzCash','Easypaisa'],key='wm_wd')
+ wp=st.text_input('W Phone WD',value='03XXXXXXXXX',key='wp_wd')
+ wa=st.number_input('W Amount WD',value=250,key='wa_wd')
+ if st.button('WITHDRAW REAL',key='wd_wd'):
   if len(wp)>=11 and wa<=S['rb'] and wa>=250:
    S['rb']-=wa
    hr=S['hr']
@@ -517,7 +517,7 @@ elif pg=='DEPOSIT':
    rec['METHOD']=wm
    rec['TO']=wp
    rec['AMT']=wa
-   rec['STATUS']='PROC V130'
+   rec['STATUS']='PROC V131'
    rec['ACC']='REAL'
    th=S['th']
    th.append(rec)
@@ -533,81 +533,81 @@ elif pg=='DEPOSIT':
   st.markdown(C+'WITHDRAW HISTORY'+E,unsafe_allow_html=True)
   df2=pd.DataFrame(S['wd'][::-1])
   st.dataframe(df2,use_container_width=True,height=200)
- if st.button('RESET BOTH',key='rb1'):
+ if st.button('RESET BOTH',key='rb_dep'):
   for k in list(S.keys()):
    del S[k]
   st.rerun()
 elif pg=='SETTINGS':
- st.markdown(C+'SETTINGS V130'+E,unsafe_allow_html=True)
+ st.markdown(C+'SETTINGS V131'+E,unsafe_allow_html=True)
  t=C+'TIME '+pkt_str+' TF '+S['stf']+' OPEN '+str(oc)+E
  st.markdown(t,unsafe_allow_html=True)
  c_a1,c_a2=st.columns(2)
  with c_a1:
-  ta=st.selectbox('Amount',[250,500,750,1000],key='ta1')
+  ta=st.selectbox('Amount SET',[250,500,750,1000],key='ta_set')
   S['ta']=ta
   st.write(ta)
  with c_a2:
-  tph=st.selectbox('Trades 4/H',[4],key='tph1')
+  tph=st.selectbox('Trades SET',[4],key='tph_set')
   S['tph']=tph
   st.write(tph)
  c1,c2=st.columns(2)
  with c1:
   ur=S['ur']
-  ur=st.toggle('RSI',value=ur,key='ur1')
+  ur=st.toggle('RSI ON',value=ur,key='ur_set')
   S['ur']=ur
   rv=S['rthr']
-  rv=st.slider('RSI',30,80,rv,key='rv1')
+  rv=st.slider('RSI VAL',30,80,rv,key='rv_set')
   S['rthr']=rv
   st.write(rv)
  with c2:
   uv=S['uv']
-  uv=st.toggle('VOL',value=uv,key='uv1')
+  uv=st.toggle('VOL ON',value=uv,key='uv_set')
   S['uv']=uv
   vv=S['vthr']
-  vv=st.slider('VOL',5,30,int(vv*10),key='vv1')
+  vv=st.slider('VOL VAL',5,30,int(vv*10),key='vv_set')
   vv=vv/10
   S['vthr']=vv
   st.write(vv)
  c3,c4=st.columns(2)
  with c3:
   ua=S['uat']
-  ua=st.toggle('ATR',value=ua,key='ua1')
+  ua=st.toggle('ATR ON',value=ua,key='ua_set')
   S['uat']=ua
   av=S['athr']
-  av=st.slider('ATR',50,200,av,key='av1')
+  av=st.slider('ATR VAL',50,200,av,key='av_set')
   S['athr']=av
   st.write(av)
  with c4:
   um=S['um']
-  um=st.toggle('MACD',value=um,key='um1')
+  um=st.toggle('MACD ON',value=um,key='um_set')
   S['um']=um
   mv=S['mthr']
-  mv=st.slider('MACD',-50,50,int(mv*100),key='mv1')
+  mv=st.slider('MACD VAL',-50,50,int(mv*100),key='mv_set')
   mv=mv/100
   S['mthr']=mv
   st.write(mv)
  c5,c6=st.columns(2)
  with c5:
   ul=S['ul']
-  ul=st.toggle('LIQ',value=ul,key='ul1')
+  ul=st.toggle('LIQ ON',value=ul,key='ul_set')
   S['ul']=ul
-  lf=st.selectbox('LIQ',['LOW','HIGH'],key='lf1')
+  lf=st.selectbox('LIQ VAL',['LOW','HIGH'],key='lf_set')
   S['lf']=lf
   st.write(lf)
  with c6:
   up=S['up']
-  up=st.toggle('PULL',value=up,key='up1')
+  up=st.toggle('PULL ON',value=up,key='up_set')
   S['up']=up
-  pf=st.selectbox('PULL',['50%','61%','NO'],key='pf1')
+  pf=st.selectbox('PULL VAL',['50%','61%','NO'],key='pf_set')
   S['pf']=pf
   st.write(pf)
  al=S['aon']
- al=st.toggle('ALERT',value=al,key='al1')
+ al=st.toggle('ALERT ON',value=al,key='al_set')
  S['aon']=al
  amkt=S['amkt']
- amkt=st.toggle('AUTO MKT',value=amkt,key='am1')
+ amkt=st.toggle('AUTO MKT SET',value=amkt,key='am_set')
  S['amkt']=amkt
- t=C+'SET V130 READY 95% WIN TODAY '+str(S['td'])+E
+ t=C+'SET V131 READY 95% WIN TODAY '+str(S['td'])+E
  st.markdown(t,unsafe_allow_html=True)
  t=C+'TOTAL '+str(S['tt'])+' OPEN '+str(oc)+' TIME '+pkt_str+E
  st.markdown(t,unsafe_allow_html=True)
@@ -616,23 +616,23 @@ elif pg=='SETTINGS':
 st.write('---')
 b1,b2,b3,b4,b5=st.columns(5)
 with b1:
- if st.button('TRADING',key='b1'):
+ if st.button('TRADING',key='b_trad'):
   S['pg']='TRADING'
   st.rerun()
 with b2:
- if st.button('AI BRAIN',key='b2'):
+ if st.button('AI BRAIN',key='b_ai'):
   S['pg']='AI_BRAIN'
   st.rerun()
 with b3:
- if st.button('HISTORY',key='b3'):
+ if st.button('HISTORY',key='b_hist'):
   S['pg']='HISTORY'
   st.rerun()
 with b4:
- if st.button('DEPOSIT',key='b4'):
+ if st.button('DEPOSIT',key='b_dep'):
   S['pg']='DEPOSIT'
   st.rerun()
 with b5:
- if st.button('SETTINGS',key='b5'):
+ if st.button('SETTINGS',key='b_set'):
   S['pg']='SETTINGS'
   st.rerun()
 comp.html('<script>setTimeout(function(){window.location.reload();},10000);</script>',height=0)
