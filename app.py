@@ -282,7 +282,9 @@ if am=='REAL': cb=rb
 else: cb=db
 pkt_str=now.strftime('%H:%M:%S PKT')
 oc=len(S['ot'])
-t=C+'SONA V136 PRO MAX | DEMO '+str(db)+' | BAL '+str(cb)+E
+t=C+'SONA V137 | DEMO '+str(db)+' | REAL '+str(rb)+E
+st.markdown(t,unsafe_allow_html=True)
+t=C+'BAL '+str(cb)+' '+am+' | DEMO '+str(db)+' REAL '+str(rb)+E
 st.markdown(t,unsafe_allow_html=True)
 t=C+S['sm']+' '+str(lp)+' AI '+ai+' '+str(ac)+'% | '+pkt_str+E
 st.markdown(t,unsafe_allow_html=True)
