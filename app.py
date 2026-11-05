@@ -2,7 +2,7 @@ import streamlit as st
 import random, time
 from datetime import datetime, timedelta
 import pytz
-st.set_page_config(page_title='SONA V145 4 PER HOUR', layout='centered')
+st.set_page_config(page_title='SONA V146 90 CONFIDENCE', layout='centered')
 C='<div style="background:#111;padding:12px;border-radius:12px;color:#fff;font-weight:bold;text-align:center;margin-bottom:6px;font-size:15px;">'
 G='<div style="background:#0f3d1e;padding:10px;border-radius:10px;color:#0f0;font-weight:bold;text-align:center;margin-bottom:6px;font-size:15px;">'
 R='<div style="background:#3d0f0f;padding:10px;border-radius:10px;color:#ff5555;font-weight:bold;text-align:center;margin-bottom:6px;font-size:15px;">'
@@ -11,7 +11,7 @@ B='<div style="background:#0f1e3d;padding:10px;border-radius:10px;color:#5aafff;
 E='</div>'
 BASE={'SOL/USD':179.50,'BTC/USD':67200,'BNB/USD':710,'EUR/USD':1.085,'AUD/CHF OTC':0.585,'GBP/USD':1.275,'USD/JPY':152.30,'XAU/USD':2650,'EUR/GBP OTC':0.850,'USD/CHF OTC':0.885,'GBP/JPY':194.20,'AUD/USD':0.655}
 if 'S' not in st.session_state:
-    st.session_state.S={'am':'DEMO','auto':True,'db':10000,'rb':0,'dp':0,'rp':0,'open':None,'ht':[],'wc':0,'lc':0,'today':0,'total':0,'streak':0,'pair':'SOL/USD','tf':'1MIN','lp':179.50,'ai':'UP','ac':89,'price_hist':[179.50]*30,'dep_hist':[],'with_hist':[],'last':time.time(),'last_trade_time':0,'last_scan_time':0,'name':'Usam','scan':[],'best':'SOL/USD','best_score':0,'best_dir':'UP','candles':[],'quality':'GOOD','auto_scan':True,'hour_trades':[],'hour_start':datetime.now(pytz.timezone('Asia/Karachi')).replace(minute=0,second=0,microsecond=0),'max_per_hour':4,'trade_gap_min':15}
+    st.session_state.S={'am':'DEMO','auto':True,'db':10000,'rb':0,'dp':0,'rp':0,'open':None,'ht':[],'wc':0,'lc':0,'today':0,'total':0,'streak':0,'pair':'SOL/USD','tf':'1MIN','lp':179.50,'ai':'UP','ac':89,'price_hist':[179.50]*30,'dep_hist':[],'with_hist':[],'last':time.time(),'last_trade_time':0,'last_scan_time':0,'name':'Usam','scan':[],'best':'SOL/USD','best_score':0,'best_dir':'UP','candles':[],'quality':'GOOD','auto_scan':True,'hour_trades':[],'hour_start':datetime.now(pytz.timezone('Asia/Karachi')).replace(minute=0,second=0,microsecond=0),'min_conf':90,'min_gap_sec':60}
 S=st.session_state.S
 pkt=pytz.timezone('Asia/Karachi')
 now=datetime.now(pkt)
@@ -70,14 +70,10 @@ def calc_liquidity(prices):
 def calc_trend(prices):
     e20=calc_ema(prices,20)
     return 'UP' if prices[-1]>e20 else 'DOWN'
-def calc_quality(score,rsi,vol,bos,sweep):
-    q=score
-    if vol>5000: q+=5
-    if 'SWEEP' in sweep: q+=5
-    if 'BOS' in bos: q+=5
-    if q>=90: return 'EXCELLENT 🔥'
-    if q>=80: return 'HIGH QUALITY ✅'
-    if q>=70: return 'GOOD 👍'
+def calc_quality(score):
+    if score>=90: return 'EXCELLENT 90+ 🔥'
+    if score>=80: return 'HIGH 80+ ✅'
+    if score>=70: return 'GOOD 👍'
     return 'LOW ⚠️'
 def make_candle():
     base=BASE[S['pair']]
@@ -117,41 +113,31 @@ def ai_scan_all():
         if 'BOS DOWN' in bos: direction='DOWN'
         if 'SWEEP LOW' in sweep: direction='UP'
         if 'SWEEP HIGH' in sweep: direction='DOWN'
-        quality=calc_quality(score,rsi,vol,bos,sweep)
+        quality=calc_quality(score)
         res.append({'pair':pair,'price':prices[-1],'rsi':rsi,'macd':macd,'atr':atr,'vwap':vwap,'vol':vol,'bos':bos,'sweep':sweep,'pull':pull,'hi':hi,'lo':lo,'trend':trend,'score':score,'dir':direction,'quality':quality})
     return sorted(res,key=lambda x: x['score'],reverse=True)
-# ===== 4 TRADE PER HOUR LOGIC =====
+# ===== 90 CONFIDENCE RULE — NO FIXED GAP — NO FIXED 4 =====
 def hour_count():
-    # Naya ghanta shuru hua to reset
-    cur_hour_start=now.replace(minute=0,second=0,microsecond=0)
-    if S['hour_start']!=cur_hour_start:
-        S['hour_start']=cur_hour_start; S['hour_trades']=[]
+    cur=now.replace(minute=0,second=0,microsecond=0)
+    if S['hour_start']!=cur: S['hour_start']=cur; S['hour_trades']=[]
     return len(S['hour_trades'])
-def can_trade():
-    if hour_count()>=S['max_per_hour']: return False
-    # Har trade ke beech 15 min gap — 60 min / 4 = 15 min
-    if S['hour_trades']:
-        last_t=S['hour_trades'][-1]
-        if (now-last_t).total_seconds()<S['trade_gap_min']*60: return False
-    return True
-def minutes_to_next():
-    if hour_count()>=S['max_per_hour']:
-        nxt=(S['hour_start']+timedelta(hours=1)-now).total_seconds()/60
-        return int(nxt)+1
-    if S['hour_trades']:
-        last_t=S['hour_trades'][-1]
-        left=S['trade_gap_min']*60-(now-last_t).total_seconds()
-        return int(left/60)+1 if left>0 else 0
-    return 0
+def can_trade_by_conf():
+    # Sirf 1 min ka chota gap — Taake ek hi second me double trade na khule — 10/15 min gap KHATAM
+    if time.time()-S['last_trade_time']<S['min_gap_sec']: return False
+    # Confidence check — Best score 90+ hona chahiye
+    if S['scan']:
+        best=S['scan'][0]
+        if best['score']<S['min_conf']: return False
+        return True
+    return False
 def open_trade(pair=None,dir=None,manual=False):
     if S['open'] is not None: return False
-    if not manual and not can_trade(): return False
+    if not manual and not can_trade_by_conf(): return False
     bal=S['rb'] if S['am']=='REAL' else S['db']
     if bal<=0: return False
     S['open']={'pair':pair or S['pair'],'tf':S['tf'],'entry':S['lp'],'dir':dir or S['ai'],'am':S['am'],'time':datetime.now(pkt)}
     S['last_trade_time']=time.time()
-    if not manual:
-        S['hour_trades'].append(now)
+    if not manual: S['hour_trades'].append(now)
     return True
 def close_trade():
     if S['open'] is None: return
@@ -167,57 +153,61 @@ if time.time()-S['last']>3:
     S['last']=time.time(); make_candle()
     if S['auto_scan'] and time.time()-S['last_scan_time']>10:
         S['last_scan_time']=time.time(); S['scan']=ai_scan_all(); best=S['scan'][0]
-        if best['score']>=75:
-            S['best']=best['pair']; S['best_score']=best['score']; S['best_dir']=best['dir']; S['quality']=best['quality']
-            if S['open'] is None:
-                S['pair']=best['pair']; S['ai']=best['dir']; S['ac']=best['score']; S['lp']=BASE[best['pair']]
+        S['best']=best['pair']; S['best_score']=best['score']; S['best_dir']=best['dir']; S['quality']=best['quality']
+        if S['open'] is None:
+            S['pair']=best['pair']; S['ai']=best['dir']; S['ac']=best['score']; S['lp']=BASE[best['pair']]
     if S['open'] is not None:
         if (datetime.now(pkt)-S['open']['time']).total_seconds()>=60: close_trade()
+    # AUTO — Sirf 90+ confidence pe — Gap 1 min — Fixed 4 KHATAM
     if S['auto'] and S['open'] is None and S['today']<96:
-        if can_trade() and time.time()-S['last_trade_time']>60:
-            open_trade()
+        if can_trade_by_conf(): open_trade()
 c1,c2=st.columns(2)
 with c1: S['auto']=st.toggle('AUTO TRADING ON',value=S['auto'])
 with c2:
     acc=st.radio('ACCOUNT',['DEMO','REAL'],horizontal=True)
     S['am']='REAL' if 'REAL' in acc else 'DEMO'
 am=S['am']; db=int(S['db']); rb=int(S['rb']); dp=int(S['dp']); rp=int(S['rp']); cb=rb if am=='REAL' else db; cp=rp if am=='REAL' else dp
-t=C+'SONA V145 | DEMO '+str(db)+' | REAL '+str(rb)+E; st.markdown(t,unsafe_allow_html=True)
+t=C+'SONA V146 90 CONF | DEMO '+str(db)+' | REAL '+str(rb)+E; st.markdown(t,unsafe_allow_html=True)
 t=C+'BAL '+str(cb)+' '+am+' | DEMO '+str(db)+' REAL '+str(rb)+' | PROFIT '+str(cp)+E; st.markdown(t,unsafe_allow_html=True)
 t=C+S['pair']+' '+str(S['lp'])+' AI '+S['ai']+' '+str(S['ac'])+'% | '+now.strftime('%H:%M:%S PKT')+' | TF '+S['tf']+E; st.markdown(t,unsafe_allow_html=True)
 if am=='DEMO':
     t=G+'DEMO MODE — Practice — REAL paisa safe hai'+E; st.markdown(t,unsafe_allow_html=True)
 if am=='REAL' and rb==0:
     t=R+'REAL 0 — Pehle DEPOSIT karo'+E; st.markdown(t,unsafe_allow_html=True)
-# ===== 4 PER HOUR BOX — HAMESHA UPAR =====
+# ===== 90 CONFIDENCE BOX =====
 hc=hour_count()
-if hc>=S['max_per_hour']:
-    t=R+'⏰ HOURLY LIMIT FULL — '+str(hc)+'/4 TRADE HO GAYE — NEXT HOUR ME '+str(minutes_to_next())+' MIN BAAD — Ab koi trade nahi khulega!'+E; st.markdown(t,unsafe_allow_html=True)
+if S['scan']:
+    bs=S['scan'][0]['score']
+    if bs>=90:
+        t=G+'✅ 90+ CONFIDENCE MIL GAYA — '+str(bs)+'% — TRADE KHULEGA — 1 min gap bhi chalega!'+E; st.markdown(t,unsafe_allow_html=True)
+    else:
+        t=Y+'⏳ WAIT — BEST SCORE '+str(bs)+'% — 90+ ka wait kar raha hai — Low confidence trade NAHI lega — Is ghante me '+str(hc)+' trade hue (4 se kam/zyada ho sakta hai)'+E; st.markdown(t,unsafe_allow_html=True)
 else:
-    t=Y+'⏰ THIS HOUR: '+str(hc)+'/4 TRADE — Agla trade '+str(minutes_to_next())+' min baad — Har 15 min me 1 trade — 1 Hour me 4 max'+E; st.markdown(t,unsafe_allow_html=True)
+    t=B+'🤖 AI BRAIN SCANNING — 90+ ka wait...'+E; st.markdown(t,unsafe_allow_html=True)
 if S['scan']:
     best=S['scan'][0]
-    t=B+'🤖 AI BRAIN AUTO SCAN ON — BEST: '+best['pair']+' | '+best['dir']+' | SCORE '+str(best['score'])+' | QUALITY '+best['quality']+E; st.markdown(t,unsafe_allow_html=True)
-S['auto_scan']=st.toggle('AI BRAIN AUTO SCAN ON — Automatic Select Market',value=S['auto_scan'])
-# Hour setting — Tum badal sakte ho
-S['max_per_hour']=st.selectbox('HAR 1 HOUR ME KITNE TRADE?',[2,3,4,5,6],index=2)
-S['trade_gap_min']=st.selectbox('HAR TRADE KE BEECH GAP (MIN)',[10,15,20,30],index=1)
+    t=B+'🤖 AI BRAIN AUTO SCAN ON — BEST: '+best['pair']+' | '+best['dir']+' | SCORE '+str(best['score'])+' | '+best['quality']+' | THIS HOUR: '+str(hc)+' trade'+E; st.markdown(t,unsafe_allow_html=True)
+S['auto_scan']=st.toggle('AI BRAIN AUTO SCAN ON',value=S['auto_scan'])
+# Confidence setting — Tum badal sakte ho 85 / 90 / 95
+S['min_conf']=st.selectbox('MIN CONFIDENCE — Kitne % se neeche trade NAHI lena?',[80,85,90,95],index=2)
+S['min_gap_sec']=st.selectbox('MIN GAP — 2 trade ke beech sab se kam gap',[30,60,120,300],index=1)
+t=C+'RULE: Fixed 10/15 min gap KHATAM — Fixed 4 KHATAM — Sirf '+str(S['min_conf'])+'%+ confidence wala trade — 1 min / 8 min / 15 min / 20 min — Jab sah time aaye tab trade'+E; st.markdown(t,unsafe_allow_html=True)
 menu=st.selectbox('MENU — PORA APP',['🧠 AI BRAIN AUTO SCAN','🏠 HOME — CANDLE','📈 TERMINAL — CANDLE','💰 DEPOSIT','💸 WITHDRAW','📊 TRADES / HISTORY','⚙️ SETTINGS'],index=1)
 if S['candles']:
     lc=S['candles'][-1]
     move='🟢 UP' if lc['dir']=='UP' else '🔴 DOWN'
     t=C+'LAST CANDLE: '+move+' | OPEN '+str(lc['o'])+' | CLOSE '+str(lc['c'])+' | HIGH '+str(lc['h'])+' | LOW '+str(lc['l'])+' | VOL '+str(lc['v'])+' | '+lc['time']+E; st.markdown(t,unsafe_allow_html=True)
 if menu=='🧠 AI BRAIN AUTO SCAN':
-    t=B+'🧠 AI BRAIN — AUTOMATIC — 4 PER HOUR'+E; st.markdown(t,unsafe_allow_html=True)
-    t=C+'AI har 10 sec scan — Best Quality auto select — Har 15 min me 1 trade — 1 Hour me 4 max'+E; st.markdown(t,unsafe_allow_html=True)
+    t=B+'🧠 AI BRAIN — 90+ CONFIDENCE ONLY'+E; st.markdown(t,unsafe_allow_html=True)
+    t=C+'1 min gap bhi OK — 8 min gap bhi OK — 20 min gap bhi OK — Sirf confidence important hai'+E; st.markdown(t,unsafe_allow_html=True)
     if st.button('🧠 SCAN NOW'):
         S['scan']=ai_scan_all(); st.rerun()
     if S['scan']:
         best=S['scan'][0]
-        t=G+'🏆 BEST: '+best['pair']+' | '+best['dir']+' | SCORE '+str(best['score'])+' | QUALITY '+best['quality']+E; st.markdown(t,unsafe_allow_html=True)
+        t=G+'🏆 BEST: '+best['pair']+' | '+best['dir']+' | SCORE '+str(best['score'])+' | '+best['quality']+E; st.markdown(t,unsafe_allow_html=True)
         t=Y+'STRATEGY: '+best['bos']+' + '+best['sweep']+' + '+best['pull']+' + Trend '+best['trend']+E; st.markdown(t,unsafe_allow_html=True)
         for s in S['scan']:
-            col=G if s['score']>=85 else Y if s['score']>=75 else C
+            col=G if s['score']>=90 else Y if s['score']>=80 else C
             t=col+s['pair']+' '+str(s['price'])+' | '+s['dir']+' '+str(s['score'])+'% | '+s['quality']+' | RSI '+str(s['rsi'])+' | MACD '+str(s['macd'])+' | ATR '+str(s['atr'])+' | VWAP '+str(s['vwap'])+' | VOL '+str(s['vol'])+' | '+s['bos']+' | '+s['sweep']+E; st.markdown(t,unsafe_allow_html=True)
 if menu in ['🏠 HOME — CANDLE','📈 TERMINAL — CANDLE']:
     if menu=='📈 TERMINAL — CANDLE':
@@ -227,7 +217,7 @@ if menu in ['🏠 HOME — CANDLE','📈 TERMINAL — CANDLE']:
         S['tf']=st.selectbox('TF / TIME',TFS,index=TFS.index(S['tf']))
         if S['pair']!=old: S['lp']=BASE[S['pair']]; S['candles']=[]; S['price_hist']=[S['lp']]*30
     else:
-        t=C+'HOME — TODAY '+str(S['today'])+'/96 TOTAL '+str(S['total'])+' | WIN '+str(S['wc'])+' LOSS '+str(S['lc'])+' PROFIT '+str(cp)+' | HOUR '+str(hc)+'/4'+E; st.markdown(t,unsafe_allow_html=True)
+        t=C+'HOME — TODAY '+str(S['today'])+'/96 TOTAL '+str(S['total'])+' | WIN '+str(S['wc'])+' LOSS '+str(S['lc'])+' PROFIT '+str(cp)+' | THIS HOUR '+str(hc)+' (Fixed nahi)'+E; st.markdown(t,unsafe_allow_html=True)
     st.line_chart(S['price_hist'])
     pr=S['price_hist']; rsi=calc_rsi(pr); macd,sig,hist=calc_macd(pr); atr=calc_atr(S['candles']); vwap=calc_vwap(S['candles']); bos=calc_bos(pr); sweep=calc_sweep(pr); pull=calc_pullback(pr); hi,lo=calc_liquidity(pr); vol=S['candles'][-1]['v'] if S['candles'] else 0
     t=C+'RSI '+str(rsi)+' | Volume '+str(vol)+' | ATR '+str(atr)+' | VWAP '+str(vwap)+' | MACD '+str(macd)+' | Sig '+str(sig)+E; st.markdown(t,unsafe_allow_html=True)
@@ -238,11 +228,11 @@ if menu in ['🏠 HOME — CANDLE','📈 TERMINAL — CANDLE']:
         t=G+'OPEN TRADE LIVE: '+o['pair']+' ENTRY '+str(o['entry'])+' | '+o['dir']+' | '+str(left)+'s LEFT | '+o['am']+' | Now '+str(S['lp'])+E; st.markdown(t,unsafe_allow_html=True)
         if st.button('CLOSE NOW'): close_trade(); st.rerun()
     else:
-        if can_trade():
-            t=C+'NO OPEN — Agla AUTO trade 1 min me — Hour '+str(hc)+'/4'+E; st.markdown(t,unsafe_allow_html=True)
+        if can_trade_by_conf():
+            t=G+'✅ 90+ READY — Agla trade abhi khulega'+E; st.markdown(t,unsafe_allow_html=True)
         else:
-            t=R+'NO OPEN — HOURLY LIMIT / GAP — Agla trade '+str(minutes_to_next())+' min baad'+E; st.markdown(t,unsafe_allow_html=True)
-        if st.button('TRADE ABHI KHOLO — MANUAL (Hour limit se bahar)'): open_trade(manual=True); st.rerun()
+            t=C+'⏳ WAIT — 90+ confidence ka wait — 1 min / 8 min / 15 min — Jab sah time aaye tab trade'+E; st.markdown(t,unsafe_allow_html=True)
+        if st.button('TRADE ABHI KHOLO — MANUAL'): open_trade(manual=True); st.rerun()
     b1,b2=st.columns(2)
     with b1:
         if st.button('MANUAL UP CALL'): S['ai']='UP'; open_trade(manual=True); st.rerun()
@@ -275,21 +265,20 @@ if menu=='💸 WITHDRAW':
         t=R+'WITHDRAW -'+str(w['amt'])+' | '+w['time']+E; st.markdown(t,unsafe_allow_html=True)
 if menu=='📊 TRADES / HISTORY':
     t=C+'TRADES - HISTORY FULL DAY'+E; st.markdown(t,unsafe_allow_html=True)
-    t=C+'TODAY '+str(S['today'])+'/96 TOTAL '+str(S['total'])+' | WIN '+str(S['wc'])+' LOSS '+str(S['lc'])+' PROFIT '+str(cp)+' | THIS HOUR '+str(hc)+'/4'+E; st.markdown(t,unsafe_allow_html=True)
-    t=Y+'HOURLY RULE: Har 15 min me 1 — 1 Hour me 4 max — Agar 4 ho gaye to agle ghante tak STOP'+E; st.markdown(t,unsafe_allow_html=True)
+    t=C+'TODAY '+str(S['today'])+'/96 TOTAL '+str(S['total'])+' | WIN '+str(S['wc'])+' LOSS '+str(S['lc'])+' PROFIT '+str(cp)+' | THIS HOUR '+str(hc)+E; st.markdown(t,unsafe_allow_html=True)
+    t=Y+'RULE: 90+ confidence hi trade — Ghante me 2 bhi ho sakta — 6 bhi ho sakta — Fixed 4 KHATAM'+E; st.markdown(t,unsafe_allow_html=True)
     if S['open'] is not None:
         o=S['open']; t=G+'OPEN '+o['pair']+' ENTRY '+str(o['entry'])+' | '+o['dir']+' | '+o['am']+E; st.markdown(t,unsafe_allow_html=True)
-    else:
-        t=C+'NO OPEN — Hour '+str(hc)+'/4 — Next in '+str(minutes_to_next())+' min'+E; st.markdown(t,unsafe_allow_html=True)
     for h in reversed(S['ht'][-15:]):
         col='🟢 WIN' if h['win'] else '🔴 LOSS'
         t=C+col+' '+h['pair']+' '+h['tf']+' ENTRY '+str(h['entry'])+' EXIT '+str(h['exit'])+' '+str(h['amt'])+' | '+h['am']+' | '+h['time']+E; st.markdown(t,unsafe_allow_html=True)
     if st.button('REFRESH HISTORY'): st.rerun()
 if menu=='⚙️ SETTINGS':
-    t=C+'SETTINGS — 4 PER HOUR CONTROL'+E; st.markdown(t,unsafe_allow_html=True)
+    t=C+'SETTINGS — 90 CONFIDENCE CONTROL'+E; st.markdown(t,unsafe_allow_html=True)
     S['name']=st.text_input('Tumhara Naam',value=S['name'])
+    t=C+'SCREEN OPEN / CLOSED: App tab khula rakho — DATA ON rakho — Phone lock bhi ho to DATA ON rakho — Tab band kar doge to Streamlit so jayega — Isliye Chrome me tab khula rakho, DATA ON rakho'+E; st.markdown(t,unsafe_allow_html=True)
     if st.button('RESET DEMO 10000'): S['db']=10000; S['dp']=0; S['today']=0; S['total']=0; S['wc']=0; S['lc']=0; S['ht']=[]; S['open']=None; S['candles']=[]; S['hour_trades']=[]; st.rerun()
-    if st.button('RESET HOUR — 4 Trade Dobara'): S['hour_trades']=[]; st.rerun()
-    t=C+'APP: SONA V145 | USER: '+S['name']+' | STREAK '+str(S['streak'])+' | HOUR '+str(hc)+'/4'+E; st.markdown(t,unsafe_allow_html=True)
-t=C+'STREAK '+str(S['streak'])+' | BEST '+S['best']+' '+str(S['best_score'])+'% | HOUR '+str(hc)+'/4 | V145 4 PER HOUR'+E; st.markdown(t,unsafe_allow_html=True)
+    if st.button('RESET HOUR'): S['hour_trades']=[]; st.rerun()
+    t=C+'APP: SONA V146 | USER: '+S['name']+' | STREAK '+str(S['streak'])+' | HOUR '+str(hc)+E; st.markdown(t,unsafe_allow_html=True)
+t=C+'STREAK '+str(S['streak'])+' | BEST '+S['best']+' '+str(S['best_score'])+'% | HOUR '+str(hc)+' | V146 90 CONF'+E; st.markdown(t,unsafe_allow_html=True)
 time.sleep(3); st.rerun()
