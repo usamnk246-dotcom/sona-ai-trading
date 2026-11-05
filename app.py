@@ -2,7 +2,7 @@ import streamlit as st
 import random, pandas as pd
 from datetime import datetime, timedelta
 import streamlit.components.v1 as comp
-st.set_page_config(page_title='V134 PRO',layout='wide')
+st.set_page_config(page_title='V135 PRO MAX',layout='wide')
 C='<div class="card">'
 P='<div class="profit">'
 O='<div class="open">'
@@ -131,7 +131,7 @@ b=bmap[k]
 lp=round(b+random.uniform(-0.02,0.03),4)
 if k in ['BTC','Bitcoin','Gold','BNB']:
  lp=round(b+random.uniform(-10,20),2)
-cc=20
+cc=24
 ohlc=[]
 p=lp-0.01 if k=='EUR' else lp-20
 for i in range(cc):
@@ -282,7 +282,7 @@ if am=='REAL': cb=rb
 else: cb=db
 pkt_str=now.strftime('%H:%M:%S PKT')
 oc=len(S['ot'])
-t=C+'SONA V134 PRO | DEMO '+str(db)+' | BAL '+str(cb)+E
+t=C+'SONA V135 PRO MAX | DEMO '+str(db)+' | BAL '+str(cb)+E
 st.markdown(t,unsafe_allow_html=True)
 t=C+S['sm']+' '+str(lp)+' AI '+ai+' '+str(ac)+'% | '+pkt_str+E
 st.markdown(t,unsafe_allow_html=True)
@@ -301,6 +301,9 @@ if am=='REAL': cp=rp
 else: cp=dp
 if am=='REAL': bl=S['hr']
 else: bl=S['hd']
+pages=['TERMINAL','TRADES','MARKET','HOME','HELP','DEPOSIT']
+pg0=st.selectbox('GO TO',pages,index=pages.index(S['pg']) if S['pg'] in pages else 0,key='nav_top')
+S['pg']=pg0
 pg=S['pg']
 if pg=='HOME':
  st.markdown(C+'HOME - Demo Account'+E,unsafe_allow_html=True)
@@ -327,8 +330,6 @@ if pg=='HOME':
   st.success('Task Accepted')
 elif pg=='TRADES':
  st.markdown(C+'TRADES - HISTORY FULL DAY'+E,unsafe_allow_html=True)
- t=C+'Fixed Time InZone Forex Stocks'+E
- st.markdown(t,unsafe_allow_html=True)
  t=C+'TODAY '+str(S['td'])+'/96 TOTAL '+str(S['tt'])+E
  st.markdown(t,unsafe_allow_html=True)
  if oc>0:
@@ -350,8 +351,6 @@ elif pg=='TRADES':
    st.markdown(t,unsafe_allow_html=True)
    t=C+'PROFIT '+str(r['PROF'])+' '+r['TIME']+' BAL '+str(r['BAL'])+E
    st.markdown(t,unsafe_allow_html=True)
-  df=pd.DataFrame(S['th'][::-1])
-  st.dataframe(df,use_container_width=True,height=300)
  else:
   st.info('No closed yet - AUTO STARTING - OPEN above')
  st.markdown(C+'Open Full History - Full Day'+E,unsafe_allow_html=True)
@@ -373,17 +372,17 @@ elif pg=='TERMINAL':
  cs=','.join(cjs)
  ch='<div style="background:#111;border:1px"'
  ch+=' solid #FCD535;border-radius:14px;padding:6px"'
- ch+='><canvas id="cc" width="360" height="160"'
- ch+=' style="width:100%;height:160px"></canvas></div>'
+ ch+='><canvas id="cc" width="360" height="200"'
+ ch+=' style="width:100%;height:200px"></canvas></div>'
  ch+='<script>const cv=document.getElementById'
  ch+="('cc');const ct=cv.getContext('2d');"
  ch+='const ca=[CANDLES];const W=cv.width;const H='
- ch+='cv.height;const pad=10;const n=ca.length;let'
+ ch+='cv.height;const pad=12;const n=ca.length;let'
  ch+=' mn=Math.min(...ca.map(x=>x.l));let mx='
  ch+='Math.max(...ca.map(x=>x.h));let rg=mx-mn;'
  ch+='if(rg<20){rg=20;mn-=10;mx+=10;}mn-=rg*0.1;'
  ch+='mx+=rg*0.1;rg=mx-mn;ca.forEach((c,i)=>{const'
- ch+=' x=pad+i*W/n;const up=c.c>=c.o;const col='
+ ch+=' x=pad+i*(W-pad*2)/n;const up=c.c>=c.o;const col='
  ch+="up?'#0ECB81':'#F6465D';const hy=pad+(1-(c.h-mn)/"
  ch+='rg)*(H-pad*2);const ly=pad+(1-(c.l-mn)/rg)*'
  ch+='(H-pad*2);const oy=pad+(1-(c.o-mn)/rg)*'
@@ -393,10 +392,10 @@ elif pg=='TERMINAL':
  ch+='ct.beginPath();ct.moveTo(x,hy);ct.lineTo(x,ly);'
  ch+='ct.stroke();ct.fillStyle=col;ct.fillRect('
  ch+='x-4,top,8,Math.max(bh,3));});ct.fillStyle='
- ch+=" '#FCD535';ct.fillText('V134 CANDLE',pad,12);"
+ ch+=" '#FCD535';ct.fillText('V135 CANDLE',pad,12);"
  ch+='</script>'
  ch=ch.replace('CANDLES',cs)
- comp.html(ch,height=220)
+ comp.html(ch,height=260)
  st.markdown(C+'INDICATORS - RSI VOL ATR VWAP MACD'+E,unsafe_allow_html=True)
  t=G+'RSI '+str(rsi)+' | VOL '+str(vol)+' | ATR '+str(atr)+E
  st.markdown(t,unsafe_allow_html=True)
@@ -430,7 +429,7 @@ elif pg=='TERMINAL':
  st.markdown(t,unsafe_allow_html=True)
 elif pg=='MARKET':
  st.markdown(C+'MARKET - AI BRAIN'+E,unsafe_allow_html=True)
- t=A1+'AI BRAIN V134 SCORE '+str(sc)+' AI '+ai+E
+ t=A1+'AI BRAIN V135 SCORE '+str(sc)+' AI '+ai+E
  st.markdown(t,unsafe_allow_html=True)
  t=A1+'CONF '+str(ac)+'% MKT '+S['sm']+' LIVE '+str(lp)+E
  st.markdown(t,unsafe_allow_html=True)
@@ -466,37 +465,31 @@ elif pg=='HELP':
  st.markdown(C+'Education - Expand knowledge'+E,unsafe_allow_html=True)
  st.markdown(C+'Trading Tutorials - Learn open trade'+E,unsafe_allow_html=True)
  st.markdown(C+'Trading Conditions - Beneficial'+E,unsafe_allow_html=True)
- st.markdown(C+'SETTINGS V134 - Indicators'+E,unsafe_allow_html=True)
+ st.markdown(C+'SETTINGS V135 - Indicators'+E,unsafe_allow_html=True)
  t=C+'TIME '+pkt_str+' TF '+S['stf']+' OPEN '+str(oc)+E
  st.markdown(t,unsafe_allow_html=True)
  rv=S['rthr']
  rv=st.slider('RSI VAL',30,80,rv,key='rv_help')
  S['rthr']=rv
- st.write(rv)
  vv=S['vthr']
  vv=st.slider('VOL VAL',5,30,int(vv*10),key='vv_help')
  vv=vv/10
  S['vthr']=vv
- st.write(vv)
  av=S['athr']
  av=st.slider('ATR VAL',50,200,av,key='av_help')
  S['athr']=av
- st.write(av)
  mv=S['mthr']
  mv=st.slider('MACD VAL',-50,50,int(mv*100),key='mv_help')
  mv=mv/100
  S['mthr']=mv
- st.write(mv)
  lf=st.selectbox('LIQ VAL',['LOW','HIGH'],key='lf_help')
  S['lf']=lf
- st.write(lf)
  pf=st.selectbox('PULL VAL',['50%','61%','NO'],key='pf_help')
  S['pf']=pf
- st.write(pf)
- t=C+'SET V134 READY 95% WIN'+E
+ t=C+'SET V135 READY 95% WIN'+E
  st.markdown(t,unsafe_allow_html=True)
 elif pg=='DEPOSIT':
- st.markdown(C+'DEPOSIT V134 - Payments'+E,unsafe_allow_html=True)
+ st.markdown(C+'DEPOSIT V135 - Payments'+E,unsafe_allow_html=True)
  if st.button('RESET DEMO',key='rd_dep'):
   S['db']=10000
   S['dp']=0
@@ -525,7 +518,7 @@ elif pg=='DEPOSIT':
    rec['AMT']=amt
    rec['TID']=tid
    rec['TID_DATE']=dt
-   rec['STATUS']='OK V134'
+   rec['STATUS']='OK V135'
    depr=S['depr']
    depr.append(rec)
    S['depr']=depr
@@ -541,9 +534,10 @@ elif pg=='DEPOSIT':
    st.error('Enter phone 11 TID 6 LIMIT 2500')
  if len(S['depr'])>0:
   st.markdown(C+'DEPOSIT HISTORY'+E,unsafe_allow_html=True)
-  df=pd.DataFrame(S['depr'][::-1])
-  st.dataframe(df,use_container_width=True,height=200)
- st.markdown(C+'WITHDRAW V134'+E,unsafe_allow_html=True)
+  for r in S['depr'][::-1]:
+   t=C+r['METHOD']+' +'+str(r['AMT'])+' '+r['TID']+E
+   st.markdown(t,unsafe_allow_html=True)
+ st.markdown(C+'WITHDRAW V135'+E,unsafe_allow_html=True)
  wm=st.selectbox('W METHOD WD',['JazzCash','Easypaisa'],key='wm_wd')
  wp=st.text_input('W Phone WD',value='03XXXXXXXXX',key='wp_wd')
  wa=st.number_input('W Amount WD',value=250,key='wa_wd')
@@ -562,7 +556,7 @@ elif pg=='DEPOSIT':
    rec['METHOD']=wm
    rec['TO']=wp
    rec['AMT']=wa
-   rec['STATUS']='PROC V134'
+   rec['STATUS']='PROC V135'
    rec['ACC']='REAL'
    th=S['th']
    th.append(rec)
@@ -576,41 +570,11 @@ elif pg=='DEPOSIT':
    st.error('Invalid phone low bal REAL')
  if len(S['wd'])>0:
   st.markdown(C+'WITHDRAW HISTORY'+E,unsafe_allow_html=True)
-  df2=pd.DataFrame(S['wd'][::-1])
-  st.dataframe(df2,use_container_width=True,height=200)
+  for r in S['wd'][::-1]:
+   t=C+r['METHOD']+' -'+str(r['AMT'])+' to '+r['TO']+E
+   st.markdown(t,unsafe_allow_html=True)
  if st.button('RESET BOTH',key='rb_dep'):
   for k in list(S.keys()):
    del S[k]
-  st.rerun()
-st.write('---')
-b1,b2,b3,b4,b5=st.columns(5)
-with b1:
- if st.button('Home',key='b_home'):
-  S['pg']='HOME'
-  st.rerun()
-with b2:
- if st.button('Trades',key='b_trad'):
-  S['pg']='TRADES'
-  st.rerun()
-with b3:
- if st.button('Terminal',key='b_term'):
-  S['pg']='TERMINAL'
-  st.rerun()
-with b4:
- if st.button('Market',key='b_mkt'):
-  S['pg']='MARKET'
-  st.rerun()
-with b5:
- if st.button('Help',key='b_help'):
-  S['pg']='HELP'
-  st.rerun()
-b6,b7=st.columns(2)
-with b6:
- if st.button('Deposit',key='b_dep2'):
-  S['pg']='DEPOSIT'
-  st.rerun()
-with b7:
- if st.button('Withdraw',key='b_wd2'):
-  S['pg']='DEPOSIT'
   st.rerun()
 comp.html('<script>setTimeout(function(){window.location.reload();},10000);</script>',height=0)
