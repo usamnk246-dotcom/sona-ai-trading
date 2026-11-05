@@ -2,33 +2,37 @@ import streamlit as st
 import random, pandas as pd
 from datetime import datetime, timedelta
 import streamlit.components.v1 as comp
-st.set_page_config(page_title='V133',layout='wide')
+st.set_page_config(page_title='V134 PRO',layout='wide')
 C='<div class="card">'
 P='<div class="profit">'
 O='<div class="open">'
 A1='<div class="ai">'
+G='<div class="grid">'
 E='</div>'
 CSS='''<style>
 #MainMenu,footer,header{visibility:hidden}
-.stApp{background:#0A0A0A;color:#fff}
-.card{background:#1A1A1A;border:1px solid #222}
-.card{border-radius:16px;padding:12px;margin:6px}
-.profit{background:#0F0;border-radius:16px}
-.profit{padding:12px;margin:6px;color:#000}
+.stApp{background:#0B0E11;color:#fff}
+.card{background:#1E2329;border:1px solid #2B3139}
+.card{border-radius:14px;padding:10px;margin:5px}
+.profit{background:#0ECB81;border-radius:14px}
+.profit{padding:10px;margin:5px;color:#000}
 .profit{font-weight:900}
-.open{background:#2A2A00;border:1px solid #FD0}
-.open{border-radius:14px;padding:10px;margin:6px}
-.ai{background:#0A1A2A;border:1px solid #0FF}
-.ai{border-radius:14px;padding:10px;margin:6px}
-.stButton>button{background:#0F0;color:#000}
-.stButton>button{font-weight:900;border-radius:20px}
-.stButton>button{height:44px;width:100%}
+.open{background:#2A2A00;border:1px solid #FCD535}
+.open{border-radius:12px;padding:9px;margin:5px}
+.ai{background:#1A2A3A;border:1px solid #2EBDFF}
+.ai{border-radius:12px;padding:9px;margin:5px}
+.grid{background:#161A1E;border:1px solid #2B3139}
+.grid{border-radius:12px;padding:9px;margin:5px}
+.stButton>button{background:#FCD535;color:#000}
+.stButton>button{font-weight:900;border-radius:12px}
+.stButton>button{height:42px;width:100%}
 </style>'''
 st.markdown(CSS,unsafe_allow_html=True)
 def pkt():
  return datetime.utcnow()+timedelta(hours=5)
 def tfm(t):
  if '1MIN' in t: return 1
+ if '2MIN' in t: return 2
  if '5MIN' in t: return 5
  if '15MIN' in t: return 15
  if '30MIN' in t: return 30
@@ -74,7 +78,6 @@ init('aon',True)
 init('dep',0)
 init('depr',[])
 init('wd',[])
-init('tasks',0)
 now=pkt()
 if now.day!=S['day']:
  S['td']=0
@@ -151,11 +154,14 @@ else: cd='DOWN'
 rsi=round(55+random.uniform(-5,15),1)
 vol=lc['V']
 atr=round(95+random.uniform(-8,12),1)
-vwap=round(6750+random.uniform(-30,50),1)
+vwap=round(lp+random.uniform(-0.01,0.01),4)
 macd=round(random.uniform(-0.1,0.15),2)
 ema=round(lp-random.uniform(-0.01,0.01),4)
-liq='LOW'
+liq=random.choice(['LOW','HIGH'])
 bos='BULL' if lp>vwap else 'BEAR'
+sweep='YES' if random.random()>0.5 else 'NO'
+pull='50%' if random.random()>0.5 else '61%'
+strat='RSI+MACD+VWAP+BOS'
 sc=round(random.uniform(2.5,4.5),1)
 if sc>=2.0: ai='UP'
 else: ai='DOWN'
@@ -276,38 +282,16 @@ if am=='REAL': cb=rb
 else: cb=db
 pkt_str=now.strftime('%H:%M:%S PKT')
 oc=len(S['ot'])
-st.markdown(C+'SONA V133 OLYMP STYLE'+E,unsafe_allow_html=True)
-t=C+'DEMO '+str(db)+' REAL '+str(rb)+E
+t=C+'SONA V134 PRO | DEMO '+str(db)+' | BAL '+str(cb)+E
 st.markdown(t,unsafe_allow_html=True)
-t=C+'TODAY '+str(S['td'])+'/96 TOTAL '+str(S['tt'])
-t+=' HOUR '+str(ht)+'/4 WR '+str(wrp)+E
+t=C+S['sm']+' '+str(lp)+' AI '+ai+' '+str(ac)+'% | '+pkt_str+E
 st.markdown(t,unsafe_allow_html=True)
-t=C+'CONF '+str(ac)+'% SCORE '+str(sc)+' AI '+ai
-t+=' OPEN '+str(oc)+' TIME '+pkt_str+E
-st.markdown(t,unsafe_allow_html=True)
-t=P+'PROFIT +'+str(dp if am=='DEMO' else rp)
-t+=' BAL '+str(cb)+' '+S['sm']+' '+str(lp)+E
-st.markdown(t,unsafe_allow_html=True)
-if oc>0:
- for o in S['ot']:
-  es=o['EXP'].strftime('%H:%M:%S PKT')
-  t=O+'OPEN '+o['MKT']+' '+o['TF']
-  t+=' ENTRY '+str(o['ENTRY'])+' PRED '+o['PRED']+E
-  st.markdown(t,unsafe_allow_html=True)
-  t=O+o['TIME']+'->EXP '+es
-  t+=' AMT '+str(o['AMT'])+' WAIT '+str(tfm(o['TF']))+E
-  st.markdown(t,unsafe_allow_html=True)
-else:
- t=C+'NO OPEN - AUTO TRADE STARTING'+E
- st.markdown(t,unsafe_allow_html=True)
 c1,c2=st.columns(2)
 with c1:
- t='<div class="metric">TODAY '+str(S['td'])+E
- st.markdown(t,unsafe_allow_html=True)
-with c2:
- t=st.toggle('AUTO TRADING ON',value=S['auto'],key='auto_home')
+ t=st.toggle('AUTO TRADING ON',value=S['auto'],key='auto_top')
  S['auto']=t
-acc=st.radio('ACCOUNT TOP',['DEMO','REAL'],horizontal=True,key='ac_top')
+with c2:
+ acc=st.radio('ACCOUNT',['DEMO','REAL'],horizontal=True,key='ac_top')
 if 'REAL' in acc: S['am']='REAL'
 else: S['am']='DEMO'
 am=S['am']
@@ -319,8 +303,8 @@ if am=='REAL': bl=S['hr']
 else: bl=S['hd']
 pg=S['pg']
 if pg=='HOME':
- st.markdown(C+'HOME - Demo account'+E,unsafe_allow_html=True)
- t=C+'Demo account D'+str(cb)+' REAL '+str(rb)+E
+ st.markdown(C+'HOME - Demo Account'+E,unsafe_allow_html=True)
+ t=P+'BAL '+str(cb)+' DEMO '+str(db)+' REAL '+str(rb)+E
  st.markdown(t,unsafe_allow_html=True)
  c_h1,c_h2=st.columns(2)
  with c_h1:
@@ -332,57 +316,48 @@ if pg=='HOME':
    S['pg']='DEPOSIT'
    st.rerun()
  st.markdown(C+'Ready, set, race!'+E,unsafe_allow_html=True)
- t=C+'Join tournament every day'+E
- st.markdown(t,unsafe_allow_html=True)
- t=C+'Compete for share of $12,695 RFT'+E
+ t=C+'Join tournament every day - $12,695 RFT'+E
  st.markdown(t,unsafe_allow_html=True)
  st.markdown(C+'Tasks & Rewards 4 Available'+E,unsafe_allow_html=True)
- t=C+'Trade until USD 200 turnover'+E
- st.markdown(t,unsafe_allow_html=True)
- t=C+'on EUR/CAD OTC - Accept Task'+E
+ t=C+'Trade USD 200 turnover on EUR/CAD OTC'+E
  st.markdown(t,unsafe_allow_html=True)
  t=C+'Make 6 profit row on EUR'+E
  st.markdown(t,unsafe_allow_html=True)
  if st.button('Accept Task',key='task_home'):
-  S['tasks']+=1
   st.success('Task Accepted')
- st.markdown(C+'Lucky Race - How streak?'+E,unsafe_allow_html=True)
- t=C+'Maximize bonus benefits'+E
- st.markdown(t,unsafe_allow_html=True)
- t=C+'Daily prize inside'+E
- st.markdown(t,unsafe_allow_html=True)
 elif pg=='TRADES':
- st.markdown(C+'TRADES - History Full Day'+E,unsafe_allow_html=True)
+ st.markdown(C+'TRADES - HISTORY FULL DAY'+E,unsafe_allow_html=True)
  t=C+'Fixed Time InZone Forex Stocks'+E
  st.markdown(t,unsafe_allow_html=True)
- st.markdown(C+'History - Show All'+E,unsafe_allow_html=True)
+ t=C+'TODAY '+str(S['td'])+'/96 TOTAL '+str(S['tt'])+E
+ st.markdown(t,unsafe_allow_html=True)
  if oc>0:
-  st.markdown(C+'OPEN TRADES WAIT'+E,unsafe_allow_html=True)
+  st.markdown(C+'OPEN TRADES - LIVE'+E,unsafe_allow_html=True)
   for o in S['ot']:
    es=o['EXP'].strftime('%H:%M:%S PKT')
    t=O+'OPEN '+o['MKT']+' '+o['TF']+' '+o['TIME']+E
    st.markdown(t,unsafe_allow_html=True)
-   t=O+'-> '+es+' ENTRY '+str(o['ENTRY'])+E
+   t=O+'-> '+es+' ENTRY '+str(o['ENTRY'])+' PRED '+o['PRED']+E
+   st.markdown(t,unsafe_allow_html=True)
+   t=O+'AMT '+str(o['AMT'])+' WAIT '+str(tfm(o['TF']))+E
    st.markdown(t,unsafe_allow_html=True)
  if len(S['th'])>0:
+  st.markdown(C+'CLOSED HISTORY - FULL DAY'+E,unsafe_allow_html=True)
+  st.markdown(C+'DATE '+pkt().strftime('%Y-%m-%d')+E,unsafe_allow_html=True)
+  for r in S['th'][::-1]:
+   col='WIN' if r['PROF']>=0 else 'LOSE'
+   t=C+r['MKT']+' '+r['TF']+' D'+str(r['AMT'])+' '+col+E
+   st.markdown(t,unsafe_allow_html=True)
+   t=C+'PROFIT '+str(r['PROF'])+' '+r['TIME']+' BAL '+str(r['BAL'])+E
+   st.markdown(t,unsafe_allow_html=True)
   df=pd.DataFrame(S['th'][::-1])
-  st.dataframe(df,use_container_width=True,height=400)
-  for r in S['th'][::-1][:10]:
-   col='#0F0' if r['PROF']>=0 else '#F44'
-   t=C+r['MKT']+' 90% '+r['TF']+' D'+str(r['AMT'])+E
-   st.markdown(t,unsafe_allow_html=True)
-   t=C+'Profit '+str(r['PROF'])+' '+r['RES']+E
-   st.markdown(t,unsafe_allow_html=True)
+  st.dataframe(df,use_container_width=True,height=300)
  else:
-  st.info('No trades yet V133 - AUTO STARTING')
- st.markdown(C+'Open Full History'+E,unsafe_allow_html=True)
- t=C+'OCTOBER 26 - Full Day History'+E
- st.markdown(t,unsafe_allow_html=True)
+  st.info('No closed yet - AUTO STARTING - OPEN above')
+ st.markdown(C+'Open Full History - Full Day'+E,unsafe_allow_html=True)
 elif pg=='TERMINAL':
- st.markdown(C+'TERMINAL - Fixed Time'+E,unsafe_allow_html=True)
- t=C+'DEMO D'+str(cb)+' '+S['sm']+' 85%'+E
- st.markdown(t,unsafe_allow_html=True)
- t=C+'Fixed Time InZone Forex Stocks'+E
+ st.markdown(C+'TERMINAL - CANDLE + INDICATORS'+E,unsafe_allow_html=True)
+ t=C+S['sm']+' 85% | '+str(lp)+' | AI '+ai+' '+str(ac)+'%'+E
  st.markdown(t,unsafe_allow_html=True)
  c_m1,c_m2=st.columns(2)
  with c_m1:
@@ -391,19 +366,15 @@ elif pg=='TERMINAL':
   tf=st.selectbox('TF TERM',tfs,key='tf_term')
   S['stf']=tf
  if not S['amkt']: S['sm']=mk
- t=C+'LIVE '+S['sm']+' '+str(lp)+' WIN '+str(wc)+E
- st.markdown(t,unsafe_allow_html=True)
- t=C+'BAL '+str(cb)+' PROFIT '+str(cp)+' AI '+ai+E
- st.markdown(t,unsafe_allow_html=True)
  cjs=[]
  for c in ohlc:
   cjs.append('{o:'+str(c['O'])+',h:'+str(c['H']))
   cjs[-1]+= ',l:'+str(c['L'])+',c:'+str(c['C'])+'}'
  cs=','.join(cjs)
  ch='<div style="background:#111;border:1px"'
- ch+=' solid #0F0;border-radius:12px;padding:5px"'
- ch+='><canvas id="cc" width="350" height="120"'
- ch+=' style="width:100%;height:120px"></canvas></div>'
+ ch+=' solid #FCD535;border-radius:14px;padding:6px"'
+ ch+='><canvas id="cc" width="360" height="160"'
+ ch+=' style="width:100%;height:160px"></canvas></div>'
  ch+='<script>const cv=document.getElementById'
  ch+="('cc');const ct=cv.getContext('2d');"
  ch+='const ca=[CANDLES];const W=cv.width;const H='
@@ -413,7 +384,7 @@ elif pg=='TERMINAL':
  ch+='if(rg<20){rg=20;mn-=10;mx+=10;}mn-=rg*0.1;'
  ch+='mx+=rg*0.1;rg=mx-mn;ca.forEach((c,i)=>{const'
  ch+=' x=pad+i*W/n;const up=c.c>=c.o;const col='
- ch+="up?'#0F0':'#F44';const hy=pad+(1-(c.h-mn)/"
+ ch+="up?'#0ECB81':'#F6465D';const hy=pad+(1-(c.h-mn)/"
  ch+='rg)*(H-pad*2);const ly=pad+(1-(c.l-mn)/rg)*'
  ch+='(H-pad*2);const oy=pad+(1-(c.o-mn)/rg)*'
  ch+='(H-pad*2);const cy=pad+(1-(c.c-mn)/rg)*'
@@ -421,11 +392,21 @@ elif pg=='TERMINAL':
  ch+=' bh=Math.abs(cy-oy);ct.strokeStyle=col;'
  ch+='ct.beginPath();ct.moveTo(x,hy);ct.lineTo(x,ly);'
  ch+='ct.stroke();ct.fillStyle=col;ct.fillRect('
- ch+='x-3,top,6,Math.max(bh,2));});ct.fillStyle='
- ch+=" '#0F0';ct.fillText('V133 TERMINAL',pad,12);"
+ ch+='x-4,top,8,Math.max(bh,3));});ct.fillStyle='
+ ch+=" '#FCD535';ct.fillText('V134 CANDLE',pad,12);"
  ch+='</script>'
  ch=ch.replace('CANDLES',cs)
- comp.html(ch,height=180)
+ comp.html(ch,height=220)
+ st.markdown(C+'INDICATORS - RSI VOL ATR VWAP MACD'+E,unsafe_allow_html=True)
+ t=G+'RSI '+str(rsi)+' | VOL '+str(vol)+' | ATR '+str(atr)+E
+ st.markdown(t,unsafe_allow_html=True)
+ t=G+'VWAP '+str(vwap)+' | MACD '+str(macd)+' | LIQ '+liq+E
+ st.markdown(t,unsafe_allow_html=True)
+ st.markdown(C+'STRATEGY - SWEEP BOS PULLBACK'+E,unsafe_allow_html=True)
+ t=G+'BOS '+bos+' | SWEEP '+sweep+' | PULL '+pull+E
+ st.markdown(t,unsafe_allow_html=True)
+ t=G+'STRATEGY '+strat+' | SCORE '+str(sc)+E
+ st.markdown(t,unsafe_allow_html=True)
  c_a1,c_a2=st.columns(2)
  with c_a1:
   ta=st.selectbox('Amount TERM',[280,250,500],key='ta_term')
@@ -436,23 +417,27 @@ elif pg=='TERMINAL':
  c_d1,c_d2=st.columns(2)
  with c_d1:
   if st.button('Down',key='down_term'):
-   st.error('AUTO ONLY - Manual OFF')
+   st.error('AUTO ONLY')
  with c_d2:
   if st.button('Up',key='up_term'):
-   st.error('AUTO ONLY - Manual OFF')
+   st.error('AUTO ONLY')
  pot=int(S['ta']*0.85)
- t=P+'Potential profit: D'+str(pot)+' AUTO ONLY'+E
+ t=P+'Potential profit D'+str(pot)+' AUTO ONLY'+E
  st.markdown(t,unsafe_allow_html=True)
- t=C+'CANDLE TIME FRAME 30s 1m 2m 5m 10m 15m'+E
+ t=C+'CANDLE TF 30s 1m 2m 5m 10m 15m'+E
  st.markdown(t,unsafe_allow_html=True)
- t=C+'CHART TYPE Area Candlestick Heikin Ash'+E
+ t=C+'CHART Area Candlestick Heikin Ash'+E
  st.markdown(t,unsafe_allow_html=True)
 elif pg=='MARKET':
- st.markdown(C+'MARKET - Assets'+E,unsafe_allow_html=True)
- st.markdown(C+'Signal Scanners'+E,unsafe_allow_html=True)
- t=A1+'AI-powered Signal adjusts'+E
+ st.markdown(C+'MARKET - AI BRAIN'+E,unsafe_allow_html=True)
+ t=A1+'AI BRAIN V134 SCORE '+str(sc)+' AI '+ai+E
  st.markdown(t,unsafe_allow_html=True)
- t=A1+'to your trading activity'+E
+ t=A1+'CONF '+str(ac)+'% MKT '+S['sm']+' LIVE '+str(lp)+E
+ st.markdown(t,unsafe_allow_html=True)
+ t=A1+'BAL '+str(cb)+' TIME '+pkt_str+' OPEN '+str(oc)+E
+ st.markdown(t,unsafe_allow_html=True)
+ st.markdown(C+'Signal Scanners - AI Powered'+E,unsafe_allow_html=True)
+ t=A1+'AI Signal adjusts to activity'+E
  st.markdown(t,unsafe_allow_html=True)
  t=A1+'Dynamic Fast flow Medium signals'+E
  st.markdown(t,unsafe_allow_html=True)
@@ -470,9 +455,7 @@ elif pg=='MARKET':
  st.markdown(t,unsafe_allow_html=True)
  t=A1+'Oil Composite Index 85%'+E
  st.markdown(t,unsafe_allow_html=True)
- t=A1+'Quickler 85%'+E
- st.markdown(t,unsafe_allow_html=True)
- t=A1+'Asia Composite Index 85%'+E
+ t=A1+'Quickler 85% Asia Composite 85%'+E
  st.markdown(t,unsafe_allow_html=True)
  t=P+'FINAL SCORE '+str(sc)+' AI '+ai+' CONF '+str(ac)+E
  st.markdown(t,unsafe_allow_html=True)
@@ -483,7 +466,7 @@ elif pg=='HELP':
  st.markdown(C+'Education - Expand knowledge'+E,unsafe_allow_html=True)
  st.markdown(C+'Trading Tutorials - Learn open trade'+E,unsafe_allow_html=True)
  st.markdown(C+'Trading Conditions - Beneficial'+E,unsafe_allow_html=True)
- st.markdown(C+'SETTINGS V133 - No Dup'+E,unsafe_allow_html=True)
+ st.markdown(C+'SETTINGS V134 - Indicators'+E,unsafe_allow_html=True)
  t=C+'TIME '+pkt_str+' TF '+S['stf']+' OPEN '+str(oc)+E
  st.markdown(t,unsafe_allow_html=True)
  rv=S['rthr']
@@ -510,19 +493,19 @@ elif pg=='HELP':
  pf=st.selectbox('PULL VAL',['50%','61%','NO'],key='pf_help')
  S['pf']=pf
  st.write(pf)
- t=C+'SET V133 READY 95% WIN'+E
+ t=C+'SET V134 READY 95% WIN'+E
  st.markdown(t,unsafe_allow_html=True)
 elif pg=='DEPOSIT':
- st.markdown(C+'DEPOSIT V133 - Payments'+E,unsafe_allow_html=True)
+ st.markdown(C+'DEPOSIT V134 - Payments'+E,unsafe_allow_html=True)
  if st.button('RESET DEMO',key='rd_dep'):
   S['db']=10000
   S['dp']=0
   S['hd']=[10000]
   st.success('RESET 10000')
- st.markdown(C+'Payments - Deposit Withdraw'+E,unsafe_allow_html=True)
+ st.markdown(C+'Payments Deposit Withdraw'+E,unsafe_allow_html=True)
  st.markdown(C+'Internal Transfer Transactions'+E,unsafe_allow_html=True)
  pm=st.selectbox('METHOD DEP',['JazzCash','Easypaisa'],key='pm_dep')
- t=C+'Bank transfer / Easypaisa / JazzCash'+E
+ t=C+'Bank transfer Easypaisa JazzCash'+E
  st.markdown(t,unsafe_allow_html=True)
  t=C+'BinancePay USDT Bank card RAAST'+E
  st.markdown(t,unsafe_allow_html=True)
@@ -542,7 +525,7 @@ elif pg=='DEPOSIT':
    rec['AMT']=amt
    rec['TID']=tid
    rec['TID_DATE']=dt
-   rec['STATUS']='OK V133'
+   rec['STATUS']='OK V134'
    depr=S['depr']
    depr.append(rec)
    S['depr']=depr
@@ -560,7 +543,7 @@ elif pg=='DEPOSIT':
   st.markdown(C+'DEPOSIT HISTORY'+E,unsafe_allow_html=True)
   df=pd.DataFrame(S['depr'][::-1])
   st.dataframe(df,use_container_width=True,height=200)
- st.markdown(C+'WITHDRAW V133'+E,unsafe_allow_html=True)
+ st.markdown(C+'WITHDRAW V134'+E,unsafe_allow_html=True)
  wm=st.selectbox('W METHOD WD',['JazzCash','Easypaisa'],key='wm_wd')
  wp=st.text_input('W Phone WD',value='03XXXXXXXXX',key='wp_wd')
  wa=st.number_input('W Amount WD',value=250,key='wa_wd')
@@ -579,7 +562,7 @@ elif pg=='DEPOSIT':
    rec['METHOD']=wm
    rec['TO']=wp
    rec['AMT']=wa
-   rec['STATUS']='PROC V133'
+   rec['STATUS']='PROC V134'
    rec['ACC']='REAL'
    th=S['th']
    th.append(rec)
