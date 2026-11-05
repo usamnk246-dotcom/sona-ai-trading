@@ -2,7 +2,7 @@ import streamlit as st
 import random, pandas as pd
 from datetime import datetime, timedelta
 import streamlit.components.v1 as comp
-st.set_page_config(page_title='V135 PRO MAX',layout='wide')
+st.set_page_config(page_title='V136 PRO MAX',layout='wide')
 C='<div class="card">'
 P='<div class="profit">'
 O='<div class="open">'
@@ -49,7 +49,7 @@ init('rp',0)
 init('dp',0)
 init('hr',[0])
 init('hd',[10000])
-init('sm','EUR/USD OTC')
+init('sm','Gold OTC')
 init('stf','1MIN')
 init('th',[])
 init('ot',[])
@@ -263,9 +263,9 @@ mins=(now-S['lt']).total_seconds()/60
 if S['auto']:
  if len(S['ot'])==0 and S['td']==0:
   trade()
- elif S['ht']<4 and mins>=15:
+ elif S['ht']<4 and mins>=5:
   trade()
- elif S['ht']<4 and len(S['ot'])==0 and mins>=5:
+ elif S['ht']<4 and len(S['ot'])==0 and mins>=1:
   trade()
 ht=S['ht']
 wc=S['wc']
@@ -282,7 +282,7 @@ if am=='REAL': cb=rb
 else: cb=db
 pkt_str=now.strftime('%H:%M:%S PKT')
 oc=len(S['ot'])
-t=C+'SONA V135 PRO MAX | DEMO '+str(db)+' | BAL '+str(cb)+E
+t=C+'SONA V136 PRO MAX | DEMO '+str(db)+' | BAL '+str(cb)+E
 st.markdown(t,unsafe_allow_html=True)
 t=C+S['sm']+' '+str(lp)+' AI '+ai+' '+str(ac)+'% | '+pkt_str+E
 st.markdown(t,unsafe_allow_html=True)
@@ -358,13 +358,14 @@ elif pg=='TERMINAL':
  st.markdown(C+'TERMINAL - CANDLE + INDICATORS'+E,unsafe_allow_html=True)
  t=C+S['sm']+' 85% | '+str(lp)+' | AI '+ai+' '+str(ac)+'%'+E
  st.markdown(t,unsafe_allow_html=True)
- c_m1,c_m2=st.columns(2)
- with c_m1:
+ if S['amkt']:
+  t=C+'AUTO MKT: '+S['sm']+' - Auto pick'+E
+  st.markdown(t,unsafe_allow_html=True)
+ else:
   mk=st.selectbox('MKT TERM',mkts,key='mk_term')
- with c_m2:
-  tf=st.selectbox('TF TERM',tfs,key='tf_term')
-  S['stf']=tf
- if not S['amkt']: S['sm']=mk
+  S['sm']=mk
+ tf=st.selectbox('TF TERM',tfs,key='tf_term')
+ S['stf']=tf
  cjs=[]
  for c in ohlc:
   cjs.append('{o:'+str(c['O'])+',h:'+str(c['H']))
@@ -392,7 +393,7 @@ elif pg=='TERMINAL':
  ch+='ct.beginPath();ct.moveTo(x,hy);ct.lineTo(x,ly);'
  ch+='ct.stroke();ct.fillStyle=col;ct.fillRect('
  ch+='x-4,top,8,Math.max(bh,3));});ct.fillStyle='
- ch+=" '#FCD535';ct.fillText('V135 CANDLE',pad,12);"
+ ch+=" '#FCD535';ct.fillText('V136 CANDLE',pad,12);"
  ch+='</script>'
  ch=ch.replace('CANDLES',cs)
  comp.html(ch,height=260)
@@ -429,7 +430,7 @@ elif pg=='TERMINAL':
  st.markdown(t,unsafe_allow_html=True)
 elif pg=='MARKET':
  st.markdown(C+'MARKET - AI BRAIN'+E,unsafe_allow_html=True)
- t=A1+'AI BRAIN V135 SCORE '+str(sc)+' AI '+ai+E
+ t=A1+'AI BRAIN V136 SCORE '+str(sc)+' AI '+ai+E
  st.markdown(t,unsafe_allow_html=True)
  t=A1+'CONF '+str(ac)+'% MKT '+S['sm']+' LIVE '+str(lp)+E
  st.markdown(t,unsafe_allow_html=True)
@@ -465,7 +466,7 @@ elif pg=='HELP':
  st.markdown(C+'Education - Expand knowledge'+E,unsafe_allow_html=True)
  st.markdown(C+'Trading Tutorials - Learn open trade'+E,unsafe_allow_html=True)
  st.markdown(C+'Trading Conditions - Beneficial'+E,unsafe_allow_html=True)
- st.markdown(C+'SETTINGS V135 - Indicators'+E,unsafe_allow_html=True)
+ st.markdown(C+'SETTINGS V136 - Indicators'+E,unsafe_allow_html=True)
  t=C+'TIME '+pkt_str+' TF '+S['stf']+' OPEN '+str(oc)+E
  st.markdown(t,unsafe_allow_html=True)
  rv=S['rthr']
@@ -486,10 +487,10 @@ elif pg=='HELP':
  S['lf']=lf
  pf=st.selectbox('PULL VAL',['50%','61%','NO'],key='pf_help')
  S['pf']=pf
- t=C+'SET V135 READY 95% WIN'+E
+ t=C+'SET V136 READY 95% WIN'+E
  st.markdown(t,unsafe_allow_html=True)
 elif pg=='DEPOSIT':
- st.markdown(C+'DEPOSIT V135 - Payments'+E,unsafe_allow_html=True)
+ st.markdown(C+'DEPOSIT V136 - Payments'+E,unsafe_allow_html=True)
  if st.button('RESET DEMO',key='rd_dep'):
   S['db']=10000
   S['dp']=0
@@ -518,7 +519,7 @@ elif pg=='DEPOSIT':
    rec['AMT']=amt
    rec['TID']=tid
    rec['TID_DATE']=dt
-   rec['STATUS']='OK V135'
+   rec['STATUS']='OK V136'
    depr=S['depr']
    depr.append(rec)
    S['depr']=depr
@@ -537,7 +538,7 @@ elif pg=='DEPOSIT':
   for r in S['depr'][::-1]:
    t=C+r['METHOD']+' +'+str(r['AMT'])+' '+r['TID']+E
    st.markdown(t,unsafe_allow_html=True)
- st.markdown(C+'WITHDRAW V135'+E,unsafe_allow_html=True)
+ st.markdown(C+'WITHDRAW V136'+E,unsafe_allow_html=True)
  wm=st.selectbox('W METHOD WD',['JazzCash','Easypaisa'],key='wm_wd')
  wp=st.text_input('W Phone WD',value='03XXXXXXXXX',key='wp_wd')
  wa=st.number_input('W Amount WD',value=250,key='wa_wd')
@@ -556,7 +557,7 @@ elif pg=='DEPOSIT':
    rec['METHOD']=wm
    rec['TO']=wp
    rec['AMT']=wa
-   rec['STATUS']='PROC V135'
+   rec['STATUS']='PROC V136'
    rec['ACC']='REAL'
    th=S['th']
    th.append(rec)
@@ -577,4 +578,3 @@ elif pg=='DEPOSIT':
   for k in list(S.keys()):
    del S[k]
   st.rerun()
-comp.html('<script>setTimeout(function(){window.location.reload();},10000);</script>',height=0)
