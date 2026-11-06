@@ -3,7 +3,7 @@ import random,time,json,os
 from datetime import datetime
 import pytz
 st.set_page_config(
-page_title='SONA V155',
+page_title='SONA V156',
 layout='centered')
 C='<div style="background:#111;'
 C+='padding:12px;border-radius:12px;'
@@ -135,8 +135,8 @@ if 'S' not in st.session_state:
         'sound_on':True,
         'last_sound_id':'',
         'trade_amt':sv.get(
-        'trade_amt',100),
-        'target':sv.get('target',2000),
+        'trade_amt',250),
+        'target':sv.get('target',15000),
         'bal_hist':[sv.get('db',10000)],
         'loss_streak':0}
     else:
@@ -165,8 +165,8 @@ if 'S' not in st.session_state:
         'last_win_time':0,
         'sound_on':True,
         'last_sound_id':'',
-        'trade_amt':100,
-        'target':2000,
+        'trade_amt':250,
+        'target':15000,
         'bal_hist':[10000],
         'loss_streak':0}
 S=st.session_state.S
@@ -197,8 +197,7 @@ def calc_rsi(pr):
     al=sum(l)/14 if l else 0.0001
     if al==0:
         return 95.0
-    rs=100-(100/(1+ag/al))
-    return round(rs,1)
+    return round(100-(100/(1+ag/al)),1)
 def calc_ema(pr,p):
     if len(pr)<p:
         return pr[-1] if pr else 0
@@ -210,8 +209,7 @@ def calc_ema(pr,p):
 def calc_macd(pr):
     m=calc_ema(pr,12)-calc_ema(pr,26)
     m=round(m,4)
-    s=round(m*0.9,4)
-    return m,s
+    return m,round(m*0.9,4)
 def calc_atr(cd):
     if len(cd)<2:
         return round(step_for(S['lp'])*2,4)
@@ -222,8 +220,7 @@ def calc_atr(cd):
             b=abs(c['h']-cd[i-1]['c'])
             cc=abs(c['l']-cd[i-1]['c'])
             tr.append(max(a,b,cc))
-    v=sum(tr[-14:])/min(14,len(tr))
-    return round(v,4)
+    return round(sum(tr[-14:])/min(14,len(tr)),4)
 def calc_vwap(cd):
     if not cd:
         return S['lp']
@@ -378,8 +375,7 @@ def rest_left():
 def win_rate():
     if S['total']==0:
         return 0
-    v=S['wc']/S['total']*100
-    return round(v,1)
+    return round(S['wc']/S['total']*100,1)
 def can_trade():
     if S['dp']>=S['target']:
         return False
@@ -417,7 +413,7 @@ def open_trade(manual=False):
 def do_close(o,exit_p):
     win=random.choice(
     [True,True,False])
-    amt=S['trade_amt'] if win else -100
+    amt=o.get('amt',250) if win else -100
     if o['am']=='REAL':
         S['rb']+=amt
         S['rp']+=amt
@@ -429,10 +425,15 @@ def do_close(o,exit_p):
         S['streak']+=1
         S['loss_streak']=0
         S['last_win_time']=time.time()
+        # LADDER UP
+        if S['trade_amt']<8000:
+            S['trade_amt']=S['trade_amt']*2
     else:
         S['lc']+=1
         S['streak']=0
         S['loss_streak']+=1
+        # LADDER RESET
+        S['trade_amt']=250
     S['total']+=1
     S['today']+=1
     S['bal_hist'].append(S['db'])
@@ -454,7 +455,6 @@ def close_trade():
         return
     o=S['open']
     do_close(o,S['lp'])
-# BACKGROUND CATCH-UP
 sv2=load_json(FILE)
 if sv2 is not None and 'save_time' in sv2:
     missed=time.time()-sv2['save_time']
@@ -477,10 +477,13 @@ if sv2 is not None and 'save_time' in sv2:
                     S['wc']+=1
                     S['streak']+=1
                     S['loss_streak']=0
+                    if S['trade_amt']<8000:
+                        S['trade_amt']=S['trade_amt']*2
                 else:
                     S['lc']+=1
                     S['streak']=0
                     S['loss_streak']+=1
+                    S['trade_amt']=250
                 S['total']+=1
                 S['today']+=1
                 S['bal_hist'].append(S['db'])
@@ -519,7 +522,6 @@ if time.time()-S['last']>3:
         if can_trade():
             open_trade()
     save_data()
-# TOP BAR
 S['sound_on']=st.toggle(
 'WIN SOUND ON',value=S['sound_on'])
 if S['sound_on'] and S['ht']:
@@ -547,17 +549,19 @@ cb=rb if am=='REAL' else db
 cp=rp if am=='REAL' else dp
 hc=hour_count()
 lock='LOCKED' if S['open'] is not None else 'FREE'
-t=C+'SONA V155 | DEMO '+str(db)+' | REAL '+str(rb)+' | SAVED!'+E
+t=C+'SONA V156 | DEMO '+str(db)+' | REAL '+str(rb)+' | SAVED!'+E
 st.markdown(t,unsafe_allow_html=True)
 t=C+'BAL '+str(cb)+' '+am+' | PROFIT '+str(cp)+' | WIN RATE '+str(win_rate())+'%'+E
 st.markdown(t,unsafe_allow_html=True)
 t=C+S['pair']+' '+str(S['lp'])+' AI '+S['ai']+' '+str(S['ac'])+'% | '+lock+' | '+now.strftime('%H:%M:%S PKT')+E
 st.markdown(t,unsafe_allow_html=True)
+t=C+'LADDER NOW: '+str(S['trade_amt'])+' | TARGET: '+str(cp)+' / '+str(S['target'])+E
+st.markdown(t,unsafe_allow_html=True)
 if S['dp']>=S['target']:
     t=G+'DAILY TARGET POORA! '+str(S['dp'])+' / '+str(S['target'])+' - AUTO BAND!'+E
     st.markdown(t,unsafe_allow_html=True)
 if S['loss_streak']>=3:
-    t=R+'3 LOSS LAGATAR - AUTO RUK GAYA - Kal phir try karo!'+E
+    t=R+'3 LOSS LAGATAR - AUTO RUK GAYA!'+E
     st.markdown(t,unsafe_allow_html=True)
 if rest_left()>0:
     t=Y+'WIN REST - '+str(rest_left())+' sec baaki'+E
@@ -566,7 +570,7 @@ if S['scan']:
     best=S['scan'][0]
     t=B+'AI BRAIN - BEST = '+best['pair']+' | '+best['dir']+' | SCORE '+str(best['score'])+' | HOUR '+str(hc)+' | '+lock+E
     st.markdown(t,unsafe_allow_html=True)
-t=G+'V155 ADVANCE - WITHDRAW UPAR - TARGET + STOP LOSS'+E
+t=G+'V156 - LADDER 250 TO 8000 - TARGET 15000'+E
 st.markdown(t,unsafe_allow_html=True)
 S['auto_scan']=st.toggle(
 'AI BRAIN AUTO SCAN ON',value=S['auto_scan'])
@@ -575,20 +579,22 @@ S['min_conf']=st.selectbox(
 S['min_gap_sec']=st.selectbox(
 'MIN GAP SEC',[30,60,120,300],index=1)
 S['trade_amt']=st.selectbox(
-'TRADE AMOUNT',[100,238,500],index=0)
+'TRADE AMOUNT',
+[250,500,1000,2000,4000,8000],
+index=[250,500,1000,2000,4000,8000].index(S['trade_amt']) if S['trade_amt'] in [250,500,1000,2000,4000,8000] else 0)
 S['target']=st.selectbox(
-'DAILY TARGET',[1000,2000,5000],index=1)
+'DAILY TARGET',
+[1000,5000,10000,15000],
+index=3)
 if st.button('TEST SOUND'):
     st.markdown(
     '<audio autoplay><source src="https://www.soundjay.com/buttons/sounds/beep-07a.mp3" type="audio/mpeg"></audio>',
     unsafe_allow_html=True)
     st.success('Awaz aayi ka?')
-# MENU - AB CONTENT UPAR HOGA
 menu=st.selectbox('MENU',
 ['HOME','AI BRAIN','TERMINAL',
 'DEPOSIT','WITHDRAW','HISTORY',
 'SETTINGS'],index=0)
-# --- WITHDRAW PEHLE - FIX ---
 if menu=='WITHDRAW':
     t=C+'WITHDRAW - Paisa Nikalo'+E
     st.markdown(t,unsafe_allow_html=True)
@@ -614,7 +620,7 @@ if menu=='WITHDRAW':
     for w in reversed(S['with_hist'][-5:]):
         t=R+'WITHDRAW -'+str(w['amt'])+' | '+w['time']+E
         st.markdown(t,unsafe_allow_html=True)
-if menu=='DEPOSIT':
+elif menu=='DEPOSIT':
     t=C+'DEPOSIT - REAL me paisa dalo'+E
     st.markdown(t,unsafe_allow_html=True)
     t=C+'REAL BAL: '+str(rb)+E
@@ -640,7 +646,7 @@ if menu=='DEPOSIT':
     for d in reversed(S['dep_hist'][-5:]):
         t=G+'DEPOSIT +'+str(d['amt'])+' | '+d['method']+' | '+d['time']+E
         st.markdown(t,unsafe_allow_html=True)
-if menu=='HISTORY':
+elif menu=='HISTORY':
     t=C+'TRADES - HISTORY SAVED!'+E
     st.markdown(t,unsafe_allow_html=True)
     t=C+'TODAY '+str(S['today'])+E
@@ -657,18 +663,4 @@ if menu=='HISTORY':
     for h in reversed(S['ht'][-20:]):
         col='WIN' if h['win'] else 'LOSS'
         t=C+col+' '+h['pair']+' '+h['tf']+' ENTRY '+str(h['entry'])+' EXIT '+str(h['exit'])+' '+str(h['amt'])+' | '+h['am']+' | '+h['time']+E
-        st.markdown(t,unsafe_allow_html=True)
-    if st.button('REFRESH HISTORY'):
-        st.rerun()
-if menu=='SETTINGS':
-    t=C+'SETTINGS - V155 ADVANCE'+E
-    st.markdown(t,unsafe_allow_html=True)
-    S['name']=st.text_input(
-    'Tumhara Naam',value=S['name'])
-    t=C+'V155 BACKGROUND MODE ON hai'+E
-    st.markdown(t,unsafe_allow_html=True)
-    t=C+'HISTORY alag file me hai'+E
-    st.markdown(t,unsafe_allow_html=True)
-save_data()
-time.sleep(3)
-st.rerun()
+  
