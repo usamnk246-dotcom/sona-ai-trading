@@ -2,7 +2,7 @@ import streamlit as st
 import random,time,json,os
 from datetime import datetime
 import pytz
-st.set_page_config(page_title='SONA V153',layout='centered')
+st.set_page_config(page_title='SONA V154',layout='centered')
 C='<div style="background:#111;padding:12px;border-radius:12px;color:#fff;font-weight:bold;text-align:center;margin-bottom:6px;font-size:15px;">'
 G='<div style="background:#0f3d1e;padding:10px;border-radius:10px;color:#0f0;font-weight:bold;text-align:center;margin-bottom:6px;font-size:15px;">'
 R='<div style="background:#3d0f0f;padding:10px;border-radius:10px;color:#ff5555;font-weight:bold;text-align:center;margin-bottom:6px;font-size:15px;">'
@@ -10,45 +10,62 @@ Y='<div style="background:#3d3d0f;padding:10px;border-radius:10px;color:#ffff00;
 B='<div style="background:#0f1e3d;padding:10px;border-radius:10px;color:#5aafff;font-weight:bold;text-align:center;margin-bottom:6px;font-size:15px;">'
 E='</div>'
 FILE='sona_data.json'
+HF='sona_hist.json'
 BASE={'SOL/USD':179.50,'BTC/USD':67200,'BNB/USD':710,'EUR/USD':1.085,'AUD/CHF OTC':0.585,'GBP/USD':1.275,'USD/JPY':152.30,'XAU/USD':2650,'EUR/GBP OTC':0.850,'USD/CHF OTC':0.885,'GBP/JPY':194.20,'AUD/USD':0.655}
-def load_data():
-    if os.path.exists(FILE):
+def load_json(f):
+    if os.path.exists(f):
         try:
-            with open(FILE,'r') as f:
-                return json.load(f)
+            with open(f,'r') as x:
+                return json.load(x)
         except:
             return None
     return None
-def save_data():
+def save_hist():
     try:
-        d=dict(S)
-        d['open']=None
-        if S['open'] is not None:
-            o=S['open']
-            d['open']={'pair':o['pair'],'tf':o['tf'],'entry':o['entry'],'dir':o['dir'],'am':o['am'],'dur':o.get('dur',60),'time':o['time'].strftime('%Y-%m-%d %H:%M:%S')}
-        d['hour_start']=S['hour_start'].strftime('%Y-%m-%d %H:%M:%S')
-        d['save_time']=time.time()
-        with open(FILE,'w') as f:
-            json.dump(d,f)
+        with open(HF,'w') as x:
+            json.dump(S['ht'],x)
     except:
         pass
-if 'S' not in st.session_state:
-    sv=load_data()
-    if sv is not None:
-        try:
-            sv['hour_start']=datetime.strptime(sv['hour_start'],'%Y-%m-%d %H:%M:%S').replace(tzinfo=pytz.timezone('Asia/Karachi'))
-            if sv.get('open') is not None:
-                sv['open']['time']=datetime.strptime(sv['open']['time'],'%Y-%m-%d %H:%M:%S').replace(tzinfo=pytz.timezone('Asia/Karachi'))
-            sv['last']=time.time()
-            sv['last_scan_time']=0
-            st.session_state.S=sv
-        except:
-            sv=None
-    if sv is None:
-        st.session_state.S={'am':'DEMO','auto':True,'db':10000,'rb':0,'dp':0,'rp':0,'open':None,'ht':[],'wc':0,'lc':0,'today':0,'total':0,'streak':0,'pair':'SOL/USD','tf':'1MIN','lp':179.50,'ai':'UP','ac':89,'price_hist':[179.50]*30,'dep_hist':[],'with_hist':[],'last':time.time(),'last_trade_time':0,'last_scan_time':0,'name':'Usam','scan':[],'best':'SOL/USD','best_score':0,'best_dir':'UP','candles':[],'quality':'GOOD','auto_scan':True,'hour_trades':[],'hour_start':datetime.now(pytz.timezone('Asia/Karachi')).replace(minute=0,second=0,microsecond=0),'min_conf':90,'min_gap_sec':60,'last_win_time':0,'sound_on':True,'last_sound_id':''}
-S=st.session_state.S
+def save_data():
+    try:
+        d={}
+        d['db']=S['db']
+        d['rb']=S['rb']
+        d['dp']=S['dp']
+        d['rp']=S['rp']
+        d['wc']=S['wc']
+        d['lc']=S['lc']
+        d['today']=S['today']
+        d['total']=S['total']
+        d['streak']=S['streak']
+        d['pair']=S['pair']
+        d['tf']=S['tf']
+        d['lp']=S['lp']
+        d['ai']=S['ai']
+        d['ac']=S['ac']
+        d['open']=S['open']
+        d['last_win_time']=S['last_win_time']
+        d['last_trade_time']=S['last_trade_time']
+        d['hour_start']=S['hour_start']
+        d['hour_trades']=S['hour_trades']
+        d['save_time']=time.time()
+        d['name']=S['name']
+        with open(FILE,'w') as x:
+            json.dump(d,x)
+    except:
+        pass
 pkt=pytz.timezone('Asia/Karachi')
 now=datetime.now(pkt)
+if 'S' not in st.session_state:
+    sv=load_json(FILE)
+    ht=load_json(HF)
+    if ht is None:
+        ht=[]
+    if sv is not None:
+        st.session_state.S={'am':'DEMO','auto':True,'db':sv.get('db',10000),'rb':sv.get('rb',0),'dp':sv.get('dp',0),'rp':sv.get('rp',0),'open':sv.get('open',None),'ht':ht,'wc':sv.get('wc',0),'lc':sv.get('lc',0),'today':sv.get('today',0),'total':sv.get('total',0),'streak':sv.get('streak',0),'pair':sv.get('pair','SOL/USD'),'tf':sv.get('tf','1MIN'),'lp':sv.get('lp',179.50),'ai':sv.get('ai','UP'),'ac':sv.get('ac',89),'price_hist':[sv.get('lp',179.50)]*30,'dep_hist':[],'with_hist':[],'last':time.time(),'last_trade_time':sv.get('last_trade_time',0),'last_scan_time':0,'name':sv.get('name','Usam'),'scan':[],'best':'SOL/USD','best_score':0,'best_dir':'UP','candles':[],'quality':'GOOD','auto_scan':True,'hour_trades':sv.get('hour_trades',[]),'hour_start':sv.get('hour_start',time.time()),'min_conf':90,'min_gap_sec':60,'last_win_time':sv.get('last_win_time',0),'sound_on':True,'last_sound_id':''}
+    else:
+        st.session_state.S={'am':'DEMO','auto':True,'db':10000,'rb':0,'dp':0,'rp':0,'open':None,'ht':ht,'wc':0,'lc':0,'today':0,'total':0,'streak':0,'pair':'SOL/USD','tf':'1MIN','lp':179.50,'ai':'UP','ac':89,'price_hist':[179.50]*30,'dep_hist':[],'with_hist':[],'last':time.time(),'last_trade_time':0,'last_scan_time':0,'name':'Usam','scan':[],'best':'SOL/USD','best_score':0,'best_dir':'UP','candles':[],'quality':'GOOD','auto_scan':True,'hour_trades':[],'hour_start':time.time(),'min_conf':90,'min_gap_sec':60,'last_win_time':0,'sound_on':True,'last_sound_id':''}
+S=st.session_state.S
 PAIRS=list(BASE.keys())
 TFS=['1MIN','2MIN','5MIN','15MIN']
 def step_for(b):
@@ -147,9 +164,7 @@ def make_tick():
             lc['l']=c
         lc['dir']='UP' if c>=lc['o'] else 'DOWN'
         lc['v']=lc['v']+random.randint(10,200)
-    tfm=int(S['tf'].replace('MIN',''))
-    ticks_per_candle=tfm*20
-    if len(S['price_hist'])%ticks_per_candle==0:
+    if len(S['price_hist'])%20==0:
         S['candles'].append({'o':c,'c':c,'h':c,'l':c,'v':1000,'time':now.strftime('%H:%M:%S'),'dir':'UP'})
     if len(S['candles'])>24:
         S['candles']=S['candles'][-24:]
@@ -200,9 +215,8 @@ def ai_scan_all():
         res.append({'pair':pair,'price':pr[-1],'rsi':rsi,'macd':macd,'atr':atr,'vwap':vwap,'vol':vol,'bos':bos,'sweep':sweep,'trend':trend,'score':sc,'dir':dr,'quality':calc_q(sc)})
     return sorted(res,key=lambda x: x['score'],reverse=True)
 def hour_count():
-    cur=now.replace(minute=0,second=0,microsecond=0)
-    if S['hour_start']!=cur:
-        S['hour_start']=cur
+    if time.time()-S['hour_start']>3600:
+        S['hour_start']=time.time()
         S['hour_trades']=[]
     return len(S['hour_trades'])
 def rest_left():
@@ -229,16 +243,13 @@ def open_trade(manual=False):
     if bal<=0:
         return False
     dur=int(S['tf'].replace('MIN',''))*60
-    S['open']={'pair':S['pair'],'tf':S['tf'],'entry':S['lp'],'dir':S['ai'],'am':S['am'],'time':datetime.now(pkt),'dur':dur}
+    S['open']={'pair':S['pair'],'tf':S['tf'],'entry':S['lp'],'dir':S['ai'],'am':S['am'],'t0':time.time(),'dur':dur}
     S['last_trade_time']=time.time()
     if not manual:
-        S['hour_trades'].append(now)
+        S['hour_trades'].append(time.time())
     save_data()
     return True
-def close_trade():
-    if S['open'] is None:
-        return
-    o=S['open']
+def do_close(o,exit_p):
     win=random.choice([True,True,False])
     amt=238 if win else -100
     if o['am']=='REAL':
@@ -257,15 +268,30 @@ def close_trade():
     S['total']+=1
     S['today']+=1
     nid=o['pair']+str(o['entry'])+str(time.time())
-    S['ht'].append({'pair':o['pair'],'tf':o['tf'],'entry':o['entry'],'exit':S['lp'],'amt':amt,'win':win,'am':o['am'],'time':datetime.now(pkt).strftime('%H:%M:%S'),'id':nid})
+    S['ht'].append({'pair':o['pair'],'tf':o['tf'],'entry':o['entry'],'exit':exit_p,'amt':amt,'win':win,'am':o['am'],'time':datetime.now(pkt).strftime('%H:%M:%S'),'id':nid})
     S['open']=None
     S['last_sound_id']=nid if win else ''
+    save_hist()
     save_data()
-if S.get('save_time',0)>0:
-    missed=int(time.time()-S['save_time'])
-    if missed>90 and S['auto']:
-        n=min(5,missed//360)
-        if n>0:
+def close_trade():
+    if S['open'] is None:
+        return
+    o=S['open']
+    do_close(o,S['lp'])
+# --- BACKGROUND CATCH-UP - SCREEN BAND BHI ---
+sv2=load_json(FILE)
+if sv2 is not None and 'save_time' in sv2:
+    missed=time.time()-sv2['save_time']
+    if missed>10 and S['auto']:
+        # 1. Agar trade khula tha aur uska time poora hua - turant CLOSE
+        if S['open'] is not None:
+            o=S['open']
+            if time.time()-o.get('t0',time.time())>=o.get('dur',60):
+                do_close(o,S['lp'])
+        # 2. Jitna time bahar the - utne trades bana do
+        # 1 trade = 60 sec + 300 sec REST = 360 sec
+        if missed>360:
+            n=min(10,int(missed//360))
             for i in range(n):
                 win=random.choice([True,True,False])
                 amt=238 if win else -100
@@ -279,9 +305,8 @@ if S.get('save_time',0)>0:
                     S['streak']=0
                 S['total']+=1
                 S['today']+=1
-                S['ht'].append({'pair':S['pair'],'tf':S['tf'],'entry':S['lp'],'exit':S['lp'],'amt':amt,'win':win,'am':S['am'],'time':datetime.now(pkt).strftime('%H:%M:%S'),'id':'catch'+str(time.time())+str(i)})
-            S['open']=None
-            S['save_time']=time.time()
+                S['ht'].append({'pair':S['pair'],'tf':S['tf'],'entry':S['lp'],'exit':S['lp'],'amt':amt,'win':win,'am':'DEMO','time':datetime.now(pkt).strftime('%H:%M:%S'),'id':'bg'+str(time.time())+str(i)})
+            save_hist()
             save_data()
 if time.time()-S['last']>3:
     S['last']=time.time()
@@ -300,7 +325,7 @@ if time.time()-S['last']>3:
             S['ac']=best['score']
     if S['open'] is not None:
         dur=S['open'].get('dur',60)
-        el=(datetime.now(pkt)-S['open']['time']).total_seconds()
+        el=time.time()-S['open'].get('t0',time.time())
         if el>=dur:
             close_trade()
     if S['auto'] and S['open'] is None and S['today']<96:
@@ -326,7 +351,7 @@ dp=int(S['dp'])
 rp=int(S['rp'])
 cb=rb if am=='REAL' else db
 cp=rp if am=='REAL' else dp
-t=C+'SONA V153 | DEMO '+str(db)+' | REAL '+str(rb)+' | SAVED!'+E
+t=C+'SONA V154 | DEMO '+str(db)+' | REAL '+str(rb)+' | SAVED!'+E
 st.markdown(t,unsafe_allow_html=True)
 t=C+'BAL '+str(cb)+' '+am+' | PROFIT '+str(cp)+E
 st.markdown(t,unsafe_allow_html=True)
@@ -354,12 +379,12 @@ if S['scan']:
     best=S['scan'][0]
     t=B+'AI BRAIN - BEST = '+best['pair']+' | '+best['dir']+' | SCORE '+str(best['score'])+' | HOUR '+str(hc)+' | '+lock+E
     st.markdown(t,unsafe_allow_html=True)
-t=G+'V153 - TF = TRADE TIME - 1MIN=60s 2MIN=120s 5MIN=300s'+E
+t=G+'V154 - SCREEN BAND BHI TRADE CHALEGA - BACKGROUND MODE'+E
 st.markdown(t,unsafe_allow_html=True)
 S['auto_scan']=st.toggle('AI BRAIN AUTO SCAN ON',value=S['auto_scan'])
 S['min_conf']=st.selectbox('MIN CONFIDENCE',[80,85,90,95],index=2)
 S['min_gap_sec']=st.selectbox('MIN GAP SEC',[30,60,120,300],index=1)
-t=C+'RULE: WIN ke baad 5 MIN REST - Sirf '+str(S['min_conf'])+'%+ - DATA ON = Trading ON'+E
+t=C+'RULE: WIN ke baad 5 MIN REST - Sirf '+str(S['min_conf'])+'%+'+E
 st.markdown(t,unsafe_allow_html=True)
 if st.button('TEST SOUND'):
     st.markdown('<audio autoplay><source src="https://www.soundjay.com/buttons/sounds/beep-07a.mp3" type="audio/mpeg"></audio>',unsafe_allow_html=True)
@@ -422,7 +447,7 @@ if menu in ['HOME','TERMINAL']:
     if S['open'] is not None:
         o=S['open']
         dur=o.get('dur',60)
-        el=(datetime.now(pkt)-o['time']).total_seconds()
+        el=time.time()-o.get('t0',time.time())
         left=max(0,int(dur-el))
         t=G+'OPEN TRADE LIVE: '+o['pair']+' ENTRY '+str(o['entry'])+' | '+o['dir']+' | '+str(left)+'s LEFT | TF '+o['tf']+' | '+o['am']+' | Now '+str(S['lp'])+' | LOCKED'+E
         st.markdown(t,unsafe_allow_html=True)
@@ -472,35 +497,4 @@ if menu=='DEPOSIT':
         S['dep_hist'].append({'amt':int(amt),'method':method,'num':num,'time':now.strftime('%H:%M:%S')})
         save_data()
         st.success('DEPOSIT HO GAYA!')
-        st.rerun()
-    for d in reversed(S['dep_hist'][-5:]):
-        t=G+'DEPOSIT +'+str(d['amt'])+' | '+d['method']+' | '+d['time']+E
-        st.markdown(t,unsafe_allow_html=True)
-if menu=='WITHDRAW':
-    t=C+'WITHDRAW'+E
-    st.markdown(t,unsafe_allow_html=True)
-    t=C+'REAL BAL: '+str(rb)+' | Profit: '+str(rp)+E
-    st.markdown(t,unsafe_allow_html=True)
-    wamt=st.number_input('Amt',100,10000,100)
-    wnum=st.text_input('Number','0300-1234567')
-    if st.button('WITHDRAW CONFIRM'):
-        if int(wamt)>rb:
-            st.error('BAL se zyada nahi!')
-        else:
-            S['rb']-=int(wamt)
-            S['with_hist'].append({'amt':int(wamt),'num':wnum,'time':now.strftime('%H:%M:%S')})
-            save_data()
-            st.success('WITHDRAW HO GAYA!')
-            st.rerun()
-    for w in reversed(S['with_hist'][-5:]):
-        t=R+'WITHDRAW -'+str(w['amt'])+' | '+w['time']+E
-        st.markdown(t,unsafe_allow_html=True)
-if menu=='HISTORY':
-    t=C+'TRADES - HISTORY SAVED!'+E
-    st.markdown(t,unsafe_allow_html=True)
-    t=C+'TODAY '+str(S['today'])+E
-    st.markdown(t,unsafe_allow_html=True)
-    t=C+'WIN '+str(S['wc'])+' LOSS '+str(S['lc'])+E
-    st.markdown(t,unsafe_allow_html=True)
-    t=C+'PROFIT '+str(cp)+' HOUR '+str(hc)+E
-    st.markdown(t,unsafe_allow_html=True)
+        st.reru
