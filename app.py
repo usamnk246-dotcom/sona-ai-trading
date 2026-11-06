@@ -668,4 +668,7 @@ if menu=='SETTINGS':
     t=C+'V155 BACKGROUND MODE ON hai'+E
     st.markdown(t,unsafe_allow_html=True)
     t=C+'HISTORY alag file me hai'+E
-    st.markdo
+    st.markdown(t,unsafe_allow_html=True)
+save_data()
+time.sleep(3)
+st.rerun()
