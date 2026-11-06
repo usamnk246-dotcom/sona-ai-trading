@@ -471,12 +471,10 @@ if menu=='SETTINGS':
         S['hour_trades']=[]
         S['last_win_time']=0
         st.rerun()
-    if st.button('RESET HOUR'):
-        S['hour_trades']=[]
-        st.rerun()     
-  t=C+'APP: SONA V149'+E
-  st.markdown(t,unsafe_allow_html=True)
-  t=C+'STREAK '+str(S['streak'])+' | V149'+E
-  st.markdown(t,unsafe_allow_html=True)
+    if st.button('RESET HOUR'):     S['hour_trades']=[]
+      st.rerun()
+ t=C+'APP: SONA V149'+E
+  st.markdown(t,unsafe_allow_html=True)  t=C+'STREAK '+str(S['streak'])+' | V149'+E
+ st.markdown(t,unsafe_allow_html=True)
  time.sleep(3)
- st.rerun()
+  st.rerun()
