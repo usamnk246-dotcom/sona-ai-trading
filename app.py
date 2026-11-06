@@ -1,17 +1,50 @@
 import streamlit as st
-import random, time
+import random, time, json, os
 from datetime import datetime
 import pytz
-st.set_page_config(page_title='SONA V151', layout='centered')
+st.set_page_config(page_title='SONA V152', layout='centered')
 C='<div style="background:#111;padding:12px;border-radius:12px;color:#fff;font-weight:bold;text-align:center;margin-bottom:6px;font-size:15px;">'
 G='<div style="background:#0f3d1e;padding:10px;border-radius:10px;color:#0f0;font-weight:bold;text-align:center;margin-bottom:6px;font-size:15px;">'
 R='<div style="background:#3d0f0f;padding:10px;border-radius:10px;color:#ff5555;font-weight:bold;text-align:center;margin-bottom:6px;font-size:15px;">'
 Y='<div style="background:#3d3d0f;padding:10px;border-radius:10px;color:#ffff00;font-weight:bold;text-align:center;margin-bottom:6px;font-size:15px;">'
 B='<div style="background:#0f1e3d;padding:10px;border-radius:10px;color:#5aafff;font-weight:bold;text-align:center;margin-bottom:6px;font-size:15px;">'
 E='</div>'
+FILE='sona_data.json'
 BASE={'SOL/USD':179.50,'BTC/USD':67200,'BNB/USD':710,'EUR/USD':1.085,'AUD/CHF OTC':0.585,'GBP/USD':1.275,'USD/JPY':152.30,'XAU/USD':2650,'EUR/GBP OTC':0.850,'USD/CHF OTC':0.885,'GBP/JPY':194.20,'AUD/USD':0.655}
+def load_data():
+    if os.path.exists(FILE):
+        try:
+            with open(FILE,'r') as f:
+                return json.load(f)
+        except:
+            return None
+    return None
+def save_data():
+    try:
+        d=dict(S)
+        d['open']=None
+        if S['open'] is not None:
+            d['open']={'pair':S['open']['pair'],'tf':S['open']['tf'],'entry':S['open']['entry'],'dir':S['open']['dir'],'am':S['open']['am'],'time':S['open']['time'].strftime('%Y-%m-%d %H:%M:%S')}
+        d['hour_start']=S['hour_start'].strftime('%Y-%m-%d %H:%M:%S')
+        d['save_time']=time.time()
+        with open(FILE,'w') as f:
+            json.dump(d,f)
+    except:
+        pass
 if 'S' not in st.session_state:
-    st.session_state.S={'am':'DEMO','auto':True,'db':10000,'rb':0,'dp':0,'rp':0,'open':None,'ht':[],'wc':0,'lc':0,'today':0,'total':0,'streak':0,'pair':'SOL/USD','tf':'1MIN','lp':179.50,'ai':'UP','ac':89,'price_hist':[179.50]*30,'dep_hist':[],'with_hist':[],'last':time.time(),'last_trade_time':0,'last_scan_time':0,'name':'Usam','scan':[],'best':'SOL/USD','best_score':0,'best_dir':'UP','candles':[],'quality':'GOOD','auto_scan':True,'hour_trades':[],'hour_start':datetime.now(pytz.timezone('Asia/Karachi')).replace(minute=0,second=0,microsecond=0),'min_conf':90,'min_gap_sec':60,'last_win_time':0,'sound_on':True,'last_sound_id':''}
+    saved=load_data()
+    if saved is not None:
+        try:
+            saved['hour_start']=datetime.strptime(saved['hour_start'],'%Y-%m-%d %H:%M:%S').replace(tzinfo=pytz.timezone('Asia/Karachi'))
+            if saved.get('open') is not None:
+                saved['open']['time']=datetime.strptime(saved['open']['time'],'%Y-%m-%d %H:%M:%S').replace(tzinfo=pytz.timezone('Asia/Karachi'))
+            saved['last']=time.time()
+            saved['last_scan_time']=0
+            st.session_state.S=saved
+        except:
+            st.session_state.S={'am':'DEMO','auto':True,'db':10000,'rb':0,'dp':0,'rp':0,'open':None,'ht':[],'wc':0,'lc':0,'today':0,'total':0,'streak':0,'pair':'SOL/USD','tf':'1MIN','lp':179.50,'ai':'UP','ac':89,'price_hist':[179.50]*30,'dep_hist':[],'with_hist':[],'last':time.time(),'last_trade_time':0,'last_scan_time':0,'name':'Usam','scan':[],'best':'SOL/USD','best_score':0,'best_dir':'UP','candles':[],'quality':'GOOD','auto_scan':True,'hour_trades':[],'hour_start':datetime.now(pytz.timezone('Asia/Karachi')).replace(minute=0,second=0,microsecond=0),'min_conf':90,'min_gap_sec':60,'last_win_time':0,'sound_on':True,'last_sound_id':''}
+    else:
+        st.session_state.S={'am':'DEMO','auto':True,'db':10000,'rb':0,'dp':0,'rp':0,'open':None,'ht':[],'wc':0,'lc':0,'today':0,'total':0,'streak':0,'pair':'SOL/USD','tf':'1MIN','lp':179.50,'ai':'UP','ac':89,'price_hist':[179.50]*30,'dep_hist':[],'with_hist':[],'last':time.time(),'last_trade_time':0,'last_scan_time':0,'name':'Usam','scan':[],'best':'SOL/USD','best_score':0,'best_dir':'UP','candles':[],'quality':'GOOD','auto_scan':True,'hour_trades':[],'hour_start':datetime.now(pytz.timezone('Asia/Karachi')).replace(minute=0,second=0,microsecond=0),'min_conf':90,'min_gap_sec':60,'last_win_time':0,'sound_on':True,'last_sound_id':''}
 S=st.session_state.S
 pkt=pytz.timezone('Asia/Karachi')
 now=datetime.now(pkt)
@@ -192,6 +225,7 @@ def open_trade(manual=False):
     S['last_trade_time']=time.time()
     if not manual:
         S['hour_trades'].append(now)
+    save_data()
     return True
 def close_trade():
     if S['open'] is None:
@@ -218,6 +252,30 @@ def close_trade():
     S['ht'].append({'pair':o['pair'],'tf':o['tf'],'entry':o['entry'],'exit':S['lp'],'amt':amt,'win':win,'am':o['am'],'time':datetime.now(pkt).strftime('%H:%M:%S'),'id':nid})
     S['open']=None
     S['last_sound_id']=nid if win else ''
+    save_data()
+# CATCH-UP: Screen band thi to missed time ka hisaab
+if S.get('save_time',0)>0:
+    missed=int(time.time()-S['save_time'])
+    if missed>90 and S['auto']:
+        n=min(5,missed//360)
+        if n>0:
+            for i in range(n):
+                win=random.choice([True,True,False])
+                amt=238 if win else -100
+                S['db']+=amt
+                S['dp']+=amt
+                if win:
+                    S['wc']+=1
+                    S['streak']+=1
+                else:
+                    S['lc']+=1
+                    S['streak']=0
+                S['total']+=1
+                S['today']+=1
+                S['ht'].append({'pair':S['pair'],'tf':S['tf'],'entry':S['lp'],'exit':S['lp'],'amt':amt,'win':win,'am':S['am'],'time':datetime.now(pkt).strftime('%H:%M:%S'),'id':'catch'+str(time.time())+str(i)})
+            S['open']=None
+            S['save_time']=time.time()
+            save_data()
 if time.time()-S['last']>3:
     S['last']=time.time()
     make_candle()
@@ -239,6 +297,7 @@ if time.time()-S['last']>3:
     if S['auto'] and S['open'] is None and S['today']<96:
         if can_trade():
             open_trade()
+    save_data()
 S['sound_on']=st.toggle('WIN SOUND ON',value=S['sound_on'])
 if S['sound_on'] and S['ht'] and S['ht'][-1]['win']:
     if S['last_sound_id']==S['ht'][-1].get('id',''):
@@ -258,7 +317,7 @@ dp=int(S['dp'])
 rp=int(S['rp'])
 cb=rb if am=='REAL' else db
 cp=rp if am=='REAL' else dp
-t=C+'SONA V151 | DEMO '+str(db)+' | REAL '+str(rb)+E
+t=C+'SONA V152 | DEMO '+str(db)+' | REAL '+str(rb)+' | SAVED!'+E
 st.markdown(t,unsafe_allow_html=True)
 t=C+'BAL '+str(cb)+' '+am+' | PROFIT '+str(cp)+E
 st.markdown(t,unsafe_allow_html=True)
@@ -286,6 +345,8 @@ if S['scan']:
     best=S['scan'][0]
     t=B+'AI BRAIN - BEST = '+best['pair']+' | '+best['dir']+' | SCORE '+str(best['score'])+' | HOUR '+str(hc)+' | '+lock+E
     st.markdown(t,unsafe_allow_html=True)
+t=G+'V152 - SCREEN BAND BHI HISTORY SAVE - DATA ON + AUTO ON = KAAM!'+E
+st.markdown(t,unsafe_allow_html=True)
 S['auto_scan']=st.toggle('AI BRAIN AUTO SCAN ON',value=S['auto_scan'])
 S['min_conf']=st.selectbox('MIN CONFIDENCE',[80,85,90,95],index=2)
 S['min_gap_sec']=st.selectbox('MIN GAP SEC',[30,60,120,300],index=1)
@@ -398,57 +459,11 @@ if menu=='DEPOSIT':
     if st.button('DEPOSIT CONFIRM'):
         S['rb']+=int(amt)
         S['dep_hist'].append({'amt':int(amt),'method':method,'num':num,'time':now.strftime('%H:%M:%S')})
+        save_data()
         st.success('DEPOSIT HO GAYA!')
         st.rerun()
     for d in reversed(S['dep_hist'][-5:]):
         t=G+'DEPOSIT +'+str(d['amt'])+' | '+d['method']+' | '+d['time']+E
         st.markdown(t,unsafe_allow_html=True)
 if menu=='WITHDRAW':
-    t=C+'WITHDRAW - REAL se paisa nikalo'+E
-    st.markdown(t,unsafe_allow_html=True)
-    t=C+'REAL BAL: '+str(rb)+' | Profit: '+str(rp)+E
-    st.markdown(t,unsafe_allow_html=True)
-    wamt=st.number_input('Kitna Withdraw?',min_value=100,max_value=int(rb) if rb>0 else 100,value=100,step=100)
-    wnum=st.text_input('Jis Number pe bhejna hai',placeholder='0300-1234567')
-    if st.button('WITHDRAW CONFIRM'):
-        if int(wamt)>rb:
-            st.error('BAL se zyada nahi!')
-        else:
-            S['rb']-=int(wamt)
-            S['with_hist'].append({'amt':int(wamt),'num':wnum,'time':now.strftime('%H:%M:%S')})
-            st.success('WITHDRAW HO GAYA!')
-            st.rerun()
-    for w in reversed(S['with_hist'][-5:]):
-        t=R+'WITHDRAW -'+str(w['amt'])+' | '+w['time']+E
-        st.markdown(t,unsafe_allow_html=True)
-if menu=='HISTORY':
-    t=C+'TRADES - HISTORY FULL DAY'+E
-    st.markdown(t,unsafe_allow_html=True)
-    t=C+'TODAY '+str(S['today'])+'/96 TOTAL '+str(S['total'])+' | WIN '+str(S['wc'])+' LOSS '+str(S['lc'])+' PROFIT '+str(cp)+' | HOUR '+str(hc)+E
-    st.markdown(t,unsafe_allow_html=True)
-    if S['open'] is not None:
-        o=S['open']
-        t=G+'OPEN '+o['pair']+' ENTRY '+str(o['entry'])+' | '+o['dir']+' | '+o['am']+E
-        st.markdown(t,unsafe_allow_html=True)
-    for h in reversed(S['ht'][-15:]):
-        col='WIN' if h['win'] else 'LOSS'
-        t=C+col+' '+h['pair']+' '+h['tf']+' ENTRY '+str(h['entry'])+' EXIT '+str(h['exit'])+' '+str(h['amt'])+' | '+h['am']+' | '+h['time']+E
-        st.markdown(t,unsafe_allow_html=True)
-    if st.button('REFRESH HISTORY'):
-        st.rerun()
-if menu=='SETTINGS':
-    t=C+'SETTINGS - WIN SOUND + DATA ONLY'+E
-    st.markdown(t,unsafe_allow_html=True)
-    S['name']=st.text_input('Tumhara Naam',value=S['name'])
-    t=C+'DATA ONLY: Chrome khula rakho - DATA ON rakho'+E
-    st.markdown(t,unsafe_allow_html=True)
-    t=C+'SOUND: Volume ON rakho - Silent OFF rakho'+E
-    st.markdown(t,unsafe_allow_html=True)
-    if st.button('RESET DEMO 10000'): S['db']=10000; S['dp']=0; S['today']=0; S['total']=0; S['wc']=0; S['lc']=0; S['ht']=[]; S['open']=None; S['candles']=[]; S['hour_trades']=[]; S['last_win_time']=0; st.rerun()
-    if st.button('RESET HOUR'): S['hour_trades']=[]; st.rerun()
-    t=C+'APP: SONA V151 | USER: '+S['name']+E
-    st.markdown(t,unsafe_allow_html=True)
-t=C+'STREAK '+str(S['streak'])+' | BEST '+S['best']+' '+str(S['best_score'])+'% | HOUR '+str(hc)+' | V151 | '+lock+E
-st.markdown(t,unsafe_allow_html=True)
-time.sleep(3)
-st.rerun()
+    t=C+'WITHDRAW - REAL se pa
