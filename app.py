@@ -496,6 +496,11 @@ if menu=='WITHDRAW':
         t=R+'WITHDRAW -'+str(w['amt'])+' | '+w['time']+E
         st.markdown(t,unsafe_allow_html=True)
 if menu=='HISTORY':
-    t=C+'TRADES - HISTORY FULL DAY - SAVED!'+E
+    t=C+'TRADES - HISTORY SAVED!'+E
     st.markdown(t,unsafe_allow_html=True)
-    t=C+'TODAY '+str(S['today'])+'/96 TOTAL '+str(S['total'])+' | WIN '+st
+    t=C+'TODAY '+str(S['today'])+E
+    st.markdown(t,unsafe_allow_html=True)
+    t=C+'WIN '+str(S['wc'])+' LOSS '+str(S['lc'])+E
+    st.markdown(t,unsafe_allow_html=True)
+    t=C+'PROFIT '+str(cp)+' HOUR '+str(hc)+E
+    st.markdown(t,unsafe_allow_html=True)
