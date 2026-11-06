@@ -670,4 +670,229 @@ elif menu=='DEPOSIT':
         st.rerun()
     for d in reversed(S['dep_hist'][-5:]):
         t=G+'DEPOSIT +'+str(d['amt'])+' | '+d['method']+' | '+d['time']+E
-        
+     t=G+'DEPOSIT +'+str(d['amt'])
+t+=' | '+d['method']
+t+=' | '+d['time']+E
+st.markdown(t,unsafe_allow_html=True)
+elif menu=='HISTORY':
+    t=C+'TRADES - HISTORY SAVED!'+E
+    st.markdown(t,unsafe_allow_html=True)
+    t=C+'TODAY '+str(S['today'])+E
+    st.markdown(t,unsafe_allow_html=True)
+    t=C+'WIN '+str(S['wc'])
+    t+=' LOSS '+str(S['lc'])
+    t+=' | WIN RATE '+str(win_rate())+'%'+E
+    st.markdown(t,unsafe_allow_html=True)
+    t=C+'PROFIT '+str(cp)+' HOUR '+str(hc)+E
+    st.markdown(t,unsafe_allow_html=True)
+    st.line_chart(S['bal_hist'])
+    if S['open'] is not None:
+        o=S['open']
+        t=G+'OPEN '+o['pair']
+        t+=' ENTRY '+str(o['entry'])
+        t+=' | '+o['dir']
+        t+=' | TF '+o['tf']
+        t+=' | '+o['am']+E
+        st.markdown(t,unsafe_allow_html=True)
+    for h in reversed(S['ht'][-20:]):
+        col='WIN' if h['win'] else 'LOSS'
+        t=C+col+' '+h['pair']
+        t+=' '+h['tf']
+        t+=' ENTRY '+str(h['entry'])
+        t+=' EXIT '+str(h['exit'])
+        t+=' '+str(h['amt'])
+        t+=' | '+h['am']
+        t+=' | '+h['time']+E
+        st.markdown(t,unsafe_allow_html=True)
+    if st.button('REFRESH HISTORY'):
+        st.rerun()
+elif menu=='SETTINGS':
+    t=C+'SETTINGS - V157'+E
+    st.markdown(t,unsafe_allow_html=True)
+    S['name']=st.text_input(
+    'Tumhara Naam',value=S['name'])
+    t=C+'V157 BACKGROUND MODE ON hai'+E
+    st.markdown(t,unsafe_allow_html=True)
+    t=C+'HISTORY alag file me hai'+E
+    st.markdown(t,unsafe_allow_html=True)
+    if st.button('RESET DEMO 10000'):
+        S['db']=10000
+        S['dp']=0
+        S['today']=0
+        S['total']=0
+        S['wc']=0
+        S['lc']=0
+        S['open']=None
+        S['candles']=[]
+        S['hour_trades']=[]
+        S['last_win_time']=0
+        S['loss_streak']=0
+        S['trade_amt']=250
+        S['bal_hist']=[10000]
+        save_data()
+        st.rerun()
+    if st.button('RESET HOUR'):
+        S['hour_trades']=[]
+        save_data()
+        st.rerun()
+    if st.button('CLEAR HISTORY'):
+        S['ht']=[]
+        S['wc']=0
+        S['lc']=0
+        S['total']=0
+        save_hist()
+        save_data()
+        st.rerun()
+    t=C+'APP: SONA V157 | USER: '+S['name']+' | SAVED!'+E
+    st.markdown(t,unsafe_allow_html=True)
+elif menu=='AI BRAIN':
+    t=B+'AI BRAIN - 90+ ONLY - WIN SOUND'+E
+    st.markdown(t,unsafe_allow_html=True)
+    if st.button('SCAN NOW'):
+        S['scan']=ai_scan_all()
+        st.rerun()
+    if S['scan']:
+        best=S['scan'][0]
+        t=G+'BEST = '+best['pair']
+        t+=' | '+best['dir']
+        t+=' | SCORE '+str(best['score'])
+        t+=' | '+best['quality']+E
+        st.markdown(t,unsafe_allow_html=True)
+        t=Y+'STRATEGY: '+best['bos']
+        t+=' + '+best['sweep']
+        t+=' + Trend '+best['trend']+E
+        st.markdown(t,unsafe_allow_html=True)
+        for s in S['scan']:
+            col=G if s['score']>=90 else Y if s['score']>=80 else C
+            t=col+s['pair']
+            t+=' '+str(s['price'])
+            t+=' | '+s['dir']
+            t+=' '+str(s['score'])+'%'
+            t+=' | RSI '+str(s['rsi'])
+            t+=' | MACD '+str(s['macd'])
+            t+=' | ATR '+str(s['atr'])
+            t+=' | VWAP '+str(s['vwap'])
+            t+=' | VOL '+str(s['vol'])
+            t+=' | '+s['bos']
+            t+=' | '+s['sweep']+E
+            st.markdown(t,unsafe_allow_html=True)
+elif menu in ['HOME','TERMINAL']:
+    if menu=='TERMINAL':
+        t=C+'TERMINAL - CANDLE + INDICATORS'+E
+        st.markdown(t,unsafe_allow_html=True)
+        t=C+'PAIR / TF upar se badlo!'+E
+        st.markdown(t,unsafe_allow_html=True)
+    else:
+        t=C+'HOME - TODAY '+str(S['today'])
+        t+='/96 TOTAL '+str(S['total'])
+        t+=' | WIN '+str(S['wc'])
+        t+=' LOSS '+str(S['lc'])
+        t+=' PROFIT '+str(cp)
+        t+=' | HOUR '+str(hc)+E
+        st.markdown(t,unsafe_allow_html=True)
+    st.line_chart(S['price_hist'])
+    pr=S['price_hist']
+    rsi=calc_rsi(pr)
+    macd,sig=calc_macd(pr)
+    atr=calc_atr(S['candles'])
+    vwap=calc_vwap(S['candles'])
+    bos=calc_bos(pr)
+    sweep=calc_sweep(pr)
+    hi=max(pr[-20:]) if len(pr)>=20 else max(pr)
+    lo=min(pr[-20:]) if len(pr)>=20 else min(pr)
+    vol=S['candles'][-1]['v'] if S['candles'] else 1000
+    t=C+'RSI '+str(rsi)
+    t+=' | Volume '+str(vol)
+    t+=' | ATR '+str(atr)
+    t+=' | VWAP '+str(vwap)
+    t+=' | MACD '+str(macd)
+    t+=' | Sig '+str(sig)+E
+    st.markdown(t,unsafe_allow_html=True)
+    t=C+'Hi '+str(hi)
+    t+=' Lo '+str(lo)
+    t+=' | '+bos
+    t+=' | '+sweep
+    t+=' | Trend '+calc_trend(pr)+E
+    st.markdown(t,unsafe_allow_html=True)
+    t=Y+'AI DECISION: '+S['pair']
+    t+=' '+S['ai']
+    t+=' '+str(S['ac'])+'%'
+    t+=' - RSI '+str(rsi)
+    t+=' + MACD '+str(macd)
+    t+=' + VWAP '+str(vwap)
+    t+=' + '+bos+' + '+sweep
+    t+=' = '+S['ai']+E
+    st.markdown(t,unsafe_allow_html=True)
+    if S['open'] is not None:
+        o=S['open']
+        dur=o.get('dur',60)
+        el=time.time()-o.get('t0',time.time())
+        left=max(0,int(dur-el))
+        t=G+'OPEN TRADE LIVE: '+o['pair']
+        t+=' ENTRY '+str(o['entry'])
+        t+=' | '+o['dir']
+        t+=' | '+str(left)+'s LEFT'
+        t+=' | TF '+o['tf']
+        t+=' | '+o['am']
+        t+=' | Now '+str(S['lp'])
+        t+=' | LOCKED'+E
+        st.markdown(t,unsafe_allow_html=True)
+        if st.button('CLOSE NOW'):
+            close_trade()
+            st.rerun()
+    else:
+        if rest_left()>0:
+            t=Y+'WIN REST - '+str(rest_left())
+            t+=' sec baaki - Phir trade'+E
+            st.markdown(t,unsafe_allow_html=True)
+        elif can_trade():
+            t=G+'90+ READY - Trade abhi khulega'+E
+            st.markdown(t,unsafe_allow_html=True)
+        else:
+            t=C+'WAIT - 90+ ka wait'+E
+            st.markdown(t,unsafe_allow_html=True)
+        if st.button('TRADE ABHI KHOLO'):
+            open_trade(manual=True)
+            st.rerun()
+    b1,b2=st.columns(2)
+    with b1:
+        if st.button('MANUAL UP'):
+            S['ai']='UP'
+            open_trade(manual=True)
+            st.rerun()
+    with b2:
+        if st.button('MANUAL DOWN'):
+            S['ai']='DOWN'
+            open_trade(manual=True)
+            st.rerun()
+    t=C+'LAST 5 CANDLES'+E
+    st.markdown(t,unsafe_allow_html=True)
+    for c in reversed(S['candles'][-5:]):
+        col='UP' if c['dir']=='UP' else 'DOWN'
+        t=C+col+' | OPEN '+str(c['o'])
+        t+=' -> CLOSE '+str(c['c'])
+        t+=' | HIGH '+str(c['h'])
+        t+=' LOW '+str(c['l'])
+        t+=' | VOL '+str(c['v'])
+        t+=' | '+c['time']+E
+        st.markdown(t,unsafe_allow_html=True)
+if S['candles']:
+    lc=S['candles'][-1]
+    mv='UP' if lc['dir']=='UP' else 'DOWN'
+    t=C+'LAST CANDLE: '+mv
+    t+=' | OPEN '+str(lc['o'])
+    t+=' | CLOSE '+str(lc['c'])
+    t+=' | HIGH '+str(lc['h'])
+    t+=' | LOW '+str(lc['l'])
+    t+=' | VOL '+str(lc['v'])
+    t+=' | '+lc['time']+E
+    st.markdown(t,unsafe_allow_html=True)
+t=C+'STREAK '+str(S['streak'])
+t+=' | BEST '+S['best']
+t+=' '+str(S['best_score'])+'%'
+t+=' | HOUR '+str(hc)
+t+=' | V157 | '+lock+E
+st.markdown(t,unsafe_allow_html=True)
+save_data()
+time.sleep(3)
+st.rerun()   
