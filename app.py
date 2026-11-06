@@ -280,5 +280,11 @@ if menu=='📊 TRADES / HISTORY':
 if menu=='⚙️ SETTINGS':
     t=C+'SETTINGS — WIN SOUND + DATA ONLY'+E; st.markdown(t,unsafe_allow_html=True)
     S['name']=st.text_input('Tumhara Naam',value=S['name'])
-    t=C+'DATA ONLY TRADING: 1) Chrome tab khula rakho — Kill mat karo 2) DATA ON rakho 3) Chrome — Battery — Unrestricted karo 4) TikTok / YouTube dekh sakte ho — Trading background me chalegi — WIN pe SOUND ayegi!'+E; st.markdown(t,unsafe_allow_html=True)
-    t=C+'SOUND: Phone ka volume ON rakho — Sil
+        t=C+'DATA ONLY: Chrome khula rakho - DATA ON rakho'+E; st.markdown(t,unsafe_allow_html=True)
+    t=C+'SOUND: Volume ON rakho - Silent OFF rakho'+E; st.markdown(t,unsafe_allow_html=True)
+    if st.button('RESET DEMO 10000'): S['db']=10000; S['dp']=0; S['today']=0; S['total']=0; S['wc']=0; S['lc']=0; S['ht']=[]; S['open']=None; S['candles']=[]; S['hour_trades']=[]; S['last_win_time']=0; st.rerun()
+    if st.button('RESET HOUR'): S['hour_trades']=[]; st.rerun()
+    t=C+'APP: SONA V148 | USER: '+S['name']+' | STREAK '+str(S['streak'])+' | HOUR '+str(hc)+E; st.markdown(t,unsafe_allow_html=True)
+t=C+'STREAK '+str(S['streak'])+' | BEST '+S['best']+' '+str(S['best_score'])+'% | HOUR '+str(hc)+' | V148 WIN SOUND'+E; st.markdown(t,unsafe_allow_html=True)
+time.sleep(3); st.rerun()
+
