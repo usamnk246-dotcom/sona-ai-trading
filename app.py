@@ -668,11 +668,12 @@ elif menu=='DEPOSIT':
         save_data()
         st.success('DEPOSIT HO GAYA!')
         st.rerun()
-    for d in reversed(S['dep_hist'][-5:]):
-         t=G+'DEPOSIT +'+str(d['amt'])
-    t+=' | '+d['method']
-    t+=' | '+d['time']+E
-    st.markdown(t,unsafe_allow_html=True)
+        for x in reversed(S['dep_hist'][-5:]):
+        t=G+'DEPOSIT +'+str(x.get('amt',0))
+        t+=' | '+str(x.get('method',''))
+        t+=' | '+str(x.get('time',''))+E
+        st.markdown(t,unsafe_allow_html=True)
+    
 elif menu=='HISTORY':
     t=C+'TRADES - HISTORY SAVED!'+E
     st.markdown(t,unsafe_allow_html=True)
