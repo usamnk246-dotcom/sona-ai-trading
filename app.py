@@ -1,8 +1,8 @@
 import streamlit as st
-import random, time, json, os
+import random,time,json,os
 from datetime import datetime
 import pytz
-st.set_page_config(page_title='SONA V152', layout='centered')
+st.set_page_config(page_title='SONA V153',layout='centered')
 C='<div style="background:#111;padding:12px;border-radius:12px;color:#fff;font-weight:bold;text-align:center;margin-bottom:6px;font-size:15px;">'
 G='<div style="background:#0f3d1e;padding:10px;border-radius:10px;color:#0f0;font-weight:bold;text-align:center;margin-bottom:6px;font-size:15px;">'
 R='<div style="background:#3d0f0f;padding:10px;border-radius:10px;color:#ff5555;font-weight:bold;text-align:center;margin-bottom:6px;font-size:15px;">'
@@ -24,7 +24,8 @@ def save_data():
         d=dict(S)
         d['open']=None
         if S['open'] is not None:
-            d['open']={'pair':S['open']['pair'],'tf':S['open']['tf'],'entry':S['open']['entry'],'dir':S['open']['dir'],'am':S['open']['am'],'time':S['open']['time'].strftime('%Y-%m-%d %H:%M:%S')}
+            o=S['open']
+            d['open']={'pair':o['pair'],'tf':o['tf'],'entry':o['entry'],'dir':o['dir'],'am':o['am'],'dur':o.get('dur',60),'time':o['time'].strftime('%Y-%m-%d %H:%M:%S')}
         d['hour_start']=S['hour_start'].strftime('%Y-%m-%d %H:%M:%S')
         d['save_time']=time.time()
         with open(FILE,'w') as f:
@@ -32,165 +33,171 @@ def save_data():
     except:
         pass
 if 'S' not in st.session_state:
-    saved=load_data()
-    if saved is not None:
+    sv=load_data()
+    if sv is not None:
         try:
-            saved['hour_start']=datetime.strptime(saved['hour_start'],'%Y-%m-%d %H:%M:%S').replace(tzinfo=pytz.timezone('Asia/Karachi'))
-            if saved.get('open') is not None:
-                saved['open']['time']=datetime.strptime(saved['open']['time'],'%Y-%m-%d %H:%M:%S').replace(tzinfo=pytz.timezone('Asia/Karachi'))
-            saved['last']=time.time()
-            saved['last_scan_time']=0
-            st.session_state.S=saved
+            sv['hour_start']=datetime.strptime(sv['hour_start'],'%Y-%m-%d %H:%M:%S').replace(tzinfo=pytz.timezone('Asia/Karachi'))
+            if sv.get('open') is not None:
+                sv['open']['time']=datetime.strptime(sv['open']['time'],'%Y-%m-%d %H:%M:%S').replace(tzinfo=pytz.timezone('Asia/Karachi'))
+            sv['last']=time.time()
+            sv['last_scan_time']=0
+            st.session_state.S=sv
         except:
-            st.session_state.S={'am':'DEMO','auto':True,'db':10000,'rb':0,'dp':0,'rp':0,'open':None,'ht':[],'wc':0,'lc':0,'today':0,'total':0,'streak':0,'pair':'SOL/USD','tf':'1MIN','lp':179.50,'ai':'UP','ac':89,'price_hist':[179.50]*30,'dep_hist':[],'with_hist':[],'last':time.time(),'last_trade_time':0,'last_scan_time':0,'name':'Usam','scan':[],'best':'SOL/USD','best_score':0,'best_dir':'UP','candles':[],'quality':'GOOD','auto_scan':True,'hour_trades':[],'hour_start':datetime.now(pytz.timezone('Asia/Karachi')).replace(minute=0,second=0,microsecond=0),'min_conf':90,'min_gap_sec':60,'last_win_time':0,'sound_on':True,'last_sound_id':''}
-    else:
+            sv=None
+    if sv is None:
         st.session_state.S={'am':'DEMO','auto':True,'db':10000,'rb':0,'dp':0,'rp':0,'open':None,'ht':[],'wc':0,'lc':0,'today':0,'total':0,'streak':0,'pair':'SOL/USD','tf':'1MIN','lp':179.50,'ai':'UP','ac':89,'price_hist':[179.50]*30,'dep_hist':[],'with_hist':[],'last':time.time(),'last_trade_time':0,'last_scan_time':0,'name':'Usam','scan':[],'best':'SOL/USD','best_score':0,'best_dir':'UP','candles':[],'quality':'GOOD','auto_scan':True,'hour_trades':[],'hour_start':datetime.now(pytz.timezone('Asia/Karachi')).replace(minute=0,second=0,microsecond=0),'min_conf':90,'min_gap_sec':60,'last_win_time':0,'sound_on':True,'last_sound_id':''}
 S=st.session_state.S
 pkt=pytz.timezone('Asia/Karachi')
 now=datetime.now(pkt)
 PAIRS=list(BASE.keys())
 TFS=['1MIN','2MIN','5MIN','15MIN']
-def step_for(base):
-    return max(base*0.001,0.0005)
-def calc_rsi(prices):
-    if len(prices)<15:
+def step_for(b):
+    return max(b*0.001,0.0005)
+def calc_rsi(pr):
+    if len(pr)<15:
         return 50.0
-    gains=[]
-    losses=[]
+    g=[]
+    l=[]
     for i in range(1,15):
-        d=prices[-i]-prices[-i-1]
+        d=pr[-i]-pr[-i-1]
         if d>0:
-            gains.append(d)
+            g.append(d)
         else:
-            losses.append(abs(d))
-    ag=sum(gains)/14 if gains else 0.0001
-    al=sum(losses)/14 if losses else 0.0001
+            l.append(abs(d))
+    ag=sum(g)/14 if g else 0.0001
+    al=sum(l)/14 if l else 0.0001
     if al==0:
         return 95.0
     return round(100-(100/(1+ag/al)),1)
-def calc_ema(prices,period):
-    if len(prices)<period:
-        return prices[-1] if prices else 0
-    k=2/(period+1)
-    ema=prices[-period]
-    for p in prices[-period:]:
-        ema=p*k+ema*(1-k)
-    return round(ema,4)
-def calc_macd(prices):
-    e12=calc_ema(prices,12)
-    e26=calc_ema(prices,26)
-    m=round(e12-e26,4)
+def calc_ema(pr,p):
+    if len(pr)<p:
+        return pr[-1] if pr else 0
+    k=2/(p+1)
+    e=pr[-p]
+    for x in pr[-p:]:
+        e=x*k+e*(1-k)
+    return round(e,4)
+def calc_macd(pr):
+    m=round(calc_ema(pr,12)-calc_ema(pr,26),4)
     s=round(m*0.9,4)
     return m,s
-def calc_atr(candles):
-    if len(candles)<2:
+def calc_atr(cd):
+    if len(cd)<2:
         return round(step_for(S['lp'])*2,4)
-    trs=[]
-    for i,c in enumerate(candles):
+    tr=[]
+    for i,c in enumerate(cd):
         if i>0:
-            trs.append(max(c['h']-c['l'],abs(c['h']-candles[i-1]['c']),abs(c['l']-candles[i-1]['c'])))
-    return round(sum(trs[-14:])/min(14,len(trs)),4)
-def calc_vwap(candles):
-    if not candles:
+            tr.append(max(c['h']-c['l'],abs(c['h']-cd[i-1]['c']),abs(c['l']-cd[i-1]['c'])))
+    return round(sum(tr[-14:])/min(14,len(tr)),4)
+def calc_vwap(cd):
+    if not cd:
         return S['lp']
-    tp=sum(c['c']*c['v'] for c in candles)
-    tv=sum(c['v'] for c in candles)
+    tp=sum(c['c']*c['v'] for c in cd)
+    tv=sum(c['v'] for c in cd)
     return round(tp/tv,4) if tv else S['lp']
-def calc_bos(prices):
-    if len(prices)<10:
+def calc_bos(pr):
+    if len(pr)<10:
         return 'NO BOS'
-    if prices[-1]>max(prices[-10:-1]):
+    if pr[-1]>max(pr[-10:-1]):
         return 'BOS UP'
-    if prices[-1]<min(prices[-10:-1]):
+    if pr[-1]<min(pr[-10:-1]):
         return 'BOS DOWN'
     return 'NO BOS'
-def calc_sweep(prices):
-    if len(prices)<10:
+def calc_sweep(pr):
+    if len(pr)<10:
         return 'NO SWEEP'
-    low=min(prices[-10:])
-    high=max(prices[-10:])
-    if prices[-2]<low and prices[-1]>low:
+    lo=min(pr[-10:])
+    hi=max(pr[-10:])
+    if pr[-2]<lo and pr[-1]>lo:
         return 'SWEEP LOW + UP'
-    if prices[-2]>high and prices[-1]<high:
+    if pr[-2]>hi and pr[-1]<hi:
         return 'SWEEP HIGH + DOWN'
     return 'NO SWEEP'
-def calc_trend(prices):
-    return 'UP' if prices[-1]>calc_ema(prices,20) else 'DOWN'
-def calc_quality(score):
-    if score>=90:
+def calc_trend(pr):
+    return 'UP' if pr[-1]>calc_ema(pr,20) else 'DOWN'
+def calc_q(sc):
+    if sc>=90:
         return 'EXCELLENT 90+'
-    if score>=80:
+    if sc>=80:
         return 'HIGH 80+'
     return 'GOOD'
-def set_pair(new_pair):
-    if S['pair']!=new_pair:
-        S['pair']=new_pair
-        base=BASE[new_pair]
-        S['lp']=base
-        S['price_hist']=[base]*30
-        S['candles']=[{'o':base,'c':base,'h':base,'l':base,'v':1000,'time':datetime.now(pkt).strftime('%H:%M:%S'),'dir':'UP'}]
-def make_candle():
-    base=BASE[S['pair']]
-    stp=step_for(base)
-    if abs(S['lp']-base)>base*0.05:
-        S['lp']=base
-    o=S['lp']
-    c=round(o+random.uniform(-stp*2,stp*2),4)
-    h=round(max(o,c)+random.uniform(0,stp),4)
-    l=round(min(o,c)-random.uniform(0,stp),4)
-    v=random.randint(800,8500)
+def set_pair(np):
+    if S['pair']!=np:
+        S['pair']=np
+        b=BASE[np]
+        S['lp']=b
+        S['price_hist']=[b]*30
+        S['candles']=[{'o':b,'c':b,'h':b,'l':b,'v':1000,'time':now.strftime('%H:%M:%S'),'dir':'UP'}]
+def make_tick():
+    b=BASE[S['pair']]
+    stp=step_for(b)/3
+    c=round(S['lp']+random.uniform(-stp,stp),4)
     S['lp']=c
     S['price_hist'].append(c)
     if len(S['price_hist'])>60:
         S['price_hist']=S['price_hist'][-60:]
-    S['candles'].append({'o':o,'c':c,'h':h,'l':l,'v':v,'time':datetime.now(pkt).strftime('%H:%M:%S'),'dir':'UP' if c>=o else 'DOWN'})
+    if not S['candles']:
+        S['candles'].append({'o':c,'c':c,'h':c,'l':c,'v':1000,'time':now.strftime('%H:%M:%S'),'dir':'UP'})
+    else:
+        lc=S['candles'][-1]
+        lc['c']=c
+        if c>lc['h']:
+            lc['h']=c
+        if c<lc['l']:
+            lc['l']=c
+        lc['dir']='UP' if c>=lc['o'] else 'DOWN'
+        lc['v']=lc['v']+random.randint(10,200)
+    tfm=int(S['tf'].replace('MIN',''))
+    ticks_per_candle=tfm*20
+    if len(S['price_hist'])%ticks_per_candle==0:
+        S['candles'].append({'o':c,'c':c,'h':c,'l':c,'v':1000,'time':now.strftime('%H:%M:%S'),'dir':'UP'})
     if len(S['candles'])>24:
         S['candles']=S['candles'][-24:]
 def ai_scan_all():
     res=[]
     for pair in PAIRS:
-        base=BASE[pair]
-        stp=step_for(base)
-        prices=[base]
+        b=BASE[pair]
+        stp=step_for(b)
+        pr=[b]
         for i in range(59):
-            prices.append(round(prices[-1]+random.uniform(-stp*2,stp*2),4))
-        vols=[random.randint(800,8500) for _ in range(60)]
-        rsi=calc_rsi(prices)
-        macd,sig=calc_macd(prices)
-        atr=round(sum([abs(prices[i]-prices[i-1]) for i in range(1,len(prices))])/60,4)
-        vwap=round(sum(p*v for p,v in zip(prices,vols))/sum(vols),4)
+            pr.append(round(pr[-1]+random.uniform(-stp*2,stp*2),4))
+        vs=[random.randint(800,8500) for _ in range(60)]
+        rsi=calc_rsi(pr)
+        macd,sig=calc_macd(pr)
+        atr=round(sum([abs(pr[i]-pr[i-1]) for i in range(1,len(pr))])/60,4)
+        vwap=round(sum(p*v for p,v in zip(pr,vs))/sum(vs),4)
         vol=random.randint(800,8500)
-        bos=calc_bos(prices)
-        sweep=calc_sweep(prices)
-        trend=calc_trend(prices)
-        score=50
+        bos=calc_bos(pr)
+        sweep=calc_sweep(pr)
+        trend=calc_trend(pr)
+        sc=50
         if rsi<30:
-            score+=18
+            sc+=18
         if rsi>70:
-            score+=18
+            sc+=18
         if macd>0:
-            score+=10
+            sc+=10
         if 'BOS' in bos:
-            score+=12
+            sc+=12
         if 'SWEEP' in sweep:
-            score+=15
+            sc+=15
         if vol>4000:
-            score+=10
-        score=min(99,max(55,score))
-        direction='UP' if prices[-1]>vwap or macd>0 else 'DOWN'
+            sc+=10
+        sc=min(99,max(55,sc))
+        dr='UP' if pr[-1]>vwap or macd>0 else 'DOWN'
         if rsi<30:
-            direction='UP'
+            dr='UP'
         if rsi>70:
-            direction='DOWN'
+            dr='DOWN'
         if 'BOS UP' in bos:
-            direction='UP'
+            dr='UP'
         if 'BOS DOWN' in bos:
-            direction='DOWN'
+            dr='DOWN'
         if 'SWEEP LOW' in sweep:
-            direction='UP'
+            dr='UP'
         if 'SWEEP HIGH' in sweep:
-            direction='DOWN'
-        res.append({'pair':pair,'price':prices[-1],'rsi':rsi,'macd':macd,'atr':atr,'vwap':vwap,'vol':vol,'bos':bos,'sweep':sweep,'trend':trend,'score':score,'dir':direction,'quality':calc_quality(score)})
+            dr='DOWN'
+        res.append({'pair':pair,'price':pr[-1],'rsi':rsi,'macd':macd,'atr':atr,'vwap':vwap,'vol':vol,'bos':bos,'sweep':sweep,'trend':trend,'score':sc,'dir':dr,'quality':calc_q(sc)})
     return sorted(res,key=lambda x: x['score'],reverse=True)
 def hour_count():
     cur=now.replace(minute=0,second=0,microsecond=0)
@@ -201,8 +208,8 @@ def hour_count():
 def rest_left():
     if S['last_win_time']==0:
         return 0
-    left=300-(time.time()-S['last_win_time'])
-    return int(left) if left>0 else 0
+    lf=300-(time.time()-S['last_win_time'])
+    return int(lf) if lf>0 else 0
 def can_trade():
     if time.time()-S['last_trade_time']<S['min_gap_sec']:
         return False
@@ -221,7 +228,8 @@ def open_trade(manual=False):
     bal=S['rb'] if S['am']=='REAL' else S['db']
     if bal<=0:
         return False
-    S['open']={'pair':S['pair'],'tf':S['tf'],'entry':S['lp'],'dir':S['ai'],'am':S['am'],'time':datetime.now(pkt)}
+    dur=int(S['tf'].replace('MIN',''))*60
+    S['open']={'pair':S['pair'],'tf':S['tf'],'entry':S['lp'],'dir':S['ai'],'am':S['am'],'time':datetime.now(pkt),'dur':dur}
     S['last_trade_time']=time.time()
     if not manual:
         S['hour_trades'].append(now)
@@ -253,7 +261,6 @@ def close_trade():
     S['open']=None
     S['last_sound_id']=nid if win else ''
     save_data()
-# CATCH-UP: Screen band thi to missed time ka hisaab
 if S.get('save_time',0)>0:
     missed=int(time.time()-S['save_time'])
     if missed>90 and S['auto']:
@@ -278,7 +285,7 @@ if S.get('save_time',0)>0:
             save_data()
 if time.time()-S['last']>3:
     S['last']=time.time()
-    make_candle()
+    make_tick()
     if S['auto_scan'] and time.time()-S['last_scan_time']>10:
         S['last_scan_time']=time.time()
         S['scan']=ai_scan_all()
@@ -292,7 +299,9 @@ if time.time()-S['last']>3:
             S['ai']=best['dir']
             S['ac']=best['score']
     if S['open'] is not None:
-        if (datetime.now(pkt)-S['open']['time']).total_seconds()>=60:
+        dur=S['open'].get('dur',60)
+        el=(datetime.now(pkt)-S['open']['time']).total_seconds()
+        if el>=dur:
             close_trade()
     if S['auto'] and S['open'] is None and S['today']<96:
         if can_trade():
@@ -317,7 +326,7 @@ dp=int(S['dp'])
 rp=int(S['rp'])
 cb=rb if am=='REAL' else db
 cp=rp if am=='REAL' else dp
-t=C+'SONA V152 | DEMO '+str(db)+' | REAL '+str(rb)+' | SAVED!'+E
+t=C+'SONA V153 | DEMO '+str(db)+' | REAL '+str(rb)+' | SAVED!'+E
 st.markdown(t,unsafe_allow_html=True)
 t=C+'BAL '+str(cb)+' '+am+' | PROFIT '+str(cp)+E
 st.markdown(t,unsafe_allow_html=True)
@@ -332,7 +341,7 @@ if am=='REAL' and rb==0:
     st.markdown(t,unsafe_allow_html=True)
 hc=hour_count()
 if rest_left()>0:
-    t=Y+'WIN REST - '+str(rest_left())+' sec baaki - More trader se bachne ke liye'+E
+    t=Y+'WIN REST - '+str(rest_left())+' sec baaki'+E
     st.markdown(t,unsafe_allow_html=True)
 else:
     if S['scan'] and S['scan'][0]['score']>=90:
@@ -345,7 +354,7 @@ if S['scan']:
     best=S['scan'][0]
     t=B+'AI BRAIN - BEST = '+best['pair']+' | '+best['dir']+' | SCORE '+str(best['score'])+' | HOUR '+str(hc)+' | '+lock+E
     st.markdown(t,unsafe_allow_html=True)
-t=G+'V152 - SCREEN BAND BHI HISTORY SAVE - DATA ON + AUTO ON = KAAM!'+E
+t=G+'V153 - TF = TRADE TIME - 1MIN=60s 2MIN=120s 5MIN=300s'+E
 st.markdown(t,unsafe_allow_html=True)
 S['auto_scan']=st.toggle('AI BRAIN AUTO SCAN ON',value=S['auto_scan'])
 S['min_conf']=st.selectbox('MIN CONFIDENCE',[80,85,90,95],index=2)
@@ -358,8 +367,8 @@ if st.button('TEST SOUND'):
 menu=st.selectbox('MENU',['AI BRAIN','HOME','TERMINAL','DEPOSIT','WITHDRAW','HISTORY','SETTINGS'],index=1)
 if S['candles']:
     lc=S['candles'][-1]
-    move='UP' if lc['dir']=='UP' else 'DOWN'
-    t=C+'LAST CANDLE: '+move+' | OPEN '+str(lc['o'])+' | CLOSE '+str(lc['c'])+' | HIGH '+str(lc['h'])+' | LOW '+str(lc['l'])+' | VOL '+str(lc['v'])+' | '+lc['time']+E
+    mv='UP' if lc['dir']=='UP' else 'DOWN'
+    t=C+'LAST CANDLE: '+mv+' | OPEN '+str(lc['o'])+' | CLOSE '+str(lc['c'])+' | HIGH '+str(lc['h'])+' | LOW '+str(lc['l'])+' | VOL '+str(lc['v'])+' | '+lc['time']+E
     st.markdown(t,unsafe_allow_html=True)
 if menu=='AI BRAIN':
     t=B+'AI BRAIN - 90+ ONLY - WIN SOUND'+E
@@ -382,14 +391,14 @@ if menu in ['HOME','TERMINAL']:
         t=C+'TERMINAL - CANDLE + INDICATORS'+E
         st.markdown(t,unsafe_allow_html=True)
         old=S['pair']
-        new_pair=st.selectbox('PAIR',PAIRS,index=PAIRS.index(S['pair']))
+        np=st.selectbox('PAIR',PAIRS,index=PAIRS.index(S['pair']))
         S['tf']=st.selectbox('TF - TIME',TFS,index=TFS.index(S['tf']))
-        if new_pair!=old:
+        if np!=old:
             if S['open'] is not None:
-                t=R+'PAIR LOCKED - Trade OPEN hai - Pehle CLOSE NOW dabao!'+E
+                t=R+'PAIR LOCKED - Trade OPEN hai!'+E
                 st.markdown(t,unsafe_allow_html=True)
             else:
-                set_pair(new_pair)
+                set_pair(np)
     else:
         t=C+'HOME - TODAY '+str(S['today'])+'/96 TOTAL '+str(S['total'])+' | WIN '+str(S['wc'])+' LOSS '+str(S['lc'])+' PROFIT '+str(cp)+' | HOUR '+str(hc)+E
         st.markdown(t,unsafe_allow_html=True)
@@ -412,8 +421,10 @@ if menu in ['HOME','TERMINAL']:
     st.markdown(t,unsafe_allow_html=True)
     if S['open'] is not None:
         o=S['open']
-        left=max(0,60-int((datetime.now(pkt)-o['time']).total_seconds()))
-        t=G+'OPEN TRADE LIVE: '+o['pair']+' ENTRY '+str(o['entry'])+' | '+o['dir']+' | '+str(left)+'s LEFT | '+o['am']+' | Now '+str(S['lp'])+' | LOCKED'+E
+        dur=o.get('dur',60)
+        el=(datetime.now(pkt)-o['time']).total_seconds()
+        left=max(0,int(dur-el))
+        t=G+'OPEN TRADE LIVE: '+o['pair']+' ENTRY '+str(o['entry'])+' | '+o['dir']+' | '+str(left)+'s LEFT | TF '+o['tf']+' | '+o['am']+' | Now '+str(S['lp'])+' | LOCKED'+E
         st.markdown(t,unsafe_allow_html=True)
         if st.button('CLOSE NOW'):
             close_trade()
@@ -468,7 +479,7 @@ if menu=='DEPOSIT':
 if menu=='WITHDRAW':
     t=C+'WITHDRAW'+E
     st.markdown(t,unsafe_allow_html=True)
-    t=C+'REAL BAL: '+str(rb)+E
+    t=C+'REAL BAL: '+str(rb)+' | Profit: '+str(rp)+E
     st.markdown(t,unsafe_allow_html=True)
     wamt=st.number_input('Amt',100,10000,100)
     wnum=st.text_input('Number','0300-1234567')
@@ -479,9 +490,12 @@ if menu=='WITHDRAW':
             S['rb']-=int(wamt)
             S['with_hist'].append({'amt':int(wamt),'num':wnum,'time':now.strftime('%H:%M:%S')})
             save_data()
-            st.success('HO GAYA!')
+            st.success('WITHDRAW HO GAYA!')
             st.rerun()
     for w in reversed(S['with_hist'][-5:]):
-        t=R+'OUT -'+str(w['amt'])+E
+        t=R+'WITHDRAW -'+str(w['amt'])+' | '+w['time']+E
         st.markdown(t,unsafe_allow_html=True)
-    
+if menu=='HISTORY':
+    t=C+'TRADES - HISTORY FULL DAY - SAVED!'+E
+    st.markdown(t,unsafe_allow_html=True)
+    t=C+'TODAY '+str(S['today'])+'/96 TOTAL '+str(S['total'])+' | WIN '+st
