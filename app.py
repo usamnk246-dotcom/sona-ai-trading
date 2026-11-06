@@ -3,7 +3,7 @@ import random,time,json,os
 from datetime import datetime
 import pytz
 st.set_page_config(
-page_title='SONA V156',
+page_title='SONA V157',
 layout='centered')
 C='<div style="background:#111;'
 C+='padding:12px;border-radius:12px;'
@@ -178,6 +178,14 @@ if 'bal_hist' not in S:
     S['bal_hist']=[S['db']]
 if 'loss_streak' not in S:
     S['loss_streak']=0
+if S['trade_amt'] not in [250,500,1000,2000,4000,8000]:
+    S['trade_amt']=250
+if S['target'] not in [1000,5000,10000,15000]:
+    S['target']=15000
+if S['pair'] not in list(BASE.keys()):
+    S['pair']='SOL/USD'
+if S['tf'] not in ['1MIN','2MIN','5MIN','15MIN']:
+    S['tf']='1MIN'
 PAIRS=list(BASE.keys())
 TFS=['1MIN','2MIN','5MIN','15MIN']
 def step_for(b):
@@ -425,14 +433,12 @@ def do_close(o,exit_p):
         S['streak']+=1
         S['loss_streak']=0
         S['last_win_time']=time.time()
-        # LADDER UP
         if S['trade_amt']<8000:
             S['trade_amt']=S['trade_amt']*2
     else:
         S['lc']+=1
         S['streak']=0
         S['loss_streak']+=1
-        # LADDER RESET
         S['trade_amt']=250
     S['total']+=1
     S['today']+=1
@@ -509,7 +515,6 @@ if time.time()-S['last']>3:
         S['best_dir']=best['dir']
         S['quality']=best['quality']
         if S['open'] is None:
-            set_pair(best['pair'])
             S['ai']=best['dir']
             S['ac']=best['score']
     if S['open'] is not None:
@@ -527,10 +532,12 @@ S['sound_on']=st.toggle(
 if S['sound_on'] and S['ht']:
     if S['ht'][-1]['win']:
         if S['last_sound_id']==S['ht'][-1].get('id',''):
-            st.markdown(
-            '<audio autoplay><source src="https://www.soundjay.com/buttons/sounds/beep-07a.mp3" type="audio/mpeg"></audio>',
-            unsafe_allow_html=True)
-            t=G+'WIN SOUND - TRADE WIN - CHECK KARO!'+E
+            au='<audio autoplay><source src='
+            au+='"https://www.soundjay.com/'
+            au+='buttons/sounds/beep-07a.mp3"'
+            au+=' type="audio/mpeg"></audio>'
+            st.markdown(au,unsafe_allow_html=True)
+            t=G+'WIN SOUND - TRADE WIN!'+E
             st.markdown(t,unsafe_allow_html=True)
 c1,c2=st.columns(2)
 with c1:
@@ -549,7 +556,7 @@ cb=rb if am=='REAL' else db
 cp=rp if am=='REAL' else dp
 hc=hour_count()
 lock='LOCKED' if S['open'] is not None else 'FREE'
-t=C+'SONA V156 | DEMO '+str(db)+' | REAL '+str(rb)+' | SAVED!'+E
+t=C+'SONA V157 | DEMO '+str(db)+' | REAL '+str(rb)+' | SAVED!'+E
 st.markdown(t,unsafe_allow_html=True)
 t=C+'BAL '+str(cb)+' '+am+' | PROFIT '+str(cp)+' | WIN RATE '+str(win_rate())+'%'+E
 st.markdown(t,unsafe_allow_html=True)
@@ -570,7 +577,7 @@ if S['scan']:
     best=S['scan'][0]
     t=B+'AI BRAIN - BEST = '+best['pair']+' | '+best['dir']+' | SCORE '+str(best['score'])+' | HOUR '+str(hc)+' | '+lock+E
     st.markdown(t,unsafe_allow_html=True)
-t=G+'V156 - LADDER 250 TO 8000 - TARGET 15000'+E
+t=G+'V157 - PAIR / TF UPAR - AI PAIR NAHI BADLEGA'+E
 st.markdown(t,unsafe_allow_html=True)
 S['auto_scan']=st.toggle(
 'AI BRAIN AUTO SCAN ON',value=S['auto_scan'])
@@ -585,11 +592,29 @@ index=[250,500,1000,2000,4000,8000].index(S['trade_amt']) if S['trade_amt'] in [
 S['target']=st.selectbox(
 'DAILY TARGET',
 [1000,5000,10000,15000],
-index=3)
+index=[1000,5000,10000,15000].index(S['target']) if S['target'] in [1000,5000,10000,15000] else 3)
+t=C+'PAIR / TIMEFRAME - YAHAN SE BADLO - UPAR HI HAI!'+E
+st.markdown(t,unsafe_allow_html=True)
+np=st.selectbox('PAIR - MARKET',
+PAIRS,index=PAIRS.index(S['pair']))
+ntf=st.selectbox('TF - TIMEFRAME',
+TFS,index=TFS.index(S['tf']))
+if np!=S['pair'] or ntf!=S['tf']:
+    if S['open'] is not None:
+        t=R+'PAIR / TF LOCKED - Trade OPEN hai! Pehle CLOSE hone do!'+E
+        st.markdown(t,unsafe_allow_html=True)
+    else:
+        if np!=S['pair']:
+            set_pair(np)
+        S['tf']=ntf
+        save_data()
+        st.rerun()
 if st.button('TEST SOUND'):
-    st.markdown(
-    '<audio autoplay><source src="https://www.soundjay.com/buttons/sounds/beep-07a.mp3" type="audio/mpeg"></audio>',
-    unsafe_allow_html=True)
+    au='<audio autoplay><source src='
+    au+='"https://www.soundjay.com/'
+    au+='buttons/sounds/beep-07a.mp3"'
+    au+=' type="audio/mpeg"></audio>'
+    st.markdown(au,unsafe_allow_html=True)
     st.success('Awaz aayi ka?')
 menu=st.selectbox('MENU',
 ['HOME','AI BRAIN','TERMINAL',
@@ -645,22 +670,4 @@ elif menu=='DEPOSIT':
         st.rerun()
     for d in reversed(S['dep_hist'][-5:]):
         t=G+'DEPOSIT +'+str(d['amt'])+' | '+d['method']+' | '+d['time']+E
-        st.markdown(t,unsafe_allow_html=True)
-elif menu=='HISTORY':
-    t=C+'TRADES - HISTORY SAVED!'+E
-    st.markdown(t,unsafe_allow_html=True)
-    t=C+'TODAY '+str(S['today'])+E
-    st.markdown(t,unsafe_allow_html=True)
-    t=C+'WIN '+str(S['wc'])+' LOSS '+str(S['lc'])+' | WIN RATE '+str(win_rate())+'%'+E
-    st.markdown(t,unsafe_allow_html=True)
-    t=C+'PROFIT '+str(cp)+' HOUR '+str(hc)+E
-    st.markdown(t,unsafe_allow_html=True)
-    st.line_chart(S['bal_hist'])
-    if S['open'] is not None:
-        o=S['open']
-        t=G+'OPEN '+o['pair']+' ENTRY '+str(o['entry'])+' | '+o['dir']+' | TF '+o['tf']+' | '+o['am']+E
-        st.markdown(t,unsafe_allow_html=True)
-    for h in reversed(S['ht'][-20:]):
-        col='WIN' if h['win'] else 'LOSS'
-        t=C+col+' '+h['pair']+' '+h['tf']+' ENTRY '+str(h['entry'])+' EXIT '+str(h['exit'])+' '+str(h['amt'])+' | '+h['am']+' | '+h['time']+E
-  
+        
