@@ -2,7 +2,7 @@ import streamlit as st
 import random, time
 from datetime import datetime
 import pytz
-st.set_page_config(page_title='SONA V150', layout='centered')
+st.set_page_config(page_title='SONA V151', layout='centered')
 C='<div style="background:#111;padding:12px;border-radius:12px;color:#fff;font-weight:bold;text-align:center;margin-bottom:6px;font-size:15px;">'
 G='<div style="background:#0f3d1e;padding:10px;border-radius:10px;color:#0f0;font-weight:bold;text-align:center;margin-bottom:6px;font-size:15px;">'
 R='<div style="background:#3d0f0f;padding:10px;border-radius:10px;color:#ff5555;font-weight:bold;text-align:center;margin-bottom:6px;font-size:15px;">'
@@ -47,7 +47,7 @@ def calc_macd(prices):
     e12=calc_ema(prices,12)
     e26=calc_ema(prices,26)
     m=round(e12-e26,4)
-    s=round(calc_ema(prices,9),4)
+    s=round(m*0.9,4)
     return m,s
 def calc_atr(candles):
     if len(candles)<2:
@@ -95,7 +95,7 @@ def set_pair(new_pair):
         base=BASE[new_pair]
         S['lp']=base
         S['price_hist']=[base]*30
-        S['candles']=[]
+        S['candles']=[{'o':base,'c':base,'h':base,'l':base,'v':1000,'time':datetime.now(pkt).strftime('%H:%M:%S'),'dir':'UP'}]
 def make_candle():
     base=BASE[S['pair']]
     stp=step_for(base)
@@ -258,11 +258,12 @@ dp=int(S['dp'])
 rp=int(S['rp'])
 cb=rb if am=='REAL' else db
 cp=rp if am=='REAL' else dp
-t=C+'SONA V150 | DEMO '+str(db)+' | REAL '+str(rb)+E
+t=C+'SONA V151 | DEMO '+str(db)+' | REAL '+str(rb)+E
 st.markdown(t,unsafe_allow_html=True)
 t=C+'BAL '+str(cb)+' '+am+' | PROFIT '+str(cp)+E
 st.markdown(t,unsafe_allow_html=True)
-t=C+S['pair']+' '+str(S['lp'])+' AI '+S['ai']+' '+str(S['ac'])+'% | '+now.strftime('%H:%M:%S PKT')+E
+lock='LOCKED' if S['open'] is not None else 'FREE'
+t=C+S['pair']+' '+str(S['lp'])+' AI '+S['ai']+' '+str(S['ac'])+'% | '+lock+' | '+now.strftime('%H:%M:%S PKT')+E
 st.markdown(t,unsafe_allow_html=True)
 if am=='DEMO':
     t=G+'DEMO MODE - Practice - REAL paisa safe'+E
@@ -283,7 +284,7 @@ else:
         st.markdown(t,unsafe_allow_html=True)
 if S['scan']:
     best=S['scan'][0]
-    t=B+'AI BRAIN - BEST = '+best['pair']+' | '+best['dir']+' | SCORE '+str(best['score'])+' | HOUR '+str(hc)+E
+    t=B+'AI BRAIN - BEST = '+best['pair']+' | '+best['dir']+' | SCORE '+str(best['score'])+' | HOUR '+str(hc)+' | '+lock+E
     st.markdown(t,unsafe_allow_html=True)
 S['auto_scan']=st.toggle('AI BRAIN AUTO SCAN ON',value=S['auto_scan'])
 S['min_conf']=st.selectbox('MIN CONFIDENCE',[80,85,90,95],index=2)
@@ -323,7 +324,11 @@ if menu in ['HOME','TERMINAL']:
         new_pair=st.selectbox('PAIR',PAIRS,index=PAIRS.index(S['pair']))
         S['tf']=st.selectbox('TF - TIME',TFS,index=TFS.index(S['tf']))
         if new_pair!=old:
-            set_pair(new_pair)
+            if S['open'] is not None:
+                t=R+'PAIR LOCKED - Trade OPEN hai - Pehle CLOSE NOW dabao!'+E
+                st.markdown(t,unsafe_allow_html=True)
+            else:
+                set_pair(new_pair)
     else:
         t=C+'HOME - TODAY '+str(S['today'])+'/96 TOTAL '+str(S['total'])+' | WIN '+str(S['wc'])+' LOSS '+str(S['lc'])+' PROFIT '+str(cp)+' | HOUR '+str(hc)+E
         st.markdown(t,unsafe_allow_html=True)
@@ -337,17 +342,17 @@ if menu in ['HOME','TERMINAL']:
     sweep=calc_sweep(pr)
     hi=max(pr[-20:]) if len(pr)>=20 else max(pr)
     lo=min(pr[-20:]) if len(pr)>=20 else min(pr)
-    vol=S['candles'][-1]['v'] if S['candles'] else 0
+    vol=S['candles'][-1]['v'] if S['candles'] else 1000
     t=C+'RSI '+str(rsi)+' | Volume '+str(vol)+' | ATR '+str(atr)+' | VWAP '+str(vwap)+' | MACD '+str(macd)+' | Sig '+str(sig)+E
     st.markdown(t,unsafe_allow_html=True)
     t=C+'Hi '+str(hi)+' Lo '+str(lo)+' | '+bos+' | '+sweep+' | Trend '+calc_trend(pr)+E
     st.markdown(t,unsafe_allow_html=True)
-    t=Y+'AI DECISION: '+S['pair']+' '+S['ai']+' '+str(S['ac'])+'% - RSI '+str(rsi)+' + MACD '+str(macd)+' + VWAP '+str(vwap)+' + '+bos+' + '+sweep+' = '+S['ai']+E
+    t=Y+'AI DECISION: '+S['pair']+' '+S['ai']+' '+str(S['ac'])+'% - RSI '+str(rsi)+' + MACD '+str(macd)+' + Sig '+str(sig)+' + VWAP '+str(vwap)+' + '+bos+' + '+sweep+' = '+S['ai']+E
     st.markdown(t,unsafe_allow_html=True)
     if S['open'] is not None:
         o=S['open']
         left=max(0,60-int((datetime.now(pkt)-o['time']).total_seconds()))
-        t=G+'OPEN TRADE LIVE: '+o['pair']+' ENTRY '+str(o['entry'])+' | '+o['dir']+' | '+str(left)+'s LEFT | '+o['am']+' | Now '+str(S['lp'])+E
+        t=G+'OPEN TRADE LIVE: '+o['pair']+' ENTRY '+str(o['entry'])+' | '+o['dir']+' | '+str(left)+'s LEFT | '+o['am']+' | Now '+str(S['lp'])+' | LOCKED'+E
         st.markdown(t,unsafe_allow_html=True)
         if st.button('CLOSE NOW'):
             close_trade()
@@ -441,9 +446,9 @@ if menu=='SETTINGS':
     st.markdown(t,unsafe_allow_html=True)
     if st.button('RESET DEMO 10000'): S['db']=10000; S['dp']=0; S['today']=0; S['total']=0; S['wc']=0; S['lc']=0; S['ht']=[]; S['open']=None; S['candles']=[]; S['hour_trades']=[]; S['last_win_time']=0; st.rerun()
     if st.button('RESET HOUR'): S['hour_trades']=[]; st.rerun()
-    t=C+'APP: SONA V150 | USER: '+S['name']+E
+    t=C+'APP: SONA V151 | USER: '+S['name']+E
     st.markdown(t,unsafe_allow_html=True)
-t=C+'STREAK '+str(S['streak'])+' | BEST '+S['best']+' '+str(S['best_score'])+'% | HOUR '+str(hc)+' | V150'+E
+t=C+'STREAK '+str(S['streak'])+' | BEST '+S['best']+' '+str(S['best_score'])+'% | HOUR '+str(hc)+' | V151 | '+lock+E
 st.markdown(t,unsafe_allow_html=True)
 time.sleep(3)
 st.rerun()
