@@ -466,4 +466,22 @@ if menu=='DEPOSIT':
         t=G+'DEPOSIT +'+str(d['amt'])+' | '+d['method']+' | '+d['time']+E
         st.markdown(t,unsafe_allow_html=True)
 if menu=='WITHDRAW':
-    t=C+'WITHDRAW - REAL se pa
+    t=C+'WITHDRAW'+E
+    st.markdown(t,unsafe_allow_html=True)
+    t=C+'REAL BAL: '+str(rb)+E
+    st.markdown(t,unsafe_allow_html=True)
+    wamt=st.number_input('Amt',100,10000,100)
+    wnum=st.text_input('Number','0300-1234567')
+    if st.button('WITHDRAW CONFIRM'):
+        if int(wamt)>rb:
+            st.error('BAL se zyada nahi!')
+        else:
+            S['rb']-=int(wamt)
+            S['with_hist'].append({'amt':int(wamt),'num':wnum,'time':now.strftime('%H:%M:%S')})
+            save_data()
+            st.success('HO GAYA!')
+            st.rerun()
+    for w in reversed(S['with_hist'][-5:]):
+        t=R+'OUT -'+str(w['amt'])+E
+        st.markdown(t,unsafe_allow_html=True)
+    
