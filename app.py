@@ -1,10 +1,27 @@
-# SONA V161 - FULL CLEAN CODE - NO ERROR
+# SONA V162 - OLD DESIGN + V161 LOGIC - FULL CLEAN
 import streamlit as st
-import time, math, random, datetime, json
+import time, math, random, datetime
 import pandas as pd
 import numpy as np
-st.set_page_config(page_title='SONA V161', page_icon='💰', layout='wide')
-st.markdown('<h1 style="text-align:center;color:#FFD700;">💰 SONA V161 | AUTO TRADING BOT 💰</h1>', unsafe_allow_html=True)
+st.set_page_config(page_title='SONA V162', page_icon='💰', layout='wide')
+# ===== OLD DESIGN - YESTERDAY WALA =====
+st.markdown("""
+<style>
+.stApp { background: #0E1117; color: white; }
+h1, h2, h3 { color: #FFD700 !important; text-align: center; }
+div[data-testid="metric"] { background: #1E222D; border: 2px solid #FFD700; border-radius: 15px; padding: 10px; }
+div[data-testid="metric"] label { color: #FFD700 !important; font-size: 14px !important; }
+div[data-testid="metric"] div { color: white !important; font-size: 22px !important; font-weight: bold; }
+.stButton>button { background: linear-gradient(90deg,#FFD700,#FFA500); color: black; font-weight: bold; font-size: 18px; border-radius: 12px; height: 50px; width: 100%; border: none; }
+.stSuccess { background: #0B3D2E !important; border: 2px solid #00FF88 !important; border-radius: 12px; }
+.stWarning { background: #3D2E0B !important; border: 2px solid #FFD700 !important; border-radius: 12px; }
+.stError { background: #3D0B0B !important; border: 2px solid #FF4444 !important; border-radius: 12px; }
+.stInfo { background: #0B2A3D !important; border: 2px solid #00BFFF !important; border-radius: 12px; }
+section[data-testid="stSidebar"] { background: #161A23 !important; }
+section[data-testid="stSidebar"] * { color: white !important; }
+</style>
+""", unsafe_allow_html=True)
+st.markdown('<div style="background:linear-gradient(90deg,#FFD700,#FF8C00);padding:15px;border-radius:15px;text-align:center;"><h1 style="color:black !important;margin:0;">💰 SONA V162 💰</h1><h3 style="color:black !important;margin:0;">AUTO TRADING BOT | OLD DESIGN BACK</h3></div>', unsafe_allow_html=True)
 if 'S' not in st.session_state:
     st.session_state.S = {'auto': True, 'auto_scan': True, 'sound_on': True, 'am': 'DEMO', 'db': 10000, 'rb': 1000, 'dp': 10, 'rp': 10, 'open': None, 'ht': [], 'last_sound_id': '', 'last_candle_time': time.time(), 'last_trade_time': 0, 'last_2_loss': False, 'loss_streak': 0, 'win_streak': 0, 'total_win': 0, 'total_loss': 0, 'cp': 0, 'bos_confirm': True, 'amnt': 10, 'conf': 95, 'gap_sec': 120, 'rsi_val': 50, 'macd_val': 0, 'score': 0, 'last_price': 0, 'market': 'EUR/USD', 'tf': '1m', 'signal': 'WAIT', 'direction': '', 'reason': '', 'daily_profit': 0, 'daily_trades': 0, 'daily_target': 100, 'daily_loss_limit': 50, 'martingale': False, 'martingale_step': 0, 'max_martingale': 2, 'news_filter': True}
 S = st.session_state.S
@@ -146,7 +163,7 @@ def fetch_data_for_market(market):
     S['last_candle_time'] = time.time()
     return prices
 with st.sidebar:
-    st.header('⚙️ SONA V161 SETTINGS')
+    st.header('⚙️ SONA V162 SETTINGS')
     S['market'] = st.selectbox('MARKET', ['EUR/USD','GBP/USD','USD/JPY','AUD/USD','USD/CAD','EUR/GBP','GOLD','BTC/USD'])
     S['tf'] = st.selectbox('TIMEFRAME', ['1m','2m','5m'])
     S['amnt'] = st.number_input('TRADE AMOUNT ($)', min_value=1, max_value=1000, value=S['amnt'])
@@ -174,7 +191,7 @@ with st.sidebar:
         S['daily_profit'] = 0
         S['daily_trades'] = 0
         st.rerun()
-    st.info('V161 - 40 WIN / 8 LOSS FILTER ON')
+    st.info('V162 - OLD DESIGN + 40 WIN / 8 LOSS FILTER')
 c1, c2 = st.columns(2)
 with c1:
     S['auto'] = st.toggle('AUTO TRADING ON', value=S['auto'])
@@ -209,9 +226,8 @@ cp = S['cp']
 ck = 'LOCKED' if S['open'] is not None else 'FREE'
 total_tr = S['total_win'] + S['total_loss']
 wr = round(S['total_win']/total_tr*100, 1) if total_tr > 0 else 0
-st.markdown(f"SONA V161 | {am} {str(cb)} | PROFIT {str(cp)} | WIN RATE {str(wr)}% | {ck}", unsafe_allow_html=True)
-st.markdown(f"BAL {str(cb)} {am} | PROFIT {str(cp)} | WIN {S['total_win']} | LOSS {S['total_loss']} | STREAK W:{S['win_streak']} L:{S['loss_streak']}", unsafe_allow_html=True)
-st.markdown(f"DAILY PROFIT ${S['daily_profit']} / TARGET ${S['daily_target']} | DAILY TRADES {S['daily_trades']}", unsafe_allow_html=True)
+# OLD DESIGN - TOP GOLD CARDS
+st.markdown(f'<div style="background:#1E222D;border:2px solid #FFD700;border-radius:15px;padding:15px;text-align:center;"><h2 style="color:#FFD700;margin:0;">SONA V162 | {am} {cb} | PROFIT {cp} | WIN RATE {wr}% | {ck}</h2><p style="color:white;margin:5px 0 0 0;">BAL {cb} {am} | PROFIT {cp} | WIN {S["total_win"]} | LOSS {S["total_loss"]} | STREAK W:{S["win_streak"]} L:{S["loss_streak"]}</p><p style="color:#00FF88;margin:5px 0 0 0;">DAILY PROFIT ${S["daily_profit"]} / TARGET ${S["daily_target"]} | DAILY TRADES {S["daily_trades"]}</p></div>', unsafe_allow_html=True)
 prices = fetch_data_for_market(S['market'])
 price = prices[-1]
 S['last_price'] = price
@@ -265,8 +281,9 @@ col5.metric('EMA20', f"{ema:.5f}")
 col6.metric('EMA50', f"{ema50:.5f}")
 col7.metric('BOLL UP', f"{upper:.5f}")
 col8.metric('BOLL DN', f"{lower:.5f}")
-st.markdown(f"**SIGNAL:** {sig} | **DIR:** {direction} | **REASON:** {reason} | **TREND:** {trend} | **PATTERN:** {pattern} | **CANDLE:** {candle_type}")
-st.markdown(f"**STOCH:** {stoch:.1f} | **ATR:** {atr:.5f} | **SESSION:** {get_session()} | **TIME:** {now_str()}")
+# OLD DESIGN - SIGNAL BOX
+sig_color = "#00FF88" if score >= 95 else "#FFD700" if score >= 85 else "#00BFFF"
+st.markdown(f'<div style="background:#1E222D;border:2px solid {sig_color};border-radius:15px;padding:15px;"><h3 style="color:{sig_color} !important;">SIGNAL: {sig} | DIR: {direction}</h3><p style="color:white;">REASON: {reason} | TREND: {trend} | PATTERN: {pattern} | CANDLE: {candle_type}</p><p style="color:#FFD700;">STOCH: {stoch:.1f} | ATR: {atr:.5f} | SESSION: {get_session()} | TIME: {now_str()}</p></div>', unsafe_allow_html=True)
 if score >= 95:
     st.success(f'🔥 PAKKA SIGNAL - {direction} - {score}% - {reason}')
 elif score >= 85:
@@ -343,7 +360,7 @@ else:
         open_trade(manual=True)
         st.rerun()
 st.divider()
-st.subheader('📜 TRADE HISTORY - V161')
+st.subheader('📜 TRADE HISTORY - V162 OLD DESIGN')
 if S['ht']:
     df = pd.DataFrame(S['ht'][::-1])
     st.dataframe(df, use_container_width=True)
@@ -365,6 +382,6 @@ if S['sound_on'] and S['ht']:
             au = '<audio autoplay><source src="https://www.soundjay.com/buttons/sounds/beep-07a.mp3" type="audio/mpeg"></audio>'
             st.markdown(au, unsafe_allow_html=True)
             S['last_sound_id'] = S['ht'][-1].get('id','')
-st.write(f"Last Update: {now_str()} | V161 FULL CLEAN")
+st.write(f"Last Update: {now_str()} | V162 OLD DESIGN BACK")
 time.sleep(2)
 st.rerun()
