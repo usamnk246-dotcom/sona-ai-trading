@@ -1,16 +1,27 @@
-# SONA V167 FINAL - LAPTOP SIGNAL + MOBILE TRADE - 2 HOURS SESSION - FIXED TIME
+# SONA V168 - CLEAN PREMIUM DESIGN - NO OVERLAP - NO DUPLICATE
 import streamlit as st
 import time, random, datetime
 import pandas as pd
 import numpy as np
-st.set_page_config(page_title='SONA V167 FINAL - SIGNAL', page_icon='💰', layout='wide')
-st.markdown("""<style>.stApp{background:#0E1117;color:white} h1,h2,h3{color:#FFD700 !important;text-align:center} .stButton>button{background:#FFD700 !important;color:black !important;font-weight:bold !important;font-size:20px !important;height:60px !important;border-radius:12px !important}</style>""", unsafe_allow_html=True)
+st.set_page_config(page_title='SONA V168', page_icon='💰', layout='wide')
+# === CLEAN CSS - OVERLAP KHATAM ===
+st.markdown("""<style>
+.stApp{background:#0B0E14 !important;color:white !important;font-family:'Segoe UI',sans-serif}
+h1{font-size:28px !important;text-align:center;color:#FFD700 !important;margin:0 !important;padding:5px 0 !important;line-height:1.2 !important;white-space:normal !important;overflow:visible !important}
+h2{font-size:18px !important;text-align:center;color:#FFD700 !important;margin:5px 0 !important}
+h3{font-size:14px !important;text-align:center;color:#AAAAAA !important;margin:0 !important;font-weight:400 !important}
+div[data-testid="stVerticalBlock"]{gap:6px !important}
+div[data-testid="stHorizontalBlock"]{gap:8px !important}
+.stSelectbox label{color:#FFD700 !important;font-weight:bold !important;font-size:13px !important}
+.stSelectbox div[data-baseweb="select"]>div{background:#1A1F2E !important;color:white !important;border:1px solid #2A3042 !important;border-radius:10px !important}
+.stButton>button{background:#FFD700 !important;color:black !important;font-weight:bold !important;border-radius:10px !important;width:100% !important;height:48px !important;font-size:15px !important;border:none !important}
+</style>""", unsafe_allow_html=True)
 if 'S' not in st.session_state:
-    st.session_state.S={'win_sound':True,'auto':True,'session_start':time.time(),'session_len':7200,'market':'AUD/CHF OTC','tf':'5MIN','conf':90,'gap':180,'amnt':250,'best':'-','best_dir':'-','best_score':0,'ht':[],'total_win':0,'total_loss':0,'cp':0,'last_trade':0,'trade_open_time':'','trade_close_time':'','signal_time':''}
+    st.session_state.S={'session_start':time.time(),'session_len':7200,'tf':'5MIN','conf':90,'amnt':250,'best':'-','best_dir':'-','best_score':0,'ht':[],'total_win':0,'total_loss':0,'cp':0,'last_trade':0,'open_time':'','close_time':''}
 S=st.session_state.S
 def now_pkt():
     return (datetime.datetime.utcnow()+datetime.timedelta(hours=5)).strftime('%H:%M:%S')
-def now_pkt_dt():
+def now_dt():
     return datetime.datetime.utcnow()+datetime.timedelta(hours=5)
 MARKETS=['AUD/CHF OTC','EUR/USD','GBP/USD','USD/JPY','AUD/USD','USD/CAD','EUR/GBP','SOL/USD','BNB/USD','BTC/USD','XAU/USD','EUR/USD OTC','GBP/USD OTC']
 def get_base(m):
@@ -18,7 +29,7 @@ def get_base(m):
     return d.get(m,1.0)
 def gen_price(m):
     base=get_base(m); ps=[base]
-    for i in range(1,100):
+    for i in range(1,80):
         ps.append(ps[-1]+random.uniform(-0.0003,0.0003))
     return ps
 def calc_rsi(ps):
@@ -28,8 +39,7 @@ def calc_rsi(ps):
     if al==0: return 100.0
     return float(100-(100/(1+(ag/al))))
 def calc_macd(ps):
-    if len(ps)<26: return 0.0
-    s=pd.Series(ps); return float(s.ewm(span=12).mean().iloc[-1]-s.ewm(span=26).mean().iloc[-1])
+    s=pd.Series(ps); return float(s.ewm(span=12).mean().iloc[-1]-s.ewm(span=26).mean().iloc[-1]) if len(ps)>=26 else 0.0
 def calc_ema(ps,p=20):
     return float(pd.Series(ps).ewm(span=p).mean().iloc[-1]) if len(ps)>=p else float(ps[-1])
 def calc_boll(ps):
@@ -37,10 +47,9 @@ def calc_boll(ps):
     return float(m+2*sd),float(m-2*sd)
 def calc_vwap(ps): return float(np.mean(ps))
 def analyze(m):
-    ps=gen_price(m); price=ps[-1]; rsi=calc_rsi(ps); macd=calc_macd(ps); ema=calc_ema(ps,20); ema50=calc_ema(ps,50)
+    ps=gen_price(m); price=ps[-1]; rsi=calc_rsi(ps); macd=calc_macd(ps); ema=calc_ema(ps,20)
     upper,lower=calc_boll(ps); vwap=calc_vwap(ps); o=ps[-2]; c=ps[-1]
     bos=(c>ema and o<ema) or (c<ema and o>ema)
-    # STRICT SCORE - 50 base + bonuses - Kam signal - Pakka signal
     score=50
     if rsi<30 or rsi>70: score+=20
     elif rsi<40 or rsi>60: score+=12
@@ -53,73 +62,63 @@ def analyze(m):
     direction='UP' if price>=ema else 'DOWN'
     if rsi>60 and macd>0: direction='UP'
     if rsi<40 and macd<0: direction='DOWN'
-    return {'market':m,'price':price,'rsi':round(rsi,1),'macd':round(macd,4),'ema':ema,'ema50':ema50,'vwap':round(vwap,4),'upper':upper,'lower':lower,'bos':bos,'score':int(score),'dir':direction,'open':o,'close':c}
-def box(txt,color="#1E222D",txtcolor="white"):
-    st.markdown(f'<div style="background:{color};color:{txtcolor};padding:15px;border-radius:15px;text-align:center;font-weight:bold;margin:6px 0;border:2px solid #FFD700;">{txt}</div>',unsafe_allow_html=True)
-# ===== TOP - SESSION 2 HOURS =====
-st.markdown('<h1>💰 SONA V167 FINAL — LAPTOP SIGNAL 💰</h1>',unsafe_allow_html=True)
-st.markdown('<h3>LAPTOP PE SIGNAL DEKHO — MOBILE PE TRADE KARO</h3>',unsafe_allow_html=True)
-elapsed=int(time.time()-S['session_start'])
-left=max(0,S['session_len']-elapsed)
+    return {'market':m,'price':price,'rsi':round(rsi,1),'macd':round(macd,4),'bos':bos,'score':int(score),'dir':direction}
+def card(html):
+    st.markdown(html,unsafe_allow_html=True)
+# ===== HEADER - CHOTA SAAF - KATA NAHI =====
+st.markdown('<h1>💰 SONA V168 — LAPTOP SIGNAL</h1>',unsafe_allow_html=True)
+st.markdown('<h3>Laptop pe Signal Dekho &nbsp;•&nbsp; Mobile pe Trade Karo</h3>',unsafe_allow_html=True)
+# ===== SESSION BAR - EK LINE =====
+elapsed=int(time.time()-S['session_start']); left=max(0,S['session_len']-elapsed)
 lh=left//3600; lm=(left%3600)//60; ls=left%60
 if left<=0:
-    st.error('⏰ 2 HOURS SESSION KHATAM — Kal phir aana — Aaj ke liye bas!')
-    if st.button('🔄 NAYA 2 HOURS SESSION SHURU KARO'):
+    st.error('⏰ 2 HOURS SESSION KHATAM — Kal phir aana!')
+    if st.button('🔄 NAYA 2 HOURS SESSION'):
         S['session_start']=time.time(); st.rerun()
     st.stop()
-box(f"⏰ SESSION: {lh:02d}:{lm:02d}:{ls:02d} BACHA HAI / 2:00:00 TOTAL | TIME NOW: {now_pkt()} PKT | LAPTOP MODE ON","#0B2A5B","white")
-# SETTINGS - TOP
+card(f'<div style="background:#14213D;padding:10px 14px;border-radius:12px;text-align:center;font-weight:600;font-size:14px;border:1px solid #2A4A7A;">⏰ SESSION: <b style="color:#FFD700">{lh:02d}:{lm:02d}:{ls:02d}</b> BACHA &nbsp;|&nbsp; TIME: <b style="color:#FFD700">{now_pkt()} PKT</b> &nbsp;|&nbsp; LAPTOP MODE ON</div>')
+# ===== SETTINGS - 3 COLUMN - EK LINE ME =====
 c1,c2,c3=st.columns(3)
-with c1: S['tf']=st.selectbox('TIMEFRAME - FIXED',['5MIN','15MIN'],index=0)
+with c1: S['tf']=st.selectbox('TIMEFRAME',['5MIN','15MIN'],index=0)
 with c2: S['conf']=st.selectbox('MIN CONFIDENCE',[85,90,95],index=1)
-with c3: S['amnt']=st.selectbox('AMOUNT - MOBILE PE ITNA LAGAO',[100,250,500,1000],index=1)
+with c3: S['amnt']=st.selectbox('AMOUNT',[100,250,500,1000],index=1)
 TF_SEC={'5MIN':300,'15MIN':900}
 trade_dur=TF_SEC[S['tf']]
-# ===== AI SCAN - SAB MARKET SCAN =====
+# ===== SCAN =====
 results=[analyze(m) for m in MARKETS]
 best=max(results,key=lambda x:x['score'])
 S['best']=best['market']; S['best_dir']=best['dir']; S['best_score']=best['score']
-# ===== MAIN SIGNAL - BARA BARA =====
-# FIXED TIME - Agle 5 min ke candle ke hisab se
-now_dt=now_pkt_dt()
-# Agle trade ka OPEN TIME = Abhi, CLOSE TIME = Abhi + 5 min
-open_dt=now_dt
-close_dt=now_dt+datetime.timedelta(seconds=trade_dur)
-S['trade_open_time']=open_dt.strftime('%H:%M:%S')
-S['trade_close_time']=close_dt.strftime('%H:%M:%S')
-if best['score']>=S['conf'] and (time.time()-S['last_trade']>S['gap']):
-    # PAKKA SIGNAL MILA
+open_dt=now_dt(); close_dt=now_dt()+datetime.timedelta(seconds=trade_dur)
+S['open_time']=open_dt.strftime('%H:%M:%S'); S['close_time']=close_dt.strftime('%H:%M:%S')
+# ===== MAIN SIGNAL CARD - CHOTA SAAF - BARA PEELA KHATAM =====
+if best['score']>=S['conf'] and (time.time()-S['last_trade']>180):
     S['last_trade']=time.time()
-    S['signal_time']=now_pkt()
-    sig_color="#00FF88" if best['dir']=='UP' else "#FF4444"
-    sig_txt="🟢 UP — CALL — GREEN" if best['dir']=='UP' else "🔴 DOWN — PUT — RED"
-    st.markdown(f'<div style="background:{sig_color};padding:25px;border-radius:20px;text-align:center;border:4px solid #FFD700;"><h1 style="color:black !important;font-size:45px;margin:0;">{sig_txt}</h1><h2 style="color:black !important;margin:5px;">MARKET: {best["market"]}</h2><h2 style="color:black !important;margin:5px;">CONFIDENCE: {best["score"]}% — PAKKA SIGNAL</h2></div>',unsafe_allow_html=True)
-    box(f"📱 MOBILE PE ABHI KARO: {best['market']} — {best['dir']} — ${S['amnt']} — TF {S['tf']}","#0B6E2F","white")
-    box(f"🕐 TRADE OPEN KARO: {S['trade_open_time']} PKT — TRADE CLOSE HOGA: {S['trade_close_time']} PKT — FIXED {S['tf']} — {trade_dur}s","#8A6D00","white")
-    box(f"📊 REASON: RSI {best['rsi']} + MACD {best['macd']} + VWAP {best['vwap']} + {'BOS YES' if best['bos'] else 'BOS NO'} + PRICE {best['price']:.4f}","#1E222D","white")
-    st.success(f"✅ SIGNAL MILA — Mobile pe {best['market']} me {best['dir']} lagao — {S['trade_close_time']} tak wait karo!")
-    if st.button('✅ ME NE MOBILE PE TRADE LAGA DIYA - WIN HUA'):
-        S['total_win']+=1; S['cp']+=S['amnt']*0.85; S['ht'].append({'market':best['market'],'dir':best['dir'],'win':True,'time':now_pkt()}); st.rerun()
-    if st.button('❌ ME NE TRADE KIYA - LOSS HUA'):
-        S['total_loss']+=1; S['cp']-=S['amnt']; S['ht'].append({'market':best['market'],'dir':best['dir'],'win':False,'time':now_pkt()}); st.rerun()
+    is_up=best['dir']=='UP'
+    bg="#0F3D2E" if is_up else "#4A1212"
+    border="#00FF88" if is_up else "#FF4444"
+    arrow="▲" if is_up else "▼"
+    txt="UP — CALL" if is_up else "DOWN — PUT"
+    card(f'<div style="background:{bg};border:2px solid {border};border-radius:16px;padding:16px;text-align:center;"><div style="font-size:32px;font-weight:800;color:{border};line-height:1.1;">{arrow} {txt}</div><div style="font-size:20px;font-weight:700;margin-top:6px;">{best["market"]} &nbsp;•&nbsp; {best["score"]}% CONFIDENCE</div><div style="font-size:13px;color:#CCCCCC;margin-top:6px;">RSI {best["rsi"]} &nbsp;•&nbsp; MACD {best["macd"]} &nbsp;•&nbsp; Price {best["price"]:.4f} &nbsp;•&nbsp; {"BOS YES" if best["bos"] else "BOS NO"}</div></div>')
+    card(f'<div style="background:#1A1F2E;border-radius:12px;padding:12px;text-align:center;font-size:14px;"><b style="color:#FFD700">📱 MOBILE PE:</b> {best["market"]} — {best["dir"]} — ${S["amnt"]} — TF {S["tf"]}<br><b style="color:#FFD700">🕐 OPEN:</b> {S["open_time"]} &nbsp; <b style="color:#FFD700">CLOSE:</b> {S["close_time"]} &nbsp; ({trade_dur}s FIXED)</div>')
+    cc1,cc2=st.columns(2)
+    with cc1:
+        if st.button('✅ WIN HUA'): S['total_win']+=1; S['cp']+=S['amnt']*0.85; S['ht'].append({'Market':best['market'],'Dir':best['dir'],'Result':'WIN','Time':now_pkt()}); st.rerun()
+    with cc2:
+        if st.button('❌ LOSS HUA'): S['total_loss']+=1; S['cp']-=S['amnt']; S['ht'].append({'Market':best['market'],'Dir':best['dir'],'Result':'LOSS','Time':now_pkt()}); st.rerun()
 else:
-    # WAIT - KOI PAKKA SIGNAL NAHI
-    st.markdown(f'<div style="background:#FFD700;padding:25px;border-radius:20px;text-align:center;"><h1 style="color:black !important;margin:0;">⏳ WAIT — KOI PAKKA SIGNAL NAHI</h1><h2 style="color:black !important;margin:5px;">BEST ABHI: {best["market"]} — {best["score"]}% — {best["dir"]}</h2><h3 style="color:black !important;margin:5px;">{S["conf"]}% CHAHIYE — {best["score"]}% HAI — JALDI TRADE MAT KARO!</h3></div>',unsafe_allow_html=True)
-    box(f"📱 MOBILE PE ABHI TRADE MAT KARO — WAIT KARO — Agla signal aane do!","#3D0B0B","white")
-    box(f"🕐 AGLE SIGNAL KA WAIT — Abhi Time: {now_pkt()} — Trade Duration: {S['tf']} — Gap: {S['gap']}s","#1E222D","white")
-# ===== SAB MARKET LIST - KAUNSI MARKET KAISI HAI =====
-st.markdown('<h2>📊 SAB MARKET — KAUNSI KITNI STRONG HAI</h2>',unsafe_allow_html=True)
-for r in sorted(results,key=lambda x:x['score'],reverse=True):
-    col="🟢" if r['score']>=90 else "🟡" if r['score']>=80 else "⚪"
-    box(f"{col} {r['market']} — {r['dir']} — {r['score']}% — RSI {r['rsi']} — Price {r['price']:.4f} — {'BOS YES' if r['bos'] else 'BOS NO'}","#1E222D","white")
-# ===== TODAY RESULT =====
-tot=S['total_win']+S['total_loss']
-wr=round(S['total_win']/tot*100,1) if tot>0 else 0
-box(f"📜 AAJ KA RESULT — 2 HOURS SESSION: WIN {S['total_win']} | LOSS {S['total_loss']} | WIN RATE {wr}% | PROFIT ${S['cp']:.2f}","#0B2A5B","white")
+    # WAIT CARD - CHOTA - BARA PEELA NAHI
+    card(f'<div style="background:#2A2200;border:1px solid #FFD700;border-radius:16px;padding:16px;text-align:center;"><div style="font-size:28px;font-weight:800;color:#FFD700;line-height:1.1;">⏳ WAIT</div><div style="font-size:15px;margin-top:6px;color:#DDDDDD;">Koi Pakka Signal Nahi — Jaldi Trade Mat Karo</div><div style="font-size:14px;margin-top:6px;">BEST ABHI: <b>{best["market"]} — {best["score"]}% — {best["dir"]}</b> &nbsp;•&nbsp; Chahiye: <b>{S["conf"]}%</b></div></div>')
+    card(f'<div style="background:#1A1F2E;border-radius:12px;padding:10px;text-align:center;font-size:13px;color:#AAAAAA;">📱 MOBILE PE ABHI TRADE MAT KARO &nbsp;•&nbsp; Agla Signal Aane Do &nbsp;•&nbsp; Time: {now_pkt()} &nbsp;•&nbsp; TF: {S["tf"]} &nbsp;•&nbsp; Gap: 180s</div>')
+# ===== MARKET TABLE - 13 BOXES NAHI - EK TABLE =====
+st.markdown('<h2>📊 Sab Market — Kaunsi Kitni Strong Hai</h2>',unsafe_allow_html=True)
+df=pd.DataFrame([{'Market':r['market'],'Signal':r['dir'],'Score %':r['score'],'RSI':r['rsi'],'Price':round(r['price'],4),'BOS':'YES' if r['bos'] else 'NO'} for r in sorted(results,key=lambda x:x['score'],reverse=True)])
+st.dataframe(df,use_container_width=True,hide_index=True)
+# ===== RESULT - EK DAF - DUPLICATE NAHI =====
+tot=S['total_win']+S['total_loss']; wr=round(S['total_win']/tot*100,1) if tot>0 else 0
+card(f'<div style="background:#14213D;border:1px solid #2A4A7A;border-radius:12px;padding:12px;text-align:center;font-size:14px;">📜 <b>AAJ KA RESULT:</b> WIN {S["total_win"]} &nbsp;|&nbsp; LOSS {S["total_loss"]} &nbsp;|&nbsp; WIN RATE {wr}% &nbsp;|&nbsp; PROFIT ${S["cp"]:.2f}</div>')
 if S['ht']:
-    st.dataframe(pd.DataFrame(S['ht']),use_container_width=True)
-# ===== HOW TO USE - LAPTOP + MOBILE =====
-box("📖 TAREEKA: 1) LAPTOP pe SONA khula rakho 2) Jab BARA GREEN / RED signal aaye 3) MOBILE pe usi MARKET me usi DIR me trade lagao 4) CLOSE TIME tak wait karo 5) Yahan WIN / LOSS dabao","#0B6E2F","white")
-box("⚠️ YAAD RAKHO: 100% GUARANTEE KOI NAHI DE SAKTA — Sirf 90%+ wale signal pe trade karo — Ek din me 5 se zyada trade mat karo — Haar ke peeche mat bhaago!","#8B0000","white")
-st.write(f"Last Update: {now_pkt()} | V167 FINAL | Session Left {lh:02d}:{lm:02d}:{ls:02d}")
+    st.dataframe(pd.DataFrame(S['ht']),use_container_width=True,hide_index=True)
+# ===== FOOTER - EK DAF =====
+card(f'<div style="background:#1A1F2E;border-radius:12px;padding:12px;text-align:center;font-size:12px;color:#AAAAAA;line-height:1.6;"><b style="color:#FFD700">TAREEKA:</b> 1) Laptop pe SONA khula rakho &nbsp; 2) Bara GREEN / RED aaye to Mobile pe usi Market me trade lagao &nbsp; 3) CLOSE TIME tak wait karo &nbsp; 4) Yahan WIN / LOSS dabao<br><b style="color:#FF6B6B">⚠️ 100% GUARANTEE KOI NAHI DE SAKTA — Sirf 90%+ wale pe trade karo — Ek din me 5 se zyada mat karo!</b></div>')
+st.write(f"Last Update: {now_pkt()} | V168 CLEAN DESIGN | Session {lh:02d}:{lm:02d}:{ls:02d} bacha")
 time.sleep(3); st.rerun()
