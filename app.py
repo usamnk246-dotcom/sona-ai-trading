@@ -577,5 +577,77 @@ def close_trade(win):
         S['total_loss'] += 1
         S['loss_streak'] += 1
         S['win_streak'] = 0
-        if S['loss_streak'] >= 2:
-            S['last_2
+                if S['loss_streak'] >= 2:
+            S['last_2_loss'] = True
+        if S['martingale']:
+            S['martingale_step'] = min(S['martingale_step']+1, S['max_martingale'])
+    S['ht'].append({'id': o['id'], 'dir': o['dir'], 'win': win, 'profit': round(profit,2), 'score': o['score'], 'time': now_str(), 'hour': o['hour'], 'amount': o['amount']})
+    S['open'] = None
+
+if S['open'] is not None:
+    o = S['open']
+    elapsed = int(time.time() - o['time'])
+    st.warning(f"🔒 TRADE LOCKED - {o['dir']} - ${o['amount']} - {elapsed}s Hua - Score {o['score']}% - Price {o['price']:.5f}")
+    cc1, cc2 = st.columns(2)
+    if cc1.button('✅ WIN - TRADE BAND KARO'):
+        close_trade(True)
+        st.rerun()
+    if cc2.button('❌ LOSS - TRADE BAND KARO'):
+        close_trade(False)
+        st.rerun()
+    if elapsed > 60:
+        win_now = (price > o['price'] and o['dir'] == 'UP') or (price < o['price'] and o['dir'] == 'DOWN')
+        close_trade(win_now)
+        st.rerun()
+else:
+    win_filter = False
+    if can_trade and score >= S['conf']:
+        rsi_ok = (rsi < 35 and direction == 'DOWN') or (rsi > 65 and direction == 'UP') or (rsi < 30 or rsi > 70)
+        macd_ok = (macd > 0 and direction == 'UP') or (macd < 0 and direction == 'DOWN')
+        bos_ok = bos
+        gap_ok = (time.time() - S.get('last_trade_time', 0) > S['gap_sec'])
+        vol_ok = abs(close - open_price) > 0.0002
+        ema_ok = (price > ema50 and direction == 'UP') or (price < ema50 and direction == 'DOWN')
+        if rsi_ok and macd_ok and bos_ok and gap_ok and vol_ok and ema_ok:
+            win_filter = True
+    if win_filter:
+        st.success(f'🚀 AUTO TRADE OPEN HO RAHA HAI - {direction} - {score}% - Sab Filter PASS!')
+        open_trade(manual=False)
+        st.rerun()
+    elif can_trade and score >= 85:
+        st.info(f'⏳ {score}% Hai - 95% Ka Intezar Karo')
+    elif not can_trade and S['auto']:
+        st.info('⏸️ FILTER FAIL - Trade Nahi Liya')
+    if st.button('🎯 TRADE ABHI KHOLO - MANUAL'):
+        open_trade(manual=True)
+        st.rerun()
+
+st.divider()
+st.subheader('📜 TRADE HISTORY - V160')
+if S['ht']:
+    df = pd.DataFrame(S['ht'][::-1])
+    st.dataframe(df, use_container_width=True)
+    total = len(S['ht'])
+    win = S['total_win']
+    loss = S['total_loss']
+    wr2 = round(win/total*100, 1) if total > 0 else 0
+    st.write(f"TOTAL: {total} | WIN: {win} | LOSS: {loss} | WIN RATE: {wr2}% | PROFIT: ${S['cp']:.2f}")
+    if total >= 48:
+        if win >= 40:
+            st.success(f'🎉 TARGET PURA - 48 ME SE {win} WIN!')
+        else:
+            st.warning(f'⚠️ 48 ME SE {win} WIN - Confidence 95 Se 97 Kar Do')
+else:
+    st.write('Abhi koi trade nahi hua - AUTO ON karo aur intezar karo')
+
+if S['sound_on'] and S['ht']:
+    if S['last_sound_id'] != S['ht'][-1].get('id',''):
+        if S['ht'][-1]['win']:
+            au = '<audio autoplay><source src="https://www.soundjay.com/buttons/sounds/beep-07a.mp3" type="audio/mpeg"></audio>'
+            st.markdown(au, unsafe_allow_html=True)
+            S['last_sound_id'] = S['ht'][-1].get('id','')
+
+st.write(f"Last Update: {now_str()} | Auto Refresh 5 Sec Me | V160 FULL")
+time.sleep(2)
+st.rerun()
+# END OF SONA V160
