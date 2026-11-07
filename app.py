@@ -149,20 +149,26 @@ def analyze_one(m,seed):
 def neon(txt,border):
     st.markdown(f'<div style="background:black;border:3px solid {border};border-radius:15px;padding:12px;text-align:center;margin:6px 0;">{txt}</div>',unsafe_allow_html=True)
 def market_card(r):
-    colr='#00FF00' if r['passed']>=7 else '#FFD700' if r['passed']==6 else '#888888'
-    dir_col='#00FF00' if r['dir']=='UP' else '#FF4444'
+    colr='#00FF00' if r['passed']>=7 else '#FFD700'
+    if r['passed']<6:
+        colr='#888888'
+    dc='#00FF00' if r['dir']=='UP' else '#FF4444'
     bos_t='YES' if r['bos'] else 'NO'
     sw_t='YES' if r['sweep'] else 'NO'
     pull_t='YES' if r['pull'] else 'NO'
     div_t='YES' if r['div'] else 'NO'
-    html=f'<div style="background:#111;border:2px solid {colr};border-radius:14px;padding:10px;text-align:center;margin:5px 0;">'
-    html+=f'<div style="color:white;font-weight:900;font-size:15px;">{r["market"]}</div>'
-    html+=f'<div style="color:{colr};font-weight:900;font-size:16px;">{r["passed"]}/9 - {r["score"]}%</div>'
-    html+=f'<div style="color:{dir_col};font-weight:900;font-size:15px;">{r["dir"]} - {r["candle"]}</div>'
-    html+=f'<div style="color:#AAA;font-size:11px;margin-top:6px;">RSI {r["rsi"]} | VOL {r["vol"]}<br>ATR {r["atr"]} | MACD {r["macd"]}<br>VWAP {r["vwap"]}</div>'
-    html+=f'<div style="color:#FFD700;font-size:11px;margin-top:5px;">LIQ UP {r["hh"]} | DOWN {r["ll"]}</div>'
-    html+=f'<div style="color:white;font-size:11px;margin-top:5px;">SWEEP {sw_t} | BOS {bos_t}<br>PULL {pull_t} | DIV {div_t}</div>'
-    html+=f'<div style="color:#00FFFF;font-size:11px;margin-top:5px;">{r["strat"]}<br>{r["why"]}</div></div>'
+    st.markdown(f'<div style="background:#111;border:2px solid {colr};border-radius:14px;padding:10px;text-align:center;">',unsafe_allow_html=True)
+    st.markdown(f'<div style="color:white;font-weight:900;">{r["market"]}</div>',unsafe_allow_html=True)
+    st.markdown(f'<div style="color:{colr};font-weight:900;">{r["passed"]}/9 - {r["score"]}%</div>',unsafe_allow_html=True)
+    st.markdown(f'<div style="color:{dc};font-weight:900;">{r["dir"]} - {r["candle"]}</div>',unsafe_allow_html=True)
+    st.markdown(f'<div style="color:#AAA;font-size:12px;">RSI {r["rsi"]} | VOL {r["vol"]}</div>',unsafe_allow_html=True)
+    st.markdown(f'<div style="color:#AAA;font-size:12px;">ATR {r["atr"]} | MACD {r["macd"]}</div>',unsafe_allow_html=True)
+    st.markdown(f'<div style="color:#AAA;font-size:12px;">VWAP {r["vwap"]}</div>',unsafe_allow_html=True)
+    st.markdown(f'<div style="color:#FFD700;font-size:12px;">LIQ UP {r["hh"]} | DOWN {r["ll"]}</div>',unsafe_allow_html=True)
+    st.markdown(f'<div style="color:white;font-size:12px;">SWEEP {sw_t} | BOS {bos_t}</div>',unsafe_allow_html=True)
+    st.markdown(f'<div style="color:white;font-size:12px;">PULL {pull_t} | DIV {div_t}</div>',unsafe_allow_html=True)
+    st.markdown(f'<div style="color:#00FFFF;font-size:12px;">{r["strat"]}</div>',unsafe_allow_html=True)
+    st.markdown(f'<div style="color:#00FFFF;font-size:12px;">{r["why"]}</div></div>',unsafe_allow_html=True)
     st.markdown(html,unsafe_allow_html=True)
 neon('<div style="color:#00FF00;font-weight:900;font-size:22px;">SONA AI v182 - AI BRAIN RADAR</div><div style="color:white;font-size:13px;">HAR MARKET KA POORA DETAIL - 60 SEC SCAN - 2 MIN WAIT</div>','#00FF00')
 elapsed=int(time.time()-S['session_start'])
