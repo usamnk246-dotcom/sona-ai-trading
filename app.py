@@ -560,6 +560,7 @@ def open_trade(manual=False, dir_override=''):
     S['last_trade_time'] = time.time()
     S['daily_trades'] += 1
     st.success(f"✅ TRADE KHUL GAYA - {d} - ${amt} - Score {score}%")
+    
     def close_trade(win):
     o = S['open']
     if o is None:
