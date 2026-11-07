@@ -560,7 +560,6 @@ def open_trade(manual=False, dir_override=''):
     S['last_trade_time'] = time.time()
     S['daily_trades'] += 1
     st.success(f"✅ TRADE KHUL GAYA - {d} - ${amt} - Score {score}%")
-    
     def close_trade(win):
     o = S['open']
     if o is None:
@@ -580,12 +579,9 @@ def open_trade(manual=False, dir_override=''):
         S['win_streak'] = 0
         if S['loss_streak'] >= 2:
             S['last_2_loss'] = True
-        if S['martingale']:
-            S['martingale_step'] = min(S['martingale_step']+1, S['max_martingale'])
     S['ht'].append({'id': o['id'], 'dir': o['dir'], 'win': win, 'profit': round(profit,2), 'score': o['score'], 'time': now_str(), 'hour': o['hour'], 'amount': o['amount']})
     S['open'] = None
-        
-            S['last_2_loss'] = True
+  S['last_2_loss'] = True
         if S['martingale']:
             S['martingale_step'] = min(S['martingale_step']+1, S['max_martingale'])
     S['ht'].append({'id': o['id'], 'dir': o['dir'], 'win': win, 'profit': round(profit,2), 'score': o['score'], 'time': now_str(), 'hour': o['hour'], 'amount': o['amount']})
