@@ -1,9 +1,9 @@
-# SONA V181 - AI BRAIN RADAR - 60 SEC SCAN - BEECH BRAIN - CHARO MARKET
+# SONA V182 - FULL SCANNER DETAIL - HAR MARKET KA RSI VOL ATR VWAP MACD LIQ SWEEP BOS
 import streamlit as st
 import time, random, datetime
 import pandas as pd
 import numpy as np
-st.set_page_config(page_title='SONA V181', page_icon='🧠', layout='wide')
+st.set_page_config(page_title='SONA V182', page_icon='🧠', layout='wide')
 st.markdown("""<style>.stApp{background:#000 !important;color:white !important} .stSelectbox label{color:#00FF00 !important;font-weight:bold !important} .stSelectbox div[data-baseweb="select"]>div{background:#000 !important;color:#00FF00 !important;border:2px solid #00FF00 !important;border-radius:10px !important} .stButton>button{background:#00FF00 !important;color:black !important;font-weight:bold !important;border-radius:10px !important;width:100% !important;height:55px !important;font-size:18px !important}</style>""", unsafe_allow_html=True)
 if 'S' not in st.session_state:
     st.session_state.S={'session_start':time.time(),'phase':'SCAN','phase_start':time.time(),'tf':'5MIN','conf':90,'amnt':100,'locked_market':'-','locked_dir':'-','locked_score':0,'locked_reason':'','open_time':'','close_time':'','total_win':0,'total_loss':0,'cp':0,'bal':12622,'ht':[],'daily_loss':0,'consecutive_loss':0,'cooldown_until':0,'wait_until':0,'scan_round':1}
@@ -69,10 +69,12 @@ def analyze_one(m,seed):
     bos=(c>ema and o<ema) or (c<ema and o>ema)
     sweep_up=max(ps[-5:])>hh and c<hh
     sweep_down=min(ps[-5:])<ll and c>ll
+    sweep=sweep_up or sweep_down
     candle='GREEN' if c>o else 'RED' if c<o else 'DOJI'
     rsi_prev=calc_rsi(ps[:-5])
     div_up=(price<ps[-10] and rsi>rsi_prev)
     div_down=(price>ps[-10] and rsi<rsi_prev)
+    pull=abs(price-ema)<0.0005 or abs(price-vwap)<0.0005
     direction='UP' if price>ema50 else 'DOWN'
     if sweep_down or div_up:
         direction='UP'
@@ -99,11 +101,11 @@ def analyze_one(m,seed):
         checks.append('4.BOS YES')
     else:
         checks.append('4.BOS NO')
-    if sweep_up or sweep_down:
+    if sweep:
         checks.append('5.SWEEP YES')
     else:
         checks.append('5.SWEEP NO')
-    if abs(price-ema)<0.0005 or abs(price-vwap)<0.0005:
+    if pull:
         checks.append('6.PULLBACK YES')
     else:
         checks.append('6.PULLBACK NO')
@@ -125,14 +127,14 @@ def analyze_one(m,seed):
     score_map={9:99,8:95,7:90,6:82,5:70,4:60,3:50,2:45,1:40,0:35}
     score=score_map.get(passed,50)
     why=[]
-    if sweep_up or sweep_down:
+    if sweep:
         why.append('Sweep')
     if bos:
         why.append('BOS')
     if (direction=='UP' and div_up) or (direction=='DOWN' and div_down):
-        why.append('Divergence')
+        why.append('Div')
     if (direction=='UP' and rsi<38) or (direction=='DOWN' and rsi>62):
-        why.append('RSI Reversal')
+        why.append('RSI Rev')
     why_txt=' + '.join(why) if why else 'Trend + Momentum'
     conf_txt='95%+ BOHAT ZYADA' if passed>=8 else '90% CONFIDENT' if passed==7 else 'WAIT' if passed==6 else 'NO'
     if 'OTC' in m:
@@ -140,13 +142,29 @@ def analyze_one(m,seed):
     elif m in ['Bitcoin','Ethereum','Solana','Ripple']:
         strat='CRYPTO - Sweep + Pullback'
     elif m in ['Gold','Silver']:
-        strat='GOLD - ATR + Liquidity'
+        strat='GOLD - ATR + Liq'
     else:
         strat='FOREX - Trend + BOS + Div'
-    return {'market':m,'score':score,'passed':passed,'dir':direction,'ps':ps,'rsi':round(rsi,1),'vol':vol,'atr':round(atr,4),'vwap':round(vwap,4),'macd':round(macd,4),'hh':round(hh,4),'ll':round(ll,4),'checks':checks,'strat':strat,'is_otc':is_otc(m),'candle':candle,'why':why_txt,'conf_txt':conf_txt,'price':price}
+    return {'market':m,'score':score,'passed':passed,'dir':direction,'ps':ps,'rsi':round(rsi,1),'vol':vol,'atr':round(atr,4),'vwap':round(vwap,4),'macd':round(macd,4),'hh':round(hh,4),'ll':round(ll,4),'checks':checks,'strat':strat,'is_otc':is_otc(m),'candle':candle,'why':why_txt,'conf_txt':conf_txt,'price':price,'bos':bos,'sweep':sweep,'pull':pull,'div':div_up or div_down}
 def neon(txt,border):
     st.markdown(f'<div style="background:black;border:3px solid {border};border-radius:15px;padding:12px;text-align:center;margin:6px 0;">{txt}</div>',unsafe_allow_html=True)
-neon('<div style="color:#00FF00;font-weight:900;font-size:22px;">SONA AI v181 - AI BRAIN RADAR</div><div style="color:white;font-size:13px;">BEECH ME BRAIN - CHARO MARKET - 60 SEC SCAN - 2 MIN WAIT</div>','#00FF00')
+def market_card(r):
+    colr='#00FF00' if r['passed']>=7 else '#FFD700' if r['passed']==6 else '#888888'
+    dir_col='#00FF00' if r['dir']=='UP' else '#FF4444'
+    bos_t='YES' if r['bos'] else 'NO'
+    sw_t='YES' if r['sweep'] else 'NO'
+    pull_t='YES' if r['pull'] else 'NO'
+    div_t='YES' if r['div'] else 'NO'
+    html=f'<div style="background:#111;border:2px solid {colr};border-radius:14px;padding:10px;text-align:center;margin:5px 0;">'
+    html+=f'<div style="color:white;font-weight:900;font-size:15px;">{r["market"]}</div>'
+    html+=f'<div style="color:{colr};font-weight:900;font-size:16px;">{r["passed"]}/9 - {r["score"]}%</div>'
+    html+=f'<div style="color:{dir_col};font-weight:900;font-size:15px;">{r["dir"]} - {r["candle"]}</div>'
+    html+=f'<div style="color:#AAA;font-size:11px;margin-top:6px;">RSI {r["rsi"]} | VOL {r["vol"]}<br>ATR {r["atr"]} | MACD {r["macd"]}<br>VWAP {r["vwap"]}</div>'
+    html+=f'<div style="color:#FFD700;font-size:11px;margin-top:5px;">LIQ UP {r["hh"]} | DOWN {r["ll"]}</div>'
+    html+=f'<div style="color:white;font-size:11px;margin-top:5px;">SWEEP {sw_t} | BOS {bos_t}<br>PULL {pull_t} | DIV {div_t}</div>'
+    html+=f'<div style="color:#00FFFF;font-size:11px;margin-top:5px;">{r["strat"]}<br>{r["why"]}</div></div>'
+    st.markdown(html,unsafe_allow_html=True)
+neon('<div style="color:#00FF00;font-weight:900;font-size:22px;">SONA AI v182 - AI BRAIN RADAR</div><div style="color:white;font-size:13px;">HAR MARKET KA POORA DETAIL - 60 SEC SCAN - 2 MIN WAIT</div>','#00FF00')
 elapsed=int(time.time()-S['session_start'])
 left=max(0,7200-elapsed)
 lh=left//3600
@@ -211,21 +229,33 @@ if S['phase']=='SCAN':
     pm=phase_left//60
     ps=phase_left%60
     top8=results_sorted[:8]
-    c1,c2,c3,c4=st.columns(4)
-    for col, r in zip([c1,c2,c3,c4], top8[:4]):
-        with col:
-            colr='#00FF00' if r['passed']>=7 else '#FFD700' if r['passed']==6 else '#888888'
-            st.markdown(f'<div style="background:black;border:2px solid {colr};border-radius:12px;padding:8px;text-align:center;"><div style="color:white;font-weight:800;font-size:12px;">{r["market"]}</div><div style="color:{colr};font-weight:900;font-size:14px;">{r["passed"]}/9 - {r["score"]}%</div><div style="color:white;font-size:12px;">{r["dir"]}</div></div>',unsafe_allow_html=True)
+    st.markdown('<div style="color:#00FF00;font-weight:900;text-align:center;font-size:16px;margin:8px 0;">TOP 4 MARKET - POORA DETAIL</div>',unsafe_allow_html=True)
+    c1,c2=st.columns(2)
+    with c1:
+        market_card(top8[0])
+    with c2:
+        market_card(top8[1])
+    c3,c4=st.columns(2)
+    with c3:
+        market_card(top8[2])
+    with c4:
+        market_card(top8[3])
     brain_bg='#00FF00' if best['passed']>=7 else '#FFD700'
-    neon(f'<div style="color:{brain_bg};font-weight:900;font-size:28px;">AI BRAIN</div><div style="color:white;font-weight:800;font-size:16px;">SAB KO DEKH RAHA HAI - SCANNING</div><div style="color:#FFD700;font-size:14px;">SCAN ME: {pm:02d}:{ps:02d} BACHA - ROUND {S["scan_round"]} - 60 SEC SCAN</div><div style="color:white;font-size:15px;margin-top:6px;">ABHI SAB SE CONFIDENT: <b style="color:{brain_bg}">{best["market"]} - {best["passed"]}/9 - {best["score"]}% - {best["dir"]}</b></div><div style="color:#AAAAAA;font-size:12px;">{best["conf_txt"]} - {best["why"]} - {best["strat"]}</div>',brain_bg)
-    c5,c6,c7,c8=st.columns(4)
-    for col, r in zip([c5,c6,c7,c8], top8[4:8]):
-        with col:
-            colr='#00FF00' if r['passed']>=7 else '#FFD700' if r['passed']==6 else '#888888'
-            st.markdown(f'<div style="background:black;border:2px solid {colr};border-radius:12px;padding:8px;text-align:center;"><div style="color:white;font-weight:800;font-size:12px;">{r["market"]}</div><div style="color:{colr};font-weight:900;font-size:14px;">{r["passed"]}/9 - {r["score"]}%</div><div style="color:white;font-size:12px;">{r["dir"]}</div></div>',unsafe_allow_html=True)
+    neon(f'<div style="font-size:36px;">🧠</div><div style="color:{brain_bg};font-weight:900;font-size:28px;">AI BRAIN - HIGH QUALITY</div><div style="color:white;font-weight:800;font-size:15px;">SAB KO DEKH RAHA HAI - SCANNING - 9 CHECKS</div><div style="color:#FFD700;font-size:14px;">SCAN ME: {pm:02d}:{ps:02d} BACHA - ROUND {S["scan_round"]} - 60 SEC SCAN</div><div style="color:white;font-size:15px;margin-top:6px;">ABHI SAB SE CONFIDENT: <b style="color:{brain_bg}">{best["market"]} - {best["passed"]}/9 - {best["score"]}% - {best["dir"]}</b></div><div style="color:#AAAAAA;font-size:12px;">{best["conf_txt"]} - {best["why"]} - {best["strat"]}</div><div style="color:#00FFFF;font-size:12px;">RSI {best["rsi"]} | VOL {best["vol"]} | ATR {best["atr"]} | VWAP {best["vwap"]} | MACD {best["macd"]}</div>',brain_bg)
+    st.markdown('<div style="color:#00FF00;font-weight:900;text-align:center;font-size:16px;margin:8px 0;">NEXT 4 MARKET - POORA DETAIL</div>',unsafe_allow_html=True)
+    c5,c6=st.columns(2)
+    with c5:
+        market_card(top8[4])
+    with c6:
+        market_card(top8[5])
+    c7,c8=st.columns(2)
+    with c7:
+        market_card(top8[6])
+    with c8:
+        market_card(top8[7])
     otc_best=sorted([r for r in results if r['is_otc']],key=lambda x:(x['passed'],x['score']),reverse=True)[0]
     normal_best=sorted([r for r in results if not r['is_otc']],key=lambda x:(x['passed'],x['score']),reverse=True)[0]
-    neon(f'<div style="color:#00FF00;font-weight:800;font-size:13px;text-align:left;">BEST OTC: {otc_best["market"]} - {otc_best["passed"]}/9 - {otc_best["score"]}% - {otc_best["dir"]}<br>BEST NORMAL: {normal_best["market"]} - {normal_best["passed"]}/9 - {normal_best["score"]}% - {normal_best["dir"]}</div>','#00FF00')
+    neon(f'<div style="color:#00FF00;font-weight:800;font-size:13px;text-align:left;">BEST OTC: {otc_best["market"]} - {otc_best["passed"]}/9 - {otc_best["score"]}% - {otc_best["dir"]} - RSI {otc_best["rsi"]} - VOL {otc_best["vol"]}<br>BEST NORMAL: {normal_best["market"]} - {normal_best["passed"]}/9 - {normal_best["score"]}% - {normal_best["dir"]} - RSI {normal_best["rsi"]} - VOL {normal_best["vol"]}</div>','#00FF00')
     need_pass=7 if S['conf']==90 else 8 if S['conf']==95 else 9
     if phase_left==0 and best['passed']>=need_pass and best['score']>=S['conf']:
         S['phase']='TRADE'
@@ -237,6 +267,7 @@ if S['phase']=='SCAN':
         open_dt=now_dt()
         S['open_time']=open_dt.strftime('%H:%M:%S')
         S['close_time']=(open_dt+datetime.timedelta(seconds=TRADE_LEN)).strftime('%H:%M:%S')
+        S['_best']=best
         S['_best_checks']=best['checks']
         S['_best_strat']=best['strat']
         S['_best_conf']=best['conf_txt']
@@ -286,6 +317,9 @@ else:
         neon(f'<div style="color:#888;font-size:11px;">MACD</div><div style="color:#00FF00;font-weight:900;">{S.get("_macd","")}</div>','#00FF00')
     with b3:
         neon(f'<div style="color:#888;font-size:11px;">LIQUIDITY</div><div style="color:#FFD700;font-weight:800;">UP {S.get("_hh","")} | DOWN {S.get("_ll","")}</div>','#FFD700')
+    if '_best' in S:
+        bb=S['_best']
+        neon(f'<div style="color:white;font-weight:800;font-size:13px;text-align:left;">SWEEP: {"YES" if bb["sweep"] else "NO"} | BOS: {"YES" if bb["bos"] else "NO"} | PULLBACK: {"YES" if bb["pull"] else "NO"} | DIV: {"YES" if bb["div"] else "NO"}<br>STRATEGY: {bb["strat"]} | WHY: {bb["why"]}</div>','#00FFFF')
     st.markdown('<div style="color:#FFD700;font-weight:900;text-align:center;margin:8px 0;">IS 1 MARKET KA CHART</div>',unsafe_allow_html=True)
     st.line_chart(pd.DataFrame({'Price':S.get('_ps',[100,101,102])}),use_container_width=True)
     cc1,cc2=st.columns(2)
@@ -307,18 +341,4 @@ else:
             S['consecutive_loss']+=1
             S['cp']-=S['amnt']
             S['bal']-=S['amnt']
-            S['ht'].append({'Market':S['locked_market'],'Dir':S['locked_dir'],'Result':'LOSS','Time':now_pkt()})
-            S['phase']='WAIT'
-            S['wait_until']=time.time()+120
-            S['locked_market']='-'
-            if S['consecutive_loss']>=1:
-                S['cooldown_until']=time.time()+900
-            st.rerun()
-neon(f'<div style="color:#00FF00;font-weight:900;font-size:26px;">PROFIT: +{S["cp"]} PKR</div><div style="color:#00FF00;font-size:12px;">BAL {S["bal"]} PKR | WIN {S["total_win"]} | LOSS {S["total_loss"]} | AAJ LOSS {S["daily_loss"]}/2 | Session {lh:02d}:{lm:02d}:{ls:02d}</div>','#00FF00')
-if S['ht']:
-    st.markdown('<div style="color:#FFD700;font-weight:900;text-align:center;">AAJ KE TRADE</div>',unsafe_allow_html=True)
-    st.dataframe(pd.DataFrame(S['ht']),use_container_width=True,hide_index=True)
-neon('AI RULE: 90/95/97 LOCK - 60 SEC SCAN - TRADE - 2 MIN WAIT','#FF6B6B')
-st.write(f"Last Update: {now_pkt()} | V181 | Phase {S['phase']} | Round {S['scan_round']}")
-time.sleep(2)
-st.rerun()
+            S['ht'].append({'Market':S['locked_mark
