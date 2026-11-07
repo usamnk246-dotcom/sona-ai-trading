@@ -203,7 +203,10 @@ neon(f'<div style="color:#00FF00;font-weight:900;font-size:26px;">PROFIT: +{S["c
 if S['ht']:
     st.markdown('<div style="color:#FFD700;font-weight:900;text-align:center;">📋 AAJ KE TRADE</div>',unsafe_allow_html=True)
     st.dataframe(pd.DataFrame(S['ht']),use_container_width=True,hide_index=True)
-neon('<div style="color:#FF6B6B;font-size:12px;">🧠 AI BRAIN RADAR RULE: Beech me BRAIN - Charo taraf MARKET - 90/95/97 jo chuno usi pe LOCK - 2 MIN SCAN - TRADE - 2 MIN WAIT - PHIR SCAN - 100% koi n
+# FIX - LINE 206 - CHOTI LINE - CUT NAHI HOGI
+neon('AI BRAIN RULE: 90/95/97 LOCK - 2 MIN SCAN - TRADE - 2 MIN WAIT', '#FF6B6B')
+st.write(f"Last Update: {now_pkt()} | V180 | Phase {S['phase']} | Round {S['scan_round']}")
+time.sleep(2); st.rerun()
 # LAST 6 LINES - 201 to 206 - V180 - Isko sab se neeche paste karo
 if S['ht']:
     st.markdown('<div style="color:#FFD700;font-weight:900;text-align:center;">📋 AAJ KE TRADE</div>',unsafe_allow_html=True)
