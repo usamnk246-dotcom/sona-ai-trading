@@ -1,9 +1,9 @@
-# SONA V182 - FULL SCANNER DETAIL - HAR MARKET KA RSI VOL ATR VWAP MACD LIQ SWEEP BOS
+# SONA V183 - NO INDENT ERROR - FULL SCANNER DETAIL
 import streamlit as st
 import time, random, datetime
 import pandas as pd
 import numpy as np
-st.set_page_config(page_title='SONA V182', page_icon='🧠', layout='wide')
+st.set_page_config(page_title='SONA V183', page_icon='🧠', layout='wide')
 st.markdown("""<style>.stApp{background:#000 !important;color:white !important} .stSelectbox label{color:#00FF00 !important;font-weight:bold !important} .stSelectbox div[data-baseweb="select"]>div{background:#000 !important;color:#00FF00 !important;border:2px solid #00FF00 !important;border-radius:10px !important} .stButton>button{background:#00FF00 !important;color:black !important;font-weight:bold !important;border-radius:10px !important;width:100% !important;height:55px !important;font-size:18px !important}</style>""", unsafe_allow_html=True)
 if 'S' not in st.session_state:
     st.session_state.S={'session_start':time.time(),'phase':'SCAN','phase_start':time.time(),'tf':'5MIN','conf':90,'amnt':100,'locked_market':'-','locked_dir':'-','locked_score':0,'locked_reason':'','open_time':'','close_time':'','total_win':0,'total_loss':0,'cp':0,'bal':12622,'ht':[],'daily_loss':0,'consecutive_loss':0,'cooldown_until':0,'wait_until':0,'scan_round':1}
@@ -169,7 +169,7 @@ def market_card(r):
     st.markdown(f'<div style="color:white;font-size:12px;">PULL {pull_t} | DIV {div_t}</div>',unsafe_allow_html=True)
     st.markdown(f'<div style="color:#00FFFF;font-size:12px;">{r["strat"]}</div>',unsafe_allow_html=True)
     st.markdown(f'<div style="color:#00FFFF;font-size:12px;">{r["why"]}</div></div>',unsafe_allow_html=True)
-neon('<div style="color:#00FF00;font-weight:900;font-size:22px;">SONA AI v182 - AI BRAIN RADAR</div><div style="color:white;font-size:13px;">HAR MARKET KA POORA DETAIL - 60 SEC SCAN - 2 MIN WAIT</div>','#00FF00')
+neon('<div style="color:#00FF00;font-weight:900;font-size:22px;">SONA AI v183 - AI BRAIN RADAR</div><div style="color:white;font-size:13px;">HAR MARKET KA POORA DETAIL - 60 SEC SCAN - 2 MIN WAIT</div>','#00FF00')
 elapsed=int(time.time()-S['session_start'])
 left=max(0,7200-elapsed)
 lh=left//3600
@@ -195,13 +195,9 @@ if cool_left>0:
     neon(f'<div style="color:#FFD700;font-weight:900;font-size:20px;">COOLDOWN - {cm:02d}:{cs:02d} - RUKO</div>','#FFD700')
     time.sleep(3)
     st.rerun()
-sc1,sc2,sc3=st.columns(3)
-with sc1:
-    S['tf']=st.selectbox('BINARY TIME',['5MIN','1MIN','15MIN'],index=0)
-with sc2:
-    S['conf']=st.selectbox('AI BRAIN CONFIDENCE',[90,95,97],index=0)
-with sc3:
-    S['amnt']=st.selectbox('AMOUNT',[100,150,250],index=0)
+S['tf']=st.selectbox('BINARY TIME',['5MIN','1MIN','15MIN'],index=0)
+S['conf']=st.selectbox('AI BRAIN CONFIDENCE',[90,95,97],index=0)
+S['amnt']=st.selectbox('AMOUNT',[100,150,250],index=0)
 payout=int(S['amnt']*0.85)
 if S['conf']==90:
     conf_help='90% = 7/9 MATCH - Roz 8-10 signal'
@@ -209,7 +205,7 @@ elif S['conf']==95:
     conf_help='95% = 8/9 MATCH - Roz 3-5 signal - Strong'
 else:
     conf_help='97% = 9/9 MATCH - Roz 1-2 signal - Sab se strong'
-neon(f'<div style="color:#FFD700;font-weight:800;font-size:13px;">TUNE CHUNA: {S["conf"]}% CONFIRM - {conf_help}</div><div style="color:#00FFFF;font-size:12px;">{S["amnt"]} PKR - Jeete +{payout} - Haare -{S["amnt"]} - AAJ LOSS {S["daily_loss"]}/2 - ROUND {S["scan_round"]}</div>','#FFD700')
+neon(f'<div style="color:#FFD700;font-weight:800;font-size:13px;">TUNE CHUNA: {S["conf"]}% - {conf_help}</div><div style="color:#00FFFF;font-size:12px;">{S["amnt"]} PKR - Jeete +{payout} - Haare -{S["amnt"]} - AAJ LOSS {S["daily_loss"]}/2 - ROUND {S["scan_round"]}</div>','#FFD700')
 if S['phase']=='WAIT':
     wait_left=max(0,int(S['wait_until']-time.time()))
     if wait_left<=0:
@@ -219,7 +215,7 @@ if S['phase']=='WAIT':
         st.rerun()
     wm=wait_left//60
     ws=wait_left%60
-    neon(f'<div style="color:#00FFFF;font-weight:900;font-size:24px;">2 MIN WAIT - AI AARAM KAR RAHA HAI</div><div style="color:white;font-size:14px;">WAIT ME: {wm:02d}:{ws:02d} BACHA</div><div style="color:#AAAAAA;font-size:13px;">Trade khatam - Ab AI 2 MIN rukega - Phir SCAN</div>','#00FFFF')
+    neon(f'<div style="color:#00FFFF;font-weight:900;font-size:24px;">2 MIN WAIT - AI AARAM</div><div style="color:white;font-size:14px;">WAIT ME: {wm:02d}:{ws:02d} BACHA</div>','#00FFFF')
     time.sleep(2)
     st.rerun()
 SCAN_LEN=60
@@ -234,33 +230,22 @@ if S['phase']=='SCAN':
     pm=phase_left//60
     ps=phase_left%60
     top8=results_sorted[:8]
-    st.markdown('<div style="color:#00FF00;font-weight:900;text-align:center;font-size:16px;margin:8px 0;">TOP 4 MARKET - POORA DETAIL</div>',unsafe_allow_html=True)
-    c1,c2=st.columns(2)
-    with c1:
-        market_card(top8[0])
-    with c2:
-        market_card(top8[1])
-    c3,c4=st.columns(2)
-    with c3:
-        market_card(top8[2])
-    with c4:
-        market_card(top8[3])
+    st.markdown('<div style="color:#00FF00;font-weight:900;text-align:center;">TOP 4 MARKET - POORA DETAIL</div>',unsafe_allow_html=True)
+    market_card(top8[0])
+    market_card(top8[1])
+    market_card(top8[2])
+    market_card(top8[3])
     brain_bg='#00FF00' if best['passed']>=7 else '#FFD700'
-    neon(f'<div style="font-size:36px;">🧠</div><div style="color:{brain_bg};font-weight:900;font-size:28px;">AI BRAIN - HIGH QUALITY</div><div style="color:white;font-weight:800;font-size:15px;">SAB KO DEKH RAHA HAI - SCANNING - 9 CHECKS</div><div style="color:#FFD700;font-size:14px;">SCAN ME: {pm:02d}:{ps:02d} BACHA - ROUND {S["scan_round"]} - 60 SEC SCAN</div><div style="color:white;font-size:15px;margin-top:6px;">ABHI SAB SE CONFIDENT: <b style="color:{brain_bg}">{best["market"]} - {best["passed"]}/9 - {best["score"]}% - {best["dir"]}</b></div><div style="color:#AAAAAA;font-size:12px;">{best["conf_txt"]} - {best["why"]} - {best["strat"]}</div><div style="color:#00FFFF;font-size:12px;">RSI {best["rsi"]} | VOL {best["vol"]} | ATR {best["atr"]} | VWAP {best["vwap"]} | MACD {best["macd"]}</div>',brain_bg)
-    st.markdown('<div style="color:#00FF00;font-weight:900;text-align:center;font-size:16px;margin:8px 0;">NEXT 4 MARKET - POORA DETAIL</div>',unsafe_allow_html=True)
-    c5,c6=st.columns(2)
-    with c5:
-        market_card(top8[4])
-    with c6:
-        market_card(top8[5])
-    c7,c8=st.columns(2)
-    with c7:
-        market_card(top8[6])
-    with c8:
-        market_card(top8[7])
+    neon(f'<div style="font-size:36px;">BRAIN</div><div style="color:{brain_bg};font-weight:900;font-size:28px;">AI BRAIN - HIGH QUALITY</div><div style="color:white;font-size:15px;">SAB KO DEKH RAHA HAI - SCANNING - 9 CHECKS</div><div style="color:#FFD700;font-size:14px;">SCAN ME: {pm:02d}:{ps:02d} BACHA - ROUND {S["scan_round"]} - 60 SEC SCAN</div><div style="color:white;font-size:15px;">BEST: {best["market"]} - {best["passed"]}/9 - {best["score"]}% - {best["dir"]}</div><div style="color:#AAAAAA;font-size:12px;">{best["conf_txt"]} - {best["why"]} - {best["strat"]}</div><div style="color:#00FFFF;font-size:12px;">RSI {best["rsi"]} | VOL {best["vol"]} | ATR {best["atr"]} | VWAP {best["vwap"]} | MACD {best["macd"]}</div>',brain_bg)
+    st.markdown('<div style="color:#00FF00;font-weight:900;text-align:center;">NEXT 4 MARKET - POORA DETAIL</div>',unsafe_allow_html=True)
+    market_card(top8[4])
+    market_card(top8[5])
+    market_card(top8[6])
+    market_card(top8[7])
     otc_best=sorted([r for r in results if r['is_otc']],key=lambda x:(x['passed'],x['score']),reverse=True)[0]
     normal_best=sorted([r for r in results if not r['is_otc']],key=lambda x:(x['passed'],x['score']),reverse=True)[0]
-    neon(f'<div style="color:#00FF00;font-weight:800;font-size:13px;text-align:left;">BEST OTC: {otc_best["market"]} - {otc_best["passed"]}/9 - {otc_best["score"]}% - {otc_best["dir"]} - RSI {otc_best["rsi"]} - VOL {otc_best["vol"]}<br>BEST NORMAL: {normal_best["market"]} - {normal_best["passed"]}/9 - {normal_best["score"]}% - {normal_best["dir"]} - RSI {normal_best["rsi"]} - VOL {normal_best["vol"]}</div>','#00FF00')
+    neon(f'<div style="color:#00FF00;font-size:13px;">BEST OTC: {otc_best["market"]} - {otc_best["passed"]}/9 - {otc_best["score"]}% - {otc_best["dir"]}</div>','#00FF00')
+    neon(f'<div style="color:#00FF00;font-size:13px;">BEST NORMAL: {normal_best["market"]} - {normal_best["passed"]}/9 - {normal_best["score"]}% - {normal_best["dir"]}</div>','#00FF00')
     need_pass=7 if S['conf']==90 else 8 if S['conf']==95 else 9
     if phase_left==0 and best['passed']>=need_pass and best['score']>=S['conf']:
         S['phase']='TRADE'
@@ -289,7 +274,7 @@ if S['phase']=='SCAN':
     elif phase_left==0:
         S['phase']='WAIT'
         S['wait_until']=time.time()+120
-        st.warning(f"60 SEC me koi {S['conf']}% nahi mila - BEST {best['market']} {best['passed']}/9 - AI 2 MIN WAIT - Phir SCAN")
+        st.warning(f"60 SEC me koi {S['conf']}% nahi mila - BEST {best['market']} {best['passed']}/9 - AI 2 MIN WAIT")
         st.rerun()
 else:
     phase_left=max(0,TRADE_LEN-phase_elapsed)
@@ -303,65 +288,54 @@ else:
     is_up=S['locked_dir']=='UP'
     bg='#00FF00' if is_up else '#FF4444'
     trade_txt='UP - CALL - GREEN' if is_up else 'DOWN - PUT - RED'
-    neon(f'<div style="color:{bg};font-weight:900;font-size:32px;">{trade_txt}</div><div style="color:white;font-weight:900;font-size:20px;">AI BRAIN NE SELECT KIYA: {S["locked_market"]} - {S["locked_score"]}%</div><div style="color:#FFD700;font-size:13px;">{S.get("_best_conf","")} - {S.get("_best_strat","")} - {S.get("_best_why","")}</div><div style="color:#FFD700;font-size:13px;">{S["locked_reason"]}</div><div style="color:white;font-size:14px;margin-top:6px;">APP ME: Fixed Time - SEARCH: <b>{S["locked_market"]}</b></div><div style="color:white;font-size:14px;">TRADE: {S["locked_dir"]} - {S["amnt"]} PKR - TIME {S["tf"]} - Jeete +{payout} PKR</div><div style="color:white;font-size:14px;">OPEN: {S["open_time"]} - CLOSE: {S["close_time"]} - BACHA: {tm:02d}:{ts:02d}</div>',bg)
-    st.markdown('<div style="color:#FFD700;font-weight:900;text-align:center;margin:8px 0;">AI BRAIN CHECKLIST - 9/9</div>',unsafe_allow_html=True)
+    neon(f'<div style="color:{bg};font-weight:900;font-size:32px;">{trade_txt}</div><div style="color:white;font-weight:900;font-size:20px;">AI BRAIN NE SELECT KIYA: {S["locked_market"]} - {S["locked_score"]}%</div><div style="color:#FFD700;font-size:13px;">{S.get("_best_conf","")} - {S.get("_best_strat","")} - {S.get("_best_why","")}</div><div style="color:#FFD700;font-size:13px;">{S["locked_reason"]}</div><div style="color:white;font-size:14px;">APP ME: Fixed Time - SEARCH: {S["locked_market"]}</div><div style="color:white;font-size:14px;">TRADE: {S["locked_dir"]} - {S["amnt"]} PKR - TIME {S["tf"]} - Jeete +{payout} PKR</div><div style="color:white;font-size:14px;">OPEN: {S["open_time"]} - CLOSE: {S["close_time"]} - BACHA: {tm:02d}:{ts:02d}</div>',bg)
+    st.markdown('<div style="color:#FFD700;font-weight:900;text-align:center;">AI BRAIN CHECKLIST - 9/9</div>',unsafe_allow_html=True)
     for chk in S.get('_best_checks',[]):
-        col='#00FF00' if 'OK' in chk or 'YES' in chk or 'Strong' in chk else '#FF4444' if 'NO' in chk or 'Kam' in chk else '#FFD700'
+        col='#00FF00' if 'OK' in chk or 'YES' in chk or 'Strong' in chk else '#FF4444'
+        if 'NO' not in chk and 'Kam' not in chk and 'OK' not in chk and 'YES' not in chk and 'Strong' not in chk:
+            col='#FFD700'
         neon(f'<div style="color:{col};font-weight:700;font-size:13px;text-align:left;">{chk}</div>',col)
-            b1,b2,b3=st.columns(3)
-    with b1:
-        neon(f'<div style="color:#888;font-size:11px;">VWAP</div>', '#FF00FF')
-        neon(f'<div style="color:#FF00FF;font-weight:900;">{S.get("_vwap","")}</div>', '#FF00FF')
-    with b2:
-        neon(f'<div style="color:#888;font-size:11px;">MACD</div>', '#00FF00')
-        neon(f'<div style="color:#00FF00;font-weight:900;">{S.get("_macd","")}</div>', '#00FF00')
-    with b3:
-        neon(f'<div style="color:#888;font-size:11px;">LIQUIDITY</div>', '#FFD700')
-        neon(f'<div style="color:#FFD700;font-weight:800;">UP {S.get("_hh","")}</div>', '#FFD700')
-        neon(f'<div style="color:#FFD700;font-weight:800;">DOWN {S.get("_ll","")}</div>', '#FFD700')
+    neon(f'<div style="color:#00FF00;font-weight:900;">RSI: {S.get("_rsi","")}</div>','#00FF00')
+    neon(f'<div style="color:#FFD700;font-weight:900;">VOLUME: {S.get("_vol","")}</div>','#FFD700')
+    neon(f'<div style="color:#00FFFF;font-weight:900;">ATR: {S.get("_atr","")}</div>','#00FFFF')
+    neon(f'<div style="color:#FF00FF;font-weight:900;">VWAP: {S.get("_vwap","")}</div>','#FF00FF')
+    neon(f'<div style="color:#00FF00;font-weight:900;">MACD: {S.get("_macd","")}</div>','#00FF00')
+    neon(f'<div style="color:#FFD700;font-weight:800;">LIQ UP {S.get("_hh","")} | DOWN {S.get("_ll","")}</div>','#FFD700')
     if '_best' in S:
         bb=S['_best']
         sw2='YES' if bb["sweep"] else 'NO'
         bos2='YES' if bb["bos"] else 'NO'
         pull2='YES' if bb["pull"] else 'NO'
         div2='YES' if bb["div"] else 'NO'
-        neon(f'<div style="color:white;font-size:13px;">SWEEP {sw2} | BOS {bos2}</div>', '#00FFFF')
-        neon(f'<div style="color:white;font-size:13px;">PULL {pull2} | DIV {div2}</div>', '#00FFFF')
-        neon(f'<div style="color:white;font-size:13px;">{bb["strat"]} | {bb["why"]}</div>', '#00FFFF')
-    st.markdown('<div style="color:#FFD700;font-weight:900;text-align:center;">IS 1 MARKET KA CHART</div>', unsafe_allow_html=True)
-    st.line_chart(pd.DataFrame({'Price':S.get('_ps',[100,101,102])}), use_container_width=True)
-    cc1,cc2=st.columns(2)
-    with cc1:
-        if st.button('WIN HUA'):
-            S['total_win']+=1
-            S['cp']+=int(S['amnt']*0.85)
-            S['bal']+=int(S['amnt']*0.85)
-            S['consecutive_loss']=0
-            S['ht'].append({'Market':S['locked_market'],'Dir':S['locked_dir'],'Result':'WIN','Time':now_pkt()})
-            S['phase']='WAIT'
-            S['wait_until']=time.time()+120
-            S['locked_market']='-'
-            st.rerun()
-    with cc2:
-        if st.button('LOSS HUA'):
-            S['total_loss']+=1
-            S['daily_loss']+=1
-            S['consecutive_loss']+=1
-            S['cp']-=S['amnt']
-            S['bal']-=S['amnt']
-            S['ht'].append({'Market':S['locked_market'],'Dir':S['locked_dir'],'Result':'LOSS','Time':now_pkt()})
-            S['phase']='WAIT'
-            S['wait_until']=time.time()+120
-            S['locked_market']='-'
-            if S['consecutive_loss']>=1:
-                S['cooldown_until']=time.time()+900
-            st.rerun()
-neon(f'<div style="color:#00FF00;font-weight:900;font-size:26px;">PROFIT: +{S["cp"]} PKR</div>', '#00FF00')
-neon(f'<div style="color:#00FF00;font-size:12px;">BAL {S["bal"]} | WIN {S["total_win"]} | LOSS {S["total_loss"]}</div>', '#00FF00')
+        neon(f'<div style="color:white;font-size:13px;">SWEEP {sw2} | BOS {bos2} | PULL {pull2} | DIV {div2}</div>','#00FFFF')
+        neon(f'<div style="color:white;font-size:13px;">{bb["strat"]} | {bb["why"]}</div>','#00FFFF')
+    st.markdown('<div style="color:#FFD700;font-weight:900;text-align:center;">IS 1 MARKET KA CHART</div>',unsafe_allow_html=True)
+    st.line_chart(pd.DataFrame({'Price':S.get('_ps',[100,101,102])}),use_container_width=True)
+    if st.button('WIN HUA'):
+        S['total_win']+=1
+        S['cp']+=int(S['amnt']*0.85)
+        S['bal']+=int(S['amnt']*0.85)
+        S['consecutive_loss']=0
+        S['ht'].append({'Market':S['locked_market'],'Dir':S['locked_dir'],'Result':'WIN','Time':now_pkt()})
+        S['phase']='WAIT'
+        S['wait_until']=time.time()+120
+        S['locked_market']='-'
+        st.rerun()
+    if st.button('LOSS HUA'):
+        S['total_loss']+=1
+        S['daily_loss']+=1
+        S['consecutive_loss']+=1
+        S['cp']-=S['amnt']
+        S['bal']-=S['amnt']
+        S['ht'].append({'Market':S['locked_market'],'Dir':S['locked_dir'],'Result':'LOSS','Time':now_pkt()})
+        S['phase']='WAIT'
+        S['wait_until']=time.time()+120
+        S['locked_market']='-'
+        if S['consecutive_loss']>=1:
+            S['cooldown_until']=time.time()+900
+        st.rerun()
+neon(f'<div style="color:#00FF00;font-weight:900;font-size:26px;">PROFIT: +{S["cp"]} PKR</div>','#00FF00')
+neon(f'<div style="color:#00FF00;font-size:12px;">BAL {S["bal"]} | WIN {S["total_win"]} | LOSS {S["total_loss"]}</div>','#00FF00')
 if S['ht']:
-    st.markdown('<div style="color:#FFD700;font-weight:900;text-align:center;">AAJ KE TRADE</div>', unsafe_allow_html=True)
-    st.dataframe(pd.DataFrame(S['ht']), use_container_width=True, hide_index=True)
-neon('AI RULE: 90/95/97 LOCK - 60 SEC SCAN - TRADE - 2 MIN WAIT', '#FF6B6B')
-st.write(f"Last Update: {now_pkt()} | V182 | Phase {S['phase']}")
-time.sleep(2)
-st.rerun()
+    st.markdown('<div style="color:#FFD700;font-weight:900;text-align:center;">AAJ KE TRADE</div>',unsafe_allow_html=True)
+    st.dat
