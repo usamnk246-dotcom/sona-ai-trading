@@ -334,8 +334,12 @@ else:
         if S['consecutive_loss']>=1:
             S['cooldown_until']=time.time()+900
         st.rerun()
-neon(f'<div style="color:#00FF00;font-weight:900;font-size:26px;">PROFIT: +{S["cp"]} PKR</div>','#00FF00')
-neon(f'<div style="color:#00FF00;font-size:12px;">BAL {S["bal"]} | WIN {S["total_win"]} | LOSS {S["total_loss"]}</div>','#00FF00')
+neon(f'<div>PROFIT: +{S["cp"]} PKR</div>', '#00FF00')
+neon(f'<div>BAL {S["bal"]} | WIN {S["total_win"]}</div>', '#00FF00')
 if S['ht']:
-    st.markdown('<div style="color:#FFD700;font-weight:900;text-align:center;">AAJ KE TRADE</div>',unsafe_allow_html=True)
-    st.dat
+    st.markdown('<div>AAJ KE TRADE</div>', unsafe_allow_html=True)
+    st.dataframe(pd.DataFrame(S['ht']), use_container_width=True, hide_index=True)
+neon('AI RULE: 90/95/97 LOCK - 60 SEC SCAN', '#FF6B6B')
+st.write(f"Last Update: {now_pkt()} | V183")
+time.sleep(2)
+st.rerun()
