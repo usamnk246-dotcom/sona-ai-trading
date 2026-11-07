@@ -169,7 +169,6 @@ def market_card(r):
     st.markdown(f'<div style="color:white;font-size:12px;">PULL {pull_t} | DIV {div_t}</div>',unsafe_allow_html=True)
     st.markdown(f'<div style="color:#00FFFF;font-size:12px;">{r["strat"]}</div>',unsafe_allow_html=True)
     st.markdown(f'<div style="color:#00FFFF;font-size:12px;">{r["why"]}</div></div>',unsafe_allow_html=True)
-    st.markdown(html,unsafe_allow_html=True)
 neon('<div style="color:#00FF00;font-weight:900;font-size:22px;">SONA AI v182 - AI BRAIN RADAR</div><div style="color:white;font-size:13px;">HAR MARKET KA POORA DETAIL - 60 SEC SCAN - 2 MIN WAIT</div>','#00FF00')
 elapsed=int(time.time()-S['session_start'])
 left=max(0,7200-elapsed)
@@ -309,25 +308,28 @@ else:
     for chk in S.get('_best_checks',[]):
         col='#00FF00' if 'OK' in chk or 'YES' in chk or 'Strong' in chk else '#FF4444' if 'NO' in chk or 'Kam' in chk else '#FFD700'
         neon(f'<div style="color:{col};font-weight:700;font-size:13px;text-align:left;">{chk}</div>',col)
-    a1,a2,a3=st.columns(3)
-    with a1:
-        neon(f'<div style="color:#888;font-size:11px;">RSI</div><div style="color:#00FF00;font-weight:900;">{S.get("_rsi","")}</div>','#00FF00')
-    with a2:
-        neon(f'<div style="color:#888;font-size:11px;">VOLUME</div><div style="color:#FFD700;font-weight:900;">{S.get("_vol","")}</div>','#FFD700')
-    with a3:
-        neon(f'<div style="color:#888;font-size:11px;">ATR</div><div style="color:#00FFFF;font-weight:900;">{S.get("_atr","")}</div>','#00FFFF')
-    b1,b2,b3=st.columns(3)
+            b1,b2,b3=st.columns(3)
     with b1:
-        neon(f'<div style="color:#888;font-size:11px;">VWAP</div><div style="color:#FF00FF;font-weight:900;">{S.get("_vwap","")}</div>','#FF00FF')
+        neon(f'<div style="color:#888;font-size:11px;">VWAP</div>', '#FF00FF')
+        neon(f'<div style="color:#FF00FF;font-weight:900;">{S.get("_vwap","")}</div>', '#FF00FF')
     with b2:
-        neon(f'<div style="color:#888;font-size:11px;">MACD</div><div style="color:#00FF00;font-weight:900;">{S.get("_macd","")}</div>','#00FF00')
+        neon(f'<div style="color:#888;font-size:11px;">MACD</div>', '#00FF00')
+        neon(f'<div style="color:#00FF00;font-weight:900;">{S.get("_macd","")}</div>', '#00FF00')
     with b3:
-        neon(f'<div style="color:#888;font-size:11px;">LIQUIDITY</div><div style="color:#FFD700;font-weight:800;">UP {S.get("_hh","")} | DOWN {S.get("_ll","")}</div>','#FFD700')
+        neon(f'<div style="color:#888;font-size:11px;">LIQUIDITY</div>', '#FFD700')
+        neon(f'<div style="color:#FFD700;font-weight:800;">UP {S.get("_hh","")}</div>', '#FFD700')
+        neon(f'<div style="color:#FFD700;font-weight:800;">DOWN {S.get("_ll","")}</div>', '#FFD700')
     if '_best' in S:
         bb=S['_best']
-        neon(f'<div style="color:white;font-weight:800;font-size:13px;text-align:left;">SWEEP: {"YES" if bb["sweep"] else "NO"} | BOS: {"YES" if bb["bos"] else "NO"} | PULLBACK: {"YES" if bb["pull"] else "NO"} | DIV: {"YES" if bb["div"] else "NO"}<br>STRATEGY: {bb["strat"]} | WHY: {bb["why"]}</div>','#00FFFF')
-    st.markdown('<div style="color:#FFD700;font-weight:900;text-align:center;margin:8px 0;">IS 1 MARKET KA CHART</div>',unsafe_allow_html=True)
-    st.line_chart(pd.DataFrame({'Price':S.get('_ps',[100,101,102])}),use_container_width=True)
+        sw2='YES' if bb["sweep"] else 'NO'
+        bos2='YES' if bb["bos"] else 'NO'
+        pull2='YES' if bb["pull"] else 'NO'
+        div2='YES' if bb["div"] else 'NO'
+        neon(f'<div style="color:white;font-size:13px;">SWEEP {sw2} | BOS {bos2}</div>', '#00FFFF')
+        neon(f'<div style="color:white;font-size:13px;">PULL {pull2} | DIV {div2}</div>', '#00FFFF')
+        neon(f'<div style="color:white;font-size:13px;">{bb["strat"]} | {bb["why"]}</div>', '#00FFFF')
+    st.markdown('<div style="color:#FFD700;font-weight:900;text-align:center;">IS 1 MARKET KA CHART</div>', unsafe_allow_html=True)
+    st.line_chart(pd.DataFrame({'Price':S.get('_ps',[100,101,102])}), use_container_width=True)
     cc1,cc2=st.columns(2)
     with cc1:
         if st.button('WIN HUA'):
@@ -347,4 +349,19 @@ else:
             S['consecutive_loss']+=1
             S['cp']-=S['amnt']
             S['bal']-=S['amnt']
-            S['ht'].append({'Market':S['locked_mark
+            S['ht'].append({'Market':S['locked_market'],'Dir':S['locked_dir'],'Result':'LOSS','Time':now_pkt()})
+            S['phase']='WAIT'
+            S['wait_until']=time.time()+120
+            S['locked_market']='-'
+            if S['consecutive_loss']>=1:
+                S['cooldown_until']=time.time()+900
+            st.rerun()
+neon(f'<div style="color:#00FF00;font-weight:900;font-size:26px;">PROFIT: +{S["cp"]} PKR</div>', '#00FF00')
+neon(f'<div style="color:#00FF00;font-size:12px;">BAL {S["bal"]} | WIN {S["total_win"]} | LOSS {S["total_loss"]}</div>', '#00FF00')
+if S['ht']:
+    st.markdown('<div style="color:#FFD700;font-weight:900;text-align:center;">AAJ KE TRADE</div>', unsafe_allow_html=True)
+    st.dataframe(pd.DataFrame(S['ht']), use_container_width=True, hide_index=True)
+neon('AI RULE: 90/95/97 LOCK - 60 SEC SCAN - TRADE - 2 MIN WAIT', '#FF6B6B')
+st.write(f"Last Update: {now_pkt()} | V182 | Phase {S['phase']}")
+time.sleep(2)
+st.rerun()
