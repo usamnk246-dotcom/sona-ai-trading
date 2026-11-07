@@ -542,8 +542,8 @@ if S['sound_on'] and S['ht']:
 c1,c2=st.columns(2)
 with c1:
     S['auto']=st.toggle(
-    'AUTO TRADING ON',value=S['auto'])
-        # AUTO OFF FIX - OFF hai to naya trade mat kholo
+        'AUTO TRADING ON',value=S['auto'])
+    # AUTO OFF FIX - OFF hai to naya trade mat kholo
     can_trade = S['auto']
     if not S['auto']:
         can_trade = False
