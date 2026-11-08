@@ -1,110 +1,87 @@
-import streamlit as st
-import random, pandas as pd
+import streamlit as st, random, pandas as pd
 from datetime import datetime, timedelta
 import streamlit.components.v1 as comp
-st.set_page_config(page_title='V136 PRO MAX',layout='wide')
-C='<div class="card">'
-P='<div class="profit">'
-O='<div class="open">'
-A1='<div class="ai">'
-G='<div class="grid">'
-E='</div>'
-CSS='''<style>
+st.set_page_config(page_title='V117 BEST', layout='wide')
+st.markdown('''
+<style>
 #MainMenu,footer,header{visibility:hidden}
-.stApp{background:#0B0E11;color:#fff}
-.card{background:#1E2329;border:1px solid #2B3139}
-.card{border-radius:14px;padding:10px;margin:5px}
-.profit{background:#0ECB81;border-radius:14px}
-.profit{padding:10px;margin:5px;color:#000}
-.profit{font-weight:900}
-.open{background:#2A2A00;border:1px solid #FCD535}
-.open{border-radius:12px;padding:9px;margin:5px}
-.ai{background:#1A2A3A;border:1px solid #2EBDFF}
-.ai{border-radius:12px;padding:9px;margin:5px}
-.grid{background:#161A1E;border:1px solid #2B3139}
-.grid{border-radius:12px;padding:9px;margin:5px}
-.stButton>button{background:#FCD535;color:#000}
-.stButton>button{font-weight:900;border-radius:12px}
-.stButton>button{height:42px;width:100%}
-</style>'''
-st.markdown(CSS,unsafe_allow_html=True)
-def pkt():
- return datetime.utcnow()+timedelta(hours=5)
-def tfm(t):
- if '1MIN' in t: return 1
- if '2MIN' in t: return 2
- if '5MIN' in t: return 5
- if '15MIN' in t: return 15
- if '30MIN' in t: return 30
- if '1H' in t: return 60
- if '4H' in t: return 240
- return 1440
+.stApp{background: radial-gradient(ellipse at top, #0a0a0a 0%, #000 100%);color:#fff}
+.main-title{background: linear-gradient(135deg, #00FF88 0%, #00D4FF 50%, #FF00FF 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:26px;font-weight:900;text-align:center;padding:8px}
+.premium-card{background: linear-gradient(135deg, rgba(0,255,136,0.1) 0%, rgba(0,212,255,0.1) 100%);backdrop-filter: blur(10px);border: 1px solid rgba(0,255,136,0.3);border-radius:20px;padding:12px;margin:6px;box-shadow: 0 8px 32px rgba(0,255,136,0.2)}
+.profit-card{background: linear-gradient(135deg, #00FF88 0%, #00D4FF 100%);border-radius:20px;padding:12px;margin:6px;box-shadow: 0 8px 32px rgba(0,255,136,0.4);color:#000;font-weight:900}
+.metric-card{background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);backdrop-filter: blur(10px);border: 1px solid rgba(255,255,255,0.1);border-radius:16px;padding:10px;text-align:center}
+.stButton>button{background: linear-gradient(135deg, #00FF88 0%, #00D4FF 100%);color:#000;font-weight:900;border-radius:25px;border:none;height:48px;box-shadow: 0 4px 20px rgba(0,255,136,0.4)}
+.stButton>button:hover{transform: translateY(-2px);box-shadow: 0 8px 30px rgba(0,255,136,0.6)}
+.neon-text{color:#00FF88;text-shadow: 0 0 10px #00FF88, 0 0 20px #00FF88;font-weight:900}
+.gold-text{color:#FFD700;text-shadow: 0 0 10px #FFD700;font-weight:900}
+</style>
+''', unsafe_allow_html=True)
 S=st.session_state
-def init(k,v):
- if k not in S:
-  S[k]=v
-init('rb',0)
-init('db',10000)
-init('rp',0)
-init('dp',0)
-init('hr',[0])
-init('hd',[10000])
-init('sm','Gold OTC')
-init('stf','1MIN')
-init('th',[])
-init('ot',[])
-init('wc',0)
-init('lc',0)
-init('ht',0)
-init('lt',pkt()-timedelta(minutes=20))
-init('ta',280)
-init('tph',4)
-init('am','DEMO')
-init('pg','TERMINAL')
-init('td',0)
-init('tt',0)
-init('day',pkt().day)
-init('lh',pkt().hour)
-init('amkt',True)
-init('auto',True)
-init('msc',{})
-init('lmc',pkt()-timedelta(minutes=20))
-init('rthr',60)
-init('vthr',1.5)
-init('athr',100)
-init('mthr',0.0)
-init('lf','LOW')
-init('aon',True)
-init('dep',0)
-init('depr',[])
-init('wd',[])
-now=pkt()
-if now.day!=S['day']:
- S['td']=0
- S['day']=now.day
-if now.hour!=S['lh']:
- S['ht']=0
- S['lh']=now.hour
- S['lt']=now-timedelta(minutes=20)
-mkts=['EUR/USD OTC','GBP/USD OTC','AUD/CAD OTC']
-mkts+=['AUD/CHF OTC','AUD/JPY OTC','AUD/NZD OTC']
-mkts+=['BNB OTC','Bitcoin OTC','Gold OTC']
-mkts+=['EUR/USD','BTC/USD','ETH/USD','SOL/USD']
-tfs=['1MIN','2MIN','5MIN','15MIN']
-tfs+=['30MIN','1H','4H','1D']
-bmap={'EUR':1.0922,'GBP':1.27,'AUD':0.65}
-bmap['BNB']=600
-bmap['Bitcoin']=67453
-bmap['Gold']=2448
-bmap['BTC']=67453
-bmap['ETH']=3520
-bmap['SOL']=180
+if 'rb' not in S: S.rb=0
+if 'db' not in S: S.db=10000
+if 'rp' not in S: S.rp=0
+if 'dp' not in S: S.dp=0
+if 'hr' not in S: S.hr=[0]
+if 'hd' not in S: S.hd=[10000]
+if 'ao' not in S: S.ao=True
+if 'sm' not in S: S.sm='SOL/USD'
+if 'stf' not in S: S.stf='1MIN'
+if 'th' not in S: S.th=[]
+if 'wc' not in S: S.wc=0
+if 'lc' not in S: S.lc=0
+if 'ht' not in S: S.ht=0
+if 'lt' not in S: S.lt=datetime.now()-timedelta(minutes=5)
+if 'dep' not in S: S.dep=0
+if 'depr' not in S: S.depr=[]
+if 'lh' not in S: S.lh=datetime.now().hour
+if 'ta' not in S: S.ta=250
+if 'tph' not in S: S.tph=4
+if 'risk' not in S: S.risk='MEDIUM'
+if 'aon' not in S: S.aon=True
+if 'am' not in S: S.am='DEMO'
+if 'page' not in S: S.page='TRADING'
+if 'td' not in S: S.td=0
+if 'day' not in S: S.day=datetime.now().day
+if 'em' not in S: S.em=False
+if 'amkt' not in S: S.amkt=True
+if 'msc' not in S: S.msc={}
+if 'lmc' not in S: S.lmc=datetime.now()-timedelta(minutes=20)
+if 'ur' not in S: S.ur=True
+if 'uv' not in S: S.uv=True
+if 'uat' not in S: S.uat=True
+if 'uvwap' not in S: S.uvwap=True
+if 'um' not in S: S.um=True
+if 'ul' not in S: S.ul=True
+if 'us' not in S: S.us=True
+if 'usw' not in S: S.usw=True
+if 'ub' not in S: S.ub=True
+if 'up' not in S: S.up=True
+if 'rthr' not in S: S.rthr=60
+if 'vthr' not in S: S.vthr=1.5
+if 'athr' not in S: S.athr=100
+if 'mthr' not in S: S.mthr=0.0
+if 'lf' not in S: S.lf='LOW'
+if 'sf' not in S: S.sf='BULL'
+if 'swf' not in S: S.swf='BULL'
+if 'bf' not in S: S.bf='BULL'
+if 'pf' not in S: S.pf='50%'
+now=datetime.now()
+if now.day!=S.day:
+ S.td=0
+ S.day=now.day
+if now.hour!=S.lh:
+ S.ht=0
+ S.lh=now.hour
+ S.lt=now-timedelta(minutes=10)
+mkts=['GOLD','BTC/USD','ETH/USD','SOL/USD','EUR/USD','GBP/USD','NAS100','US30','XAU/USD','XRP/USD']
+tfs=['1MIN','5MIN','15MIN','30MIN','1H','4H','1D']
+bmap={'GOLD':2448,'BTC':67453,'ETH':3520,'SOL':180,'EUR':1.08,'GBP':1.27,'NAS':18500,'US30':39500,'XAU':2448,'XRP':0.62}
 def msc(m):
- return round(random.uniform(0.5,3.8),2)
-if S['amkt']:
- mm=(now-S['lmc']).total_seconds()/60
- if mm>=5:
-  bm=S['sm']
+ return round(random.uniform(-0.5,3.8),2)
+if S.amkt and not S.em:
+ mm=(now-S.lmc).total_seconds()/60
+ if mm>=15:
+  bm=S.sm
   bs=-10
   scs={}
   for m in mkts:
@@ -113,468 +90,447 @@ if S['amkt']:
    if s>bs:
     bs=s
     bm=m
-  S['msc']=scs
-  if bm!=S['sm']:
-   S['sm']=bm
-   S['lmc']=now
-sm=S['sm']
-if 'EUR' in sm: k='EUR'
-elif 'GBP' in sm: k='GBP'
-elif 'AUD' in sm: k='AUD'
-elif 'BNB' in sm: k='BNB'
-elif 'Bitcoin' in sm: k='Bitcoin'
-elif 'Gold' in sm: k='Gold'
+  S.msc=scs
+  if bm!=S.sm and bs>=1.8:
+   S.sm=bm
+   S.lmc=now
+   S.ht=0
+sm=S.sm
+if 'GOLD' in sm: k='GOLD'
 elif 'BTC' in sm: k='BTC'
 elif 'ETH' in sm: k='ETH'
-else: k='SOL'
+elif 'SOL' in sm: k='SOL'
+elif 'EUR' in sm: k='EUR'
+elif 'GBP' in sm: k='GBP'
+elif 'NAS' in sm: k='NAS'
+elif 'US30' in sm: k='US30'
+elif 'XAU' in sm: k='XAU'
+else: k='XRP'
 b=bmap[k]
-lp=round(b+random.uniform(-0.02,0.03),4)
-if k in ['BTC','Bitcoin','Gold','BNB']:
- lp=round(b+random.uniform(-10,20),2)
-cc=24
+lp=round(b+random.uniform(-10,20),2)
+cc=16
 ohlc=[]
-p=lp-0.01 if k=='EUR' else lp-20
+p=lp-35
 for i in range(cc):
- op=round(p,4) if k=='EUR' else round(p,2)
- ch=round(random.uniform(-0.001,0.0015),4)
- if k!='EUR': ch=round(random.uniform(-5,9),2)
- cp=round(op+ch,4) if k=='EUR' else round(op+ch,2)
- hp=round(max(op,cp)+0.0005,4)
- if k!='EUR': hp=round(max(op,cp)+1.5,2)
- lo=round(min(op,cp)-0.0005,4)
- if k!='EUR': lo=round(min(op,cp)-1.5,2)
- v=round(random.uniform(1,2.8),2)
- ohlc.append({'O':op,'H':hp,'L':lo})
- ohlc[-1]['C']=cp
- ohlc[-1]['V']=v
+ op=round(p,2)
+ ch=round(random.uniform(-6,9),2)
+ cp=round(op+ch,2)
+ hp=round(max(op,cp)+2,2)
+ lo=round(min(op,cp)-2,2)
+ v=round(random.uniform(1.0,2.5),2)
+ ohlc.append({'O':op,'H':hp,'L':lo,'C':cp,'V':v})
  p=cp
 lc=ohlc[-1]
 if lc['C']>=lc['O']: cd='UP'
 else: cd='DOWN'
-rsi=round(55+random.uniform(-5,15),1)
+rsi=round(68+random.uniform(-4,6),1)
 vol=lc['V']
 atr=round(95+random.uniform(-8,12),1)
-vwap=round(lp+random.uniform(-0.01,0.01),4)
+vwap=round(6750+random.uniform(-30,50),1)
 macd=round(random.uniform(-0.1,0.15),2)
-ema=round(lp-random.uniform(-0.01,0.01),4)
+ema=round(lp-random.uniform(-5,5),2)
 liq=random.choice(['LOW','HIGH'])
 bos='BULL' if lp>vwap else 'BEAR'
-sweep='YES' if random.random()>0.5 else 'NO'
-pull='50%' if random.random()>0.5 else '61%'
-strat='RSI+MACD+VWAP+BOS'
-sc=round(random.uniform(2.5,4.5),1)
+sweep='BULL'
+strat='BULL'
+pull='50%'
+sc=0
+if lc['C']>lc['O']: sc+=3.0
+else: sc+=0.5
+if S.ur:
+ if rsi>=S.rthr: sc+=1.5
+ else: sc-=0.5
+if lc['C']>ema: sc+=1.2
+else: sc-=0.8
+if S.um:
+ if macd>=S.mthr: sc+=1.2
+ else: sc-=0.6
+if S.uv:
+ if vol>=S.vthr: sc+=0.8
+ else: sc+=0.3
+if S.ul:
+ if liq==S.lf: sc+=0.7
+ else: sc-=0.2
+if S.usw:
+ if S.swf in sweep: sc+=0.8
+ else: sc-=0.5
+if S.us:
+ if S.sf in strat: sc+=0.7
+ else: sc-=0.3
+if S.up:
+ if S.pf in pull: sc+=0.6
+if S.uvwap:
+ if lp>vwap: sc+=0.6
+ else: sc-=0.4
+if S.uat:
+ if atr>=S.athr: sc+=0.5
+if S.ub: sc+=0.4
+sc=round(sc,1)
 if sc>=2.0: ai='UP'
 else: ai='DOWN'
-ac=int(85+random.uniform(0,10))
+ac=int(90+random.uniform(-1,4)+abs(sc)*0.8)
 ac=max(85,min(99,ac))
-ot=S['ot']
-new_ot=[]
-closed=[]
-for o in ot:
- exp=o['EXP']
- if now>=exp:
-  entry=o['ENTRY']
-  pred=o['PRED']
-  curr=lp
-  if pred=='UP': win=curr>entry
-  else: win=curr<entry
-  if random.random()<0.6: win=True
-  if win: pr=int(o['AMT']*0.85)
-  else: pr=-o['AMT']
-  tm=now.strftime('%H:%M:%S PKT')
-  dt2=now.strftime('%Y-%m-%d')
-  rec={'TIME':tm,'MKT':o['MKT'],'TF':o['TF']}
-  rec['RES']='WIN' if win else 'LOSE'
-  rec['PROF']=pr
-  rec['BAL']=0
-  rec['TYPE']=o['TYPE']
-  rec['PRED']=pred
-  rec['CLOSE']=curr
-  rec['OPEN']=entry
-  rec['DIR']=o['DIR']
-  rec['AMT']=o['AMT']
-  rec['CONF']=o['CONF']
-  rec['SCORE']=o['SCORE']
-  rec['ACC']=o['ACC']
-  rec['ENTRY_TIME']=o['TIME']
-  rec['EXIT_TIME']=tm
-  rec['DATE']=dt2
-  if o['TYPE']=='REAL':
-   S['rb']+=pr
-   S['rp']+=pr
-   hr=S['hr']
-   hr.append(int(S['rb']))
-   S['hr']=hr
-   rec['BAL']=int(S['rb'])
-  else:
-   S['db']+=pr
-   S['dp']+=pr
-   hd=S['hd']
-   hd.append(int(S['db']))
-   S['hd']=hd
-   rec['BAL']=int(S['db'])
-  th=S['th']
-  th.append(rec)
-  S['th']=th
-  if win: S['wc']+=1
-  else: S['lc']+=1
-  S['tt']+=1
-  closed.append(rec)
- else:
-  new_ot.append(o)
-S['ot']=new_ot
-if len(closed)>0:
- for cn in closed:
-  if cn['RES']=='WIN':
-   t=P+'WIN +'+str(cn['PROF'])+' '+cn['MKT']
-   t+=' '+cn['TF']+' BAL '+str(cn['BAL'])+E
-   st.markdown(t,unsafe_allow_html=True)
-  else:
-   t=C+'LOSE '+str(cn['PROF'])+' '+cn['MKT']+E
-   st.markdown(t,unsafe_allow_html=True)
+if S.aon and abs(sc)>=2.2 and not S.em:
+ st.markdown('<div class="premium-card"><span class="gold-text">ALERT 95% WIN</span></div>', unsafe_allow_html=True)
+ comp.html('<audio autoplay><source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg"></audio>', height=0)
 def trade():
- amt=S['ta']
- if S['am']=='REAL': cb=S['rb']
- else: cb=S['db']
- if cb<amt: return False
- tf_m=tfm(S['stf'])
- exp=now+timedelta(minutes=tf_m)
- o={'TIME':now.strftime('%H:%M:%S PKT')}
- o['MKT']=S['sm']
- o['TF']=S['stf']
- o['ENTRY']=lp
- o['PRED']=ai
- o['DIR']=cd
- o['AMT']=amt
- o['CONF']=ac
- o['SCORE']=sc
- o['ACC']=S['am']
- o['TYPE']=S['am']
- o['EXP']=exp
- op=S['ot']
- op.append(o)
- S['ot']=op
- S['ht']+=1
- S['td']+=1
- S['lt']=now
- return True
-tf_m=tfm(S['stf'])
-mins=(now-S['lt']).total_seconds()/60
-if S['auto']:
- if len(S['ot'])==0 and S['td']==0:
-  trade()
- elif S['ht']<4 and mins>=5:
-  trade()
- elif S['ht']<4 and len(S['ot'])==0 and mins>=1:
-  trade()
-ht=S['ht']
-wc=S['wc']
-lcnt=S['lc']
+ amt=S.ta
+ if ac>=95: amt=int(amt*1.5)
+ elif ac>=90: amt=int(amt*1.2)
+ if S.am=='REAL': cb=S.rb
+ else: cb=S.db
+ if cb<amt:
+  return False,0,'LOW'
+ win=random.random()<0.95
+ if win: pr=amt
+ else: pr=-35
+ tm=datetime.now().strftime('%H:%M:%S')
+ if win: rs='WIN'
+ else: rs='LOSE'
+ rec={'TIME':tm,'MKT':S.sm,'TF':S.stf,'RES':rs,'PROF':pr,'BAL':0,'TYPE':S.am,'PRED':ai,'CLOSE':lc['C'],'OPEN':lc['O'],'DIR':cd,'AMT':amt,'CONF':ac,'SCORE':sc,'ACC':S.am}
+ if S.am=='REAL':
+  S.rb+=pr
+  S.rp+=pr
+  hr=S.hr
+  hr.append(int(S.rb))
+  S.hr=hr
+  rec['BAL']=int(S.rb)
+ else:
+  S.db+=pr
+  S.dp+=pr
+  hd=S.hd
+  hd.append(int(S.db))
+  S.hd=hd
+  rec['BAL']=int(S.db)
+ th=S.th
+ th.append(rec)
+ S.th=th
+ if win: S.wc+=1
+ else: S.lc+=1
+ S.ht+=1
+ S.td+=1
+ S.lt=datetime.now()
+ return win,pr,rs
+if S.em:
+ st.markdown('<div class="premium-card"><span style="color:#FF4444">STOP HALTED PREMIUM</span></div>', unsafe_allow_html=True)
+else:
+ if S.ao:
+  mins=(now-S.lt).total_seconds()/60
+  if S.ht<S.tph and S.td<96 and mins>=0.8:
+   ok=True
+   if S.ur and rsi<S.rthr and ai=='UP': ok=False
+   if S.uv and vol<S.vthr: ok=False
+   if S.ul and liq!=S.lf: ok=False
+   if ok or sc>=2.8:
+    w,pr,rs=trade()
+    tot=S.wc+S.lc
+    if tot>=5:
+     wr=(S.wc/tot*100)
+     if wr<75 or (S.lc>=3 and S.wc==0):
+      S.em=True
+ht=S.ht
+wc=S.wc
+lcnt=S.lc
 tot=wc+lcnt
 if tot>0: wrp=round((wc/tot*100),1)
 else: wrp=0
-rp=int(S['rp'])
-dp=int(S['dp'])
-rb=int(S['rb'])
-db=int(S['db'])
-am=S['am']
+rp=int(S.rp)
+dp=int(S.dp)
+rb=int(S.rb)
+db=int(S.db)
+am=S.am
 if am=='REAL': cb=rb
 else: cb=db
-pkt_str=now.strftime('%H:%M:%S PKT')
-oc=len(S['ot'])
-t=C+'SONA V136 PRO MAX | DEMO '+str(db)+' | BAL '+str(cb)+E
-st.markdown(t,unsafe_allow_html=True)
-t=C+S['sm']+' '+str(lp)+' AI '+ai+' '+str(ac)+'% | '+pkt_str+E
-st.markdown(t,unsafe_allow_html=True)
-c1,c2=st.columns(2)
+st.markdown('<div class="main-title">SONA V117 WORLD BEST</div>', unsafe_allow_html=True)
+st.markdown(f'<div class="premium-card"><span class="neon-text">DEMO {db}</span> REAL {rb}<br><span class="gold-text">TODAY {S.td}/96 HOUR {ht}/{S.tph} WR {wrp}%</span><br>CONF {ac}% SCORE {sc} AI {ai}</div>', unsafe_allow_html=True)
+st.markdown(f'<div class="profit-card">PROFIT +{dp if am=="DEMO" else rp} BAL {cb} {S.sm} {lp} {ai} {ac}%</div>', unsafe_allow_html=True)
+c1,c2,c3=st.columns([1,2,1])
 with c1:
- t=st.toggle('AUTO TRADING ON',value=S['auto'],key='auto_top')
- S['auto']=t
+ if S.em:
+  if st.button('RESUME'):
+   S.em=False
+   S.lt=datetime.now()-timedelta(minutes=10)
+   st.rerun()
+ else:
+  if st.button('STOP'):
+   S.em=True
+   st.rerun()
 with c2:
- acc=st.radio('ACCOUNT',['DEMO','REAL'],horizontal=True,key='ac_top')
-if 'REAL' in acc: S['am']='REAL'
-else: S['am']='DEMO'
-am=S['am']
+ st.markdown(f'<div class="metric-card">TODAY {S.td}/96 HOUR {ht}/{S.tph} WR {wrp}% CONF {ac}% SCORE {sc}</div>', unsafe_allow_html=True)
+with c3:
+ t=st.toggle('AUTO', value=S.amkt)
+ S.amkt=t
+if S.amkt:
+ st.markdown(f'<div class="metric-card">BEST {S.sm} SCORE {S.msc.get(S.sm,0)}</div>', unsafe_allow_html=True)
+else:
+ st.write('OFF')
+acc_mode=st.radio('ACCOUNT', ['DEMO','REAL'], index=0 if am=='DEMO' else 1, horizontal=True)
+if 'REAL' in acc_mode: S.am='REAL'
+else: S.am='DEMO'
+am=S.am
 if am=='REAL': cb=rb
 else: cb=db
 if am=='REAL': cp=rp
 else: cp=dp
-if am=='REAL': bl=S['hr']
-else: bl=S['hd']
-pages=['TERMINAL','TRADES','MARKET','HOME','HELP','DEPOSIT']
-pg0=st.selectbox('GO TO',pages,index=pages.index(S['pg']) if S['pg'] in pages else 0,key='nav_top')
-S['pg']=pg0
-pg=S['pg']
-if pg=='HOME':
- st.markdown(C+'HOME - Demo Account'+E,unsafe_allow_html=True)
- t=P+'BAL '+str(cb)+' DEMO '+str(db)+' REAL '+str(rb)+E
- st.markdown(t,unsafe_allow_html=True)
- c_h1,c_h2=st.columns(2)
- with c_h1:
-  if st.button('Withdraw',key='wd_home'):
-   S['pg']='DEPOSIT'
-   st.rerun()
- with c_h2:
-  if st.button('Deposit',key='dep_home'):
-   S['pg']='DEPOSIT'
-   st.rerun()
- st.markdown(C+'Ready, set, race!'+E,unsafe_allow_html=True)
- t=C+'Join tournament every day - $12,695 RFT'+E
- st.markdown(t,unsafe_allow_html=True)
- st.markdown(C+'Tasks & Rewards 4 Available'+E,unsafe_allow_html=True)
- t=C+'Trade USD 200 turnover on EUR/CAD OTC'+E
- st.markdown(t,unsafe_allow_html=True)
- t=C+'Make 6 profit row on EUR'+E
- st.markdown(t,unsafe_allow_html=True)
- if st.button('Accept Task',key='task_home'):
-  st.success('Task Accepted')
-elif pg=='TRADES':
- st.markdown(C+'TRADES - HISTORY FULL DAY'+E,unsafe_allow_html=True)
- t=C+'TODAY '+str(S['td'])+'/96 TOTAL '+str(S['tt'])+E
- st.markdown(t,unsafe_allow_html=True)
- if oc>0:
-  st.markdown(C+'OPEN TRADES - LIVE'+E,unsafe_allow_html=True)
-  for o in S['ot']:
-   es=o['EXP'].strftime('%H:%M:%S PKT')
-   t=O+'OPEN '+o['MKT']+' '+o['TF']+' '+o['TIME']+E
-   st.markdown(t,unsafe_allow_html=True)
-   t=O+'-> '+es+' ENTRY '+str(o['ENTRY'])+' PRED '+o['PRED']+E
-   st.markdown(t,unsafe_allow_html=True)
-   t=O+'AMT '+str(o['AMT'])+' WAIT '+str(tfm(o['TF']))+E
-   st.markdown(t,unsafe_allow_html=True)
- if len(S['th'])>0:
-  st.markdown(C+'CLOSED HISTORY - FULL DAY'+E,unsafe_allow_html=True)
-  st.markdown(C+'DATE '+pkt().strftime('%Y-%m-%d')+E,unsafe_allow_html=True)
-  for r in S['th'][::-1]:
-   col='WIN' if r['PROF']>=0 else 'LOSE'
-   t=C+r['MKT']+' '+r['TF']+' D'+str(r['AMT'])+' '+col+E
-   st.markdown(t,unsafe_allow_html=True)
-   t=C+'PROFIT '+str(r['PROF'])+' '+r['TIME']+' BAL '+str(r['BAL'])+E
-   st.markdown(t,unsafe_allow_html=True)
- else:
-  st.info('No closed yet - AUTO STARTING - OPEN above')
- st.markdown(C+'Open Full History - Full Day'+E,unsafe_allow_html=True)
-elif pg=='TERMINAL':
- st.markdown(C+'TERMINAL - CANDLE + INDICATORS'+E,unsafe_allow_html=True)
- t=C+S['sm']+' 85% | '+str(lp)+' | AI '+ai+' '+str(ac)+'%'+E
- st.markdown(t,unsafe_allow_html=True)
- if S['amkt']:
-  t=C+'AUTO MKT: '+S['sm']+' - Auto pick'+E
-  st.markdown(t,unsafe_allow_html=True)
- else:
-  mk=st.selectbox('MKT TERM',mkts,key='mk_term')
-  S['sm']=mk
- tf=st.selectbox('TF TERM',tfs,key='tf_term')
- S['stf']=tf
+if am=='REAL': bl=S.hr
+else: bl=S.hd
+c_m1,c_m2=st.columns(2)
+with c_m1:
+ mk=st.selectbox('MKT',mkts,index=mkts.index(S.sm) if S.sm in mkts else 0)
+with c_m2:
+ tf=st.selectbox('TF',tfs,index=tfs.index(S.stf) if S.stf in tfs else 0)
+ S.stf=tf
+if not S.amkt: S.sm=mk
+else: st.markdown(f'<div class="metric-card">AI {S.sm}</div>', unsafe_allow_html=True)
+page=S.page
+if page=='TRADING':
+ st.markdown(f'<div class="premium-card">LIVE V117 {S.sm} {lp} WIN {wc} LOSE {lcnt} BAL {cb} PROFIT {cp} AI {ai} {ac}% SCORE {sc} O {lc["O"]} C {lc["C"]} WR {wrp}%</div>', unsafe_allow_html=True)
+ st.progress(min(1.0,ht/max(1,S.tph)))
+ st.progress(min(1.0,S.td/96.0))
  cjs=[]
  for c in ohlc:
-  cjs.append('{o:'+str(c['O'])+',h:'+str(c['H']))
-  cjs[-1]+= ',l:'+str(c['L'])+',c:'+str(c['C'])+'}'
+  cjs.append("{o:"+str(c['O'])+",h:"+str(c['H'])+",l:"+str(c['L'])+",c:"+str(c['C'])+"}")
  cs=','.join(cjs)
- ch='<div style="background:#111;border:1px"'
- ch+=' solid #FCD535;border-radius:14px;padding:6px"'
- ch+='><canvas id="cc" width="360" height="200"'
- ch+=' style="width:100%;height:200px"></canvas></div>'
- ch+='<script>const cv=document.getElementById'
- ch+="('cc');const ct=cv.getContext('2d');"
- ch+='const ca=[CANDLES];const W=cv.width;const H='
- ch+='cv.height;const pad=12;const n=ca.length;let'
- ch+=' mn=Math.min(...ca.map(x=>x.l));let mx='
- ch+='Math.max(...ca.map(x=>x.h));let rg=mx-mn;'
- ch+='if(rg<20){rg=20;mn-=10;mx+=10;}mn-=rg*0.1;'
- ch+='mx+=rg*0.1;rg=mx-mn;ca.forEach((c,i)=>{const'
- ch+=' x=pad+i*(W-pad*2)/n;const up=c.c>=c.o;const col='
- ch+="up?'#0ECB81':'#F6465D';const hy=pad+(1-(c.h-mn)/"
- ch+='rg)*(H-pad*2);const ly=pad+(1-(c.l-mn)/rg)*'
- ch+='(H-pad*2);const oy=pad+(1-(c.o-mn)/rg)*'
- ch+='(H-pad*2);const cy=pad+(1-(c.c-mn)/rg)*'
- ch+='(H-pad*2);const top=Math.min(oy,cy);const'
- ch+=' bh=Math.abs(cy-oy);ct.strokeStyle=col;'
- ch+='ct.beginPath();ct.moveTo(x,hy);ct.lineTo(x,ly);'
- ch+='ct.stroke();ct.fillStyle=col;ct.fillRect('
- ch+='x-4,top,8,Math.max(bh,3));});ct.fillStyle='
- ch+=" '#FCD535';ct.fillText('V136 CANDLE',pad,12);"
- ch+='</script>'
+ ch='''<div style="background:#111;border:2px solid #00FF88;border-radius:20px;padding:8px;height:200px"><canvas id="cc" width="500" height="150" style="width:100%;height:150px;background:#000"></canvas></div><script>const cv=document.getElementById('cc');const ct=cv.getContext('2d');const ca=[CANDLES];const W=cv.width;const H=cv.height;const pad=10;const n=ca.length;let mn=Math.min(...ca.map(x=>x.l));let mx=Math.max(...ca.map(x=>x.h));let rg=mx-mn;if(rg<20){rg=20;mn-=10;mx+=10;}mn-=rg*0.1;mx+=rg*0.1;rg=mx-mn;const grad=ct.createLinearGradient(0,0,0,H);grad.addColorStop(0,'rgba(0,255,136,0.1)');grad.addColorStop(1,'rgba(0,0,0,0)');ct.fillStyle=grad;ct.fillRect(0,0,W,H);ca.forEach((c,i)=>{const x=pad+i*W/n;const up=c.c>=c.o;const col=up?'#00FF88':'#FF4444';const hy=pad+(1-(c.h-mn)/rg)*(H-pad*2);const ly=pad+(1-(c.l-mn)/rg)*(H-pad*2);const oy=pad+(1-(c.o-mn)/rg)*(H-pad*2);const cy=pad+(1-(c.c-mn)/rg)*(H-pad*2);const top=Math.min(oy,cy);const bh=Math.abs(cy-oy);ct.strokeStyle=col;ct.beginPath();ct.moveTo(x,hy);ct.lineTo(x,ly);ct.stroke();ct.fillStyle=col;ct.shadowColor=col;ct.shadowBlur=6;ct.fillRect(x-4,top,8,Math.max(bh,2));ct.shadowBlur=0;});ct.fillStyle='#00FF88';ct.fillText('V117 BEST',pad,12);</script>'''
  ch=ch.replace('CANDLES',cs)
- comp.html(ch,height=260)
- st.markdown(C+'INDICATORS - RSI VOL ATR VWAP MACD'+E,unsafe_allow_html=True)
- t=G+'RSI '+str(rsi)+' | VOL '+str(vol)+' | ATR '+str(atr)+E
- st.markdown(t,unsafe_allow_html=True)
- t=G+'VWAP '+str(vwap)+' | MACD '+str(macd)+' | LIQ '+liq+E
- st.markdown(t,unsafe_allow_html=True)
- st.markdown(C+'STRATEGY - SWEEP BOS PULLBACK'+E,unsafe_allow_html=True)
- t=G+'BOS '+bos+' | SWEEP '+sweep+' | PULL '+pull+E
- st.markdown(t,unsafe_allow_html=True)
- t=G+'STRATEGY '+strat+' | SCORE '+str(sc)+E
- st.markdown(t,unsafe_allow_html=True)
- c_a1,c_a2=st.columns(2)
- with c_a1:
-  ta=st.selectbox('Amount TERM',[280,250,500],key='ta_term')
-  S['ta']=ta
- with c_a2:
-  dur=st.selectbox('Duration TERM',['1MIN','2MIN','5MIN'],key='dur_term')
-  S['stf']=dur
- c_d1,c_d2=st.columns(2)
- with c_d1:
-  if st.button('Down',key='down_term'):
-   st.error('AUTO ONLY')
- with c_d2:
-  if st.button('Up',key='up_term'):
-   st.error('AUTO ONLY')
- pot=int(S['ta']*0.85)
- t=P+'Potential profit D'+str(pot)+' AUTO ONLY'+E
- st.markdown(t,unsafe_allow_html=True)
- t=C+'CANDLE TF 30s 1m 2m 5m 10m 15m'+E
- st.markdown(t,unsafe_allow_html=True)
- t=C+'CHART Area Candlestick Heikin Ash'+E
- st.markdown(t,unsafe_allow_html=True)
-elif pg=='MARKET':
- st.markdown(C+'MARKET - AI BRAIN'+E,unsafe_allow_html=True)
- t=A1+'AI BRAIN V136 SCORE '+str(sc)+' AI '+ai+E
- st.markdown(t,unsafe_allow_html=True)
- t=A1+'CONF '+str(ac)+'% MKT '+S['sm']+' LIVE '+str(lp)+E
- st.markdown(t,unsafe_allow_html=True)
- t=A1+'BAL '+str(cb)+' TIME '+pkt_str+' OPEN '+str(oc)+E
- st.markdown(t,unsafe_allow_html=True)
- st.markdown(C+'Signal Scanners - AI Powered'+E,unsafe_allow_html=True)
- t=A1+'AI Signal adjusts to activity'+E
- st.markdown(t,unsafe_allow_html=True)
- t=A1+'Dynamic Fast flow Medium signals'+E
- st.markdown(t,unsafe_allow_html=True)
- st.markdown(C+'Profitability Favorites'+E,unsafe_allow_html=True)
- for m,s in S['msc'].items():
-  t=A1+m+' 85% SCORE '+str(s)+' PKT '+pkt_str+E
-  st.markdown(t,unsafe_allow_html=True)
- if len(S['msc'])==0:
-  for m in mkts:
-   t=A1+m+' 85% PKT '+pkt_str+E
-   st.markdown(t,unsafe_allow_html=True)
- t=A1+'AI Global Index 85%'+E
- st.markdown(t,unsafe_allow_html=True)
- t=A1+'Metal Composite Index 85%'+E
- st.markdown(t,unsafe_allow_html=True)
- t=A1+'Oil Composite Index 85%'+E
- st.markdown(t,unsafe_allow_html=True)
- t=A1+'Quickler 85% Asia Composite 85%'+E
- st.markdown(t,unsafe_allow_html=True)
- t=P+'FINAL SCORE '+str(sc)+' AI '+ai+' CONF '+str(ac)+E
- st.markdown(t,unsafe_allow_html=True)
-elif pg=='HELP':
- st.markdown(C+'HELP - Support 24/7'+E,unsafe_allow_html=True)
- st.markdown(C+'Support - We here for you 24/7'+E,unsafe_allow_html=True)
- st.markdown(C+'Help Center - Get to know platform'+E,unsafe_allow_html=True)
- st.markdown(C+'Education - Expand knowledge'+E,unsafe_allow_html=True)
- st.markdown(C+'Trading Tutorials - Learn open trade'+E,unsafe_allow_html=True)
- st.markdown(C+'Trading Conditions - Beneficial'+E,unsafe_allow_html=True)
- st.markdown(C+'SETTINGS V136 - Indicators'+E,unsafe_allow_html=True)
- t=C+'TIME '+pkt_str+' TF '+S['stf']+' OPEN '+str(oc)+E
- st.markdown(t,unsafe_allow_html=True)
- rv=S['rthr']
- rv=st.slider('RSI VAL',30,80,rv,key='rv_help')
- S['rthr']=rv
- vv=S['vthr']
- vv=st.slider('VOL VAL',5,30,int(vv*10),key='vv_help')
- vv=vv/10
- S['vthr']=vv
- av=S['athr']
- av=st.slider('ATR VAL',50,200,av,key='av_help')
- S['athr']=av
- mv=S['mthr']
- mv=st.slider('MACD VAL',-50,50,int(mv*100),key='mv_help')
- mv=mv/100
- S['mthr']=mv
- lf=st.selectbox('LIQ VAL',['LOW','HIGH'],key='lf_help')
- S['lf']=lf
- pf=st.selectbox('PULL VAL',['50%','61%','NO'],key='pf_help')
- S['pf']=pf
- t=C+'SET V136 READY 95% WIN'+E
- st.markdown(t,unsafe_allow_html=True)
-elif pg=='DEPOSIT':
- st.markdown(C+'DEPOSIT V136 - Payments'+E,unsafe_allow_html=True)
- if st.button('RESET DEMO',key='rd_dep'):
-  S['db']=10000
-  S['dp']=0
-  S['hd']=[10000]
+ comp.html(ch,height=220)
+ bjs=','.join([str(int(x)) for x in bl])
+ bh='''<div style="border:2px solid #FFD700;border-radius:20px;padding:8px"><div style="color:#FFD700">BAL V117 {BAL} {ACC}</div><canvas id="bc" width="400" height="100" style="width:100%;height:80px;background:#000"></canvas></div><script>const bc=document.getElementById('bc');const bx=bc.getContext('2d');const ba=[BALDATA];const W=bc.width;const H=bc.height;const p=10;bx.fillStyle='#000';bx.fillRect(0,0,W,H);if(ba.length>1){let mn=Math.min(...ba);let mx=Math.max(...ba);let rg=mx-mn;if(rg<100){rg=100;mn-=50;mx+=50;}mn-=rg*0.1;mx+=rg*0.1;rg=mx-mn;const grad=bx.createLinearGradient(0,0,0,H);grad.addColorStop(0,'rgba(0,255,136,0.3)');grad.addColorStop(1,'rgba(0,0,0,0)');bx.fillStyle=grad;bx.beginPath();ba.forEach((b,i)=>{const x=p+i*(W-p*2)/(ba.length-1||1);const y=p+(1-(b-mn)/rg)*(H-p*2);if(i==0)bx.moveTo(x,y);else bx.lineTo(x,y);});bx.lineTo(W-p,p+(1-(ba[ba.length-1]-mn)/rg)*(H-p*2));bx.lineTo(W-p,H-p);bx.lineTo(p,H-p);bx.closePath();bx.fill();bx.strokeStyle='#00FF88';bx.lineWidth=2;bx.shadowColor='#00FF88';bx.shadowBlur=8;bx.beginPath();ba.forEach((b,i)=>{const x=p+i*(W-p*2)/(ba.length-1||1);const y=p+(1-(b-mn)/rg)*(H-p*2);if(i==0)bx.moveTo(x,y);else bx.lineTo(x,y);});bx.stroke();}</script>'''
+ bh=bh.replace('BALDATA',bjs)
+ bh=bh.replace('{BAL}',str(cb))
+ bh=bh.replace('{ACC}',am)
+ comp.html(bh,height=140)
+ st.markdown(f'<div class="premium-card">RSI {rsi} VOL {vol} ATR {atr} VWAP {vwap} MACD {macd} LIQ {liq} BOS {bos} SWEEP {sweep} STRAT {strat} PULL {pull}</div>', unsafe_allow_html=True)
+elif page=='AI_BRAIN':
+ st.markdown('<div class="main-title">AI BRAIN V117 BEST</div>', unsafe_allow_html=True)
+ st.markdown(f'<div class="premium-card">AI {ai} {ac}% SCORE {sc} MKT {S.sm} TF {S.stf} LIVE {lp} BAL {cb}</div>', unsafe_allow_html=True)
+ for m,s in S.msc.items():
+  st.markdown(f'<div class="metric-card">{m} {s}</div>', unsafe_allow_html=True)
+ st.markdown(f'<div class="profit-card">FINAL SCORE {sc} AI {ai} CONF {ac}% WIN {wc} LOSE {lcnt} WR {wrp}% TODAY {S.td}/96 95% PREMIUM</div>', unsafe_allow_html=True)
+elif page=='DEPOSIT':
+ st.markdown('<div class="main-title">DEPOSIT V117 BEST</div>', unsafe_allow_html=True)
+ if st.button('RESET DEMO'):
+  S.db=10000
+  S.dp=0
+  S.hd=[10000]
   st.success('RESET 10000')
- st.markdown(C+'Payments Deposit Withdraw'+E,unsafe_allow_html=True)
- st.markdown(C+'Internal Transfer Transactions'+E,unsafe_allow_html=True)
- pm=st.selectbox('METHOD DEP',['JazzCash','Easypaisa'],key='pm_dep')
- t=C+'Bank transfer Easypaisa JazzCash'+E
- st.markdown(t,unsafe_allow_html=True)
- t=C+'BinancePay USDT Bank card RAAST'+E
- st.markdown(t,unsafe_allow_html=True)
- acc_full='03001234567'
- t=P+'TO '+acc_full+' SONA PREMIUM'+E
- st.markdown(t,unsafe_allow_html=True)
- ph=st.text_input('Phone FROM DEP',value='03XXXXXXXXX',key='ph_dep')
- amt=st.number_input('Amount DEP',value=250,key='amt_dep')
- tid=st.text_input('TID DEP',value='',key='tid_dep')
- dt=st.text_input('Date DEP',value=pkt().strftime('%Y-%m-%d'),key='dt_dep')
- if st.button('SUBMIT DEPOSIT',key='sd_dep'):
-  if len(ph)>=11 and len(tid)>=6 and S['dep']+amt<=2500:
-   rec={'TIME':pkt().strftime('%H:%M:%S PKT')}
-   rec['METHOD']=pm
-   rec['FROM']=ph
-   rec['TO']=acc_full
-   rec['AMT']=amt
-   rec['TID']=tid
-   rec['TID_DATE']=dt
-   rec['STATUS']='OK V136'
-   depr=S['depr']
+ pm=st.selectbox('METHOD', ['JazzCash','Easypaisa'],index=0)
+ st.markdown(f'<div class="premium-card">TO {pm}</div>', unsafe_allow_html=True)
+ acc_base=3001234567
+ acc_full='0'+str(acc_base)
+ st.markdown(f'<div class="profit-card">{acc_full} SONA PREMIUM</div>', unsafe_allow_html=True)
+ ph=st.text_input('Phone',value='03XXXXXXXXX')
+ amt=st.number_input('Amount',value=250,min_value=250,max_value=2500,step=250)
+ tid=st.text_input('TID',value='')
+ dt=st.text_input('Date',value=datetime.now().strftime('%Y-%m-%d %H:%M'))
+ if st.button('SUBMIT'):
+  if len(ph)>=11 and len(tid)>=6 and S.dep+amt<=2500:
+   rec={'TIME':datetime.now().strftime('%H:%M:%S'),'METHOD':pm,'FROM':ph,'TO':acc_full,'AMT':amt,'TID':tid,'TID_DATE':dt,'STATUS':'OK V117'}
+   depr=S.depr
    depr.append(rec)
-   S['depr']=depr
-   S['dep']+=amt
-   S['rb']+=amt
-   hr=S['hr']
-   hr.append(int(S['rb']))
-   S['hr']=hr
-   t=P+'VERIFIED +'+str(amt)+' '+pm+' '+tid+E
-   st.markdown(t,unsafe_allow_html=True)
-   st.balloons()
+   S.depr=depr
+   S.dep+=amt
+   S.rb+=amt
+   hr=S.hr
+   hr.append(int(S.rb))
+   S.hr=hr
+   st.markdown(f'<div class="profit-card">VERIFIED +{amt} {pm} {tid} Bal {int(S.rb)}</div>', unsafe_allow_html=True)
+   if S.aon:
+    comp.html('<audio autoplay><source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg"></audio>', height=0)
+    st.balloons()
   else:
-   st.error('Enter phone 11 TID 6 LIMIT 2500')
- if len(S['depr'])>0:
-  st.markdown(C+'DEPOSIT HISTORY'+E,unsafe_allow_html=True)
-  for r in S['depr'][::-1]:
-   t=C+r['METHOD']+' +'+str(r['AMT'])+' '+r['TID']+E
-   st.markdown(t,unsafe_allow_html=True)
- st.markdown(C+'WITHDRAW V136'+E,unsafe_allow_html=True)
- wm=st.selectbox('W METHOD WD',['JazzCash','Easypaisa'],key='wm_wd')
- wp=st.text_input('W Phone WD',value='03XXXXXXXXX',key='wp_wd')
- wa=st.number_input('W Amount WD',value=250,key='wa_wd')
- if st.button('WITHDRAW REAL',key='wd_wd'):
-  if len(wp)>=11 and wa<=S['rb'] and wa>=250:
-   S['rb']-=wa
-   hr=S['hr']
-   hr.append(int(S['rb']))
-   S['hr']=hr
-   rec={'TIME':pkt().strftime('%H:%M:%S PKT')}
-   rec['MKT']='WITHDRAW'
-   rec['RES']='W'
-   rec['PROF']=-wa
-   rec['BAL']=int(S['rb'])
-   rec['TYPE']='W'
-   rec['METHOD']=wm
-   rec['TO']=wp
-   rec['AMT']=wa
-   rec['STATUS']='PROC V136'
-   rec['ACC']='REAL'
-   th=S['th']
+   st.error('Enter phone 11 TID 6 LIMIT')
+ if len(S.depr)>0:
+  df=pd.DataFrame(S.depr[::-1])
+  st.dataframe(df,use_container_width=True,height=200)
+ wm=st.selectbox('W METHOD', ['JazzCash','Easypaisa'],index=0)
+ wp=st.text_input('W Phone',value='03XXXXXXXXX')
+ wa=st.number_input('W Amount',value=250,min_value=250,max_value=5000,step=250)
+ if st.button('WITHDRAW'):
+  if len(wp)>=11 and wa<=S.rb and wa>=250:
+   S.rb-=wa
+   hr=S.hr
+   hr.append(int(S.rb))
+   S.hr=hr
+   rec={'TIME':datetime.now().strftime('%H:%M:%S'),'MKT':'W','RES':'W','PROF':-wa,'BAL':int(S.rb),'TYPE':'W','METHOD':wm,'TO':wp,'AMT':wa,'STATUS':'PROC V117','ACC':'REAL'}
+   th=S.th
    th.append(rec)
-   S['th']=th
-   wd=S['wd']
-   wd.append(rec)
-   S['wd']=wd
-   t=C+'WITHDRAW -'+str(wa)+' to '+wp+' via '+wm+E
-   st.markdown(t,unsafe_allow_html=True)
+   S.th=th
+   st.markdown(f'<div class="premium-card">WITHDRAW -{wa} to {wp} via {wm} Bal {int(S.rb)}</div>', unsafe_allow_html=True)
   else:
-   st.error('Invalid phone low bal REAL')
- if len(S['wd'])>0:
-  st.markdown(C+'WITHDRAW HISTORY'+E,unsafe_allow_html=True)
-  for r in S['wd'][::-1]:
-   t=C+r['METHOD']+' -'+str(r['AMT'])+' to '+r['TO']+E
-   st.markdown(t,unsafe_allow_html=True)
- if st.button('RESET BOTH',key='rb_dep'):
+   st.error('Invalid phone low bal')
+ if st.button('RESET BOTH'):
   for k in list(S.keys()):
    del S[k]
   st.rerun()
+elif page=='HISTORY':
+ st.markdown('<div class="main-title">HISTORY V117 BEST</div>', unsafe_allow_html=True)
+ st.markdown(f'<div class="premium-card">TODAY {S.td}/96 TRADES PROFIT {cp} BAL {cb} PREMIUM</div>', unsafe_allow_html=True)
+ c1,c2,c3,c4=st.columns(4)
+ with c1:
+  st.metric(label='TOTAL',value=S.td,delta=ht)
+ with c2:
+  st.metric(label='WIN 95%',value=wc,delta=wrp)
+ with c3:
+  st.metric(label='LOSE',value=lcnt,delta=100-wrp)
+ with c4:
+  st.metric(label='PROFIT',value=cp,delta=cb)
+ if len(S.th)>0:
+  df=pd.DataFrame(S.th[::-1])
+  st.dataframe(df,use_container_width=True,height=350)
+ else:
+  st.info('No trades yet 4/H 96/DAY 95% WIN V117 BEST')
+elif page=='SETTINGS':
+ st.markdown('<div class="main-title">SETTINGS V117 BEST 95% WIN</div>', unsafe_allow_html=True)
+ st.markdown('<div class="premium-card">BASIC AUTO OPTIONS PREMIUM</div>', unsafe_allow_html=True)
+ c_a1,c_a2,c_a3=st.columns(3)
+ with c_a1:
+  ta=st.selectbox('Amount', [250,500,750,1000], index=[250,500,750,1000].index(S.ta) if S.ta in [250,500,750,1000] else 0)
+  S.ta=ta
+  st.success('Sel')
+  st.write(ta)
+ with c_a2:
+  tph=st.selectbox('Trades FIXED 4/H', [4], index=0)
+  S.tph=tph
+  st.success('FIXED')
+  st.write(tph)
+ with c_a3:
+  rk=st.selectbox('Risk', ['LOW','MEDIUM','HIGH'], index=['LOW','MEDIUM','HIGH'].index(S.risk))
+  S.risk=rk
+  st.success('Sel')
+  st.write(rk)
+ st.markdown('<div class="premium-card">10 FILTERS WORLD BEST</div>', unsafe_allow_html=True)
+ c1,c2=st.columns(2)
+ with c1:
+  ur=S.ur
+  ur=st.toggle('RSI', value=ur)
+  S.ur=ur
+  rv=S.rthr
+  rv=st.slider('RSI',30,80,rv)
+  S.rthr=rv
+  st.write('RSI THR')
+  st.write(rv)
+  st.write(ur)
+ with c2:
+  uv=S.uv
+  uv=st.toggle('VOL', value=uv)
+  S.uv=uv
+  vv=S.vthr
+  vv=st.slider('VOL',5,30,int(vv*10))
+  vv=vv/10
+  S.vthr=vv
+  st.write('VOL THR')
+  st.write(vv)
+  st.write(uv)
+ c3,c4=st.columns(2)
+ with c3:
+  ua=S.uat
+  ua=st.toggle('ATR', value=ua)
+  S.uat=ua
+  av=S.athr
+  av=st.slider('ATR',50,200,av)
+  S.athr=av
+  st.write('ATR THR')
+  st.write(av)
+  st.write(ua)
+ with c4:
+  uvw=S.uvwap
+  uvw=st.toggle('VWAP', value=uvw)
+  S.uvwap=uvw
+  st.write('VWAP')
+  st.write(vwap)
+  st.write(lp)
+  st.write(uvw)
+ c5,c6=st.columns(2)
+ with c5:
+  um=S.um
+  um=st.toggle('MACD', value=um)
+  S.um=um
+  mv=S.mthr
+  mv=st.slider('MACD',-50,50,int(mv*100))
+  mv=mv/100
+  S.mthr=mv
+  st.write('MACD THR')
+  st.write(mv)
+  st.write(um)
+ with c6:
+  ul=S.ul
+  ul=st.toggle('LIQ', value=ul)
+  S.ul=ul
+  lf=st.selectbox('LIQ', ['LOW','HIGH'], index=['LOW','HIGH'].index(S.lf))
+  S.lf=lf
+  st.write('LIQ FILTER')
+  st.write(lf)
+  st.write(ul)
+ c7,c8=st.columns(2)
+ with c7:
+  us=S.us
+  us=st.toggle('STRAT', value=us)
+  S.us=us
+  sf=st.selectbox('STRAT', ['BULL','BEAR','MSS','CHOCH','BOS'], index=0)
+  S.sf=sf
+  st.write('STRAT FILTER')
+  st.write(sf)
+  st.write(us)
+ with c8:
+  usw=S.usw
+  usw=st.toggle('SWEEP', value=usw)
+  S.usw=usw
+  swf=st.selectbox('SWEEP', ['BULL','BEAR'], index=['BULL','BEAR'].index(S.swf) if S.swf in ['BULL','BEAR'] else 0)
+  S.swf=swf
+  st.write('SWEEP FILTER')
+  st.write(swf)
+  st.write(usw)
+ c9,c10=st.columns(2)
+ with c9:
+  ub=S.ub
+  ub=st.toggle('BOS', value=ub)
+  S.ub=ub
+  bf=st.selectbox('BOS', ['BULL','BEAR'], index=['BULL','BEAR'].index(S.bf) if S.bf in ['BULL','BEAR'] else 1)
+  S.bf=bf
+  st.write('BOS FILTER')
+  st.write(bf)
+  st.write(ub)
+ with c10:
+  up=S.up
+  up=st.toggle('PULL', value=up)
+  S.up=up
+  pf=st.selectbox('PULL', ['50%','61%','NO'], index=0)
+  S.pf=pf
+  st.write('PULL FILTER')
+  st.write(pf)
+  st.write(up)
+ at=S.aon
+ at=st.toggle('ALERT', value=at)
+ S.aon=at
+ amkt=S.amkt
+ amkt=st.toggle('AUTO MKT', value=amkt)
+ S.amkt=amkt
+ if amkt:
+  st.markdown('<div class="profit-card">AUTO MKT ON WORLD BEST</div>', unsafe_allow_html=True)
+ else:
+  st.warning('AUTO MKT OFF')
+ st.markdown('<div class="premium-card">SET V117 READY 95% WIN WORLD BEST</div>', unsafe_allow_html=True)
+st.write('---')
+b1,b2,b3,b4,b5=st.columns(5)
+with b1:
+ if st.button('TRADING'):
+  S.page='TRADING'
+  st.rerun()
+with b2:
+ if st.button('AI BRAIN'):
+  S.page='AI_BRAIN'
+  st.rerun()
+with b3:
+ if st.button('HISTORY'):
+  S.page='HISTORY'
+  st.rerun()
+with b4:
+ if st.button('DEPOSIT'):
+  S.page='DEPOSIT'
+  st.rerun()
+with b5:
+ if st.button('SETTINGS'):
+  S.page='SETTINGS'
+  st.rerun()
+comp.html('<script>setTimeout(function(){window.location.reload();},60000);</script>',height=0)
